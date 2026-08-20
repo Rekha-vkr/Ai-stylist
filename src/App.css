@@ -1,0 +1,696 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: #0b061d;
+  color: white;
+  min-height: 100vh;
+}
+
+
+/* =========================================
+   MAIN PAGE
+========================================= */
+
+.page {
+  min-height: 100vh;
+  width: 100%;
+
+  display: flex;
+
+  background:
+    radial-gradient(
+      circle at 15% 50%,
+      rgba(180, 40, 255, 0.25),
+      transparent 40%
+    ),
+    radial-gradient(
+      circle at 85% 50%,
+      rgba(255, 70, 190, 0.18),
+      transparent 40%
+    ),
+    linear-gradient(
+      135deg,
+      #09051c,
+      #16072e,
+      #0b061c
+    );
+
+  overflow: hidden;
+}
+
+
+/* =========================================
+   LEFT SIDE
+========================================= */
+
+.fashion-side {
+  width: 53%;
+  min-height: 100vh;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      circle at 45% 45%,
+      rgba(217, 70, 239, 0.25),
+      transparent 50%
+    );
+}
+
+
+/*
+   Image container
+
+   IMPORTANT:
+   No border/card around the image.
+   This makes the image blend naturally
+   into the page.
+*/
+
+.fashion-image-wrapper {
+  width: 100%;
+  height: 100%;
+
+  position: relative;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+}
+
+
+/* =========================================
+   FASHION IMAGE
+========================================= */
+
+.fashion-image {
+  width: 100%;
+  height: 100%;
+
+  object-fit: contain;
+
+  /*
+     Slightly move image so the important
+     fashion illustration remains visible.
+  */
+
+  object-position: center center;
+
+  display: block;
+
+  /*
+     Blend image into purple background.
+  */
+
+  opacity: 0.96;
+
+  filter:
+    saturate(1.05)
+    contrast(1.02)
+    brightness(0.95);
+
+  /*
+     Fade the RIGHT edge of the image.
+     This makes it merge into login side.
+  */
+
+  -webkit-mask-image:
+    linear-gradient(
+      to right,
+      black 0%,
+      black 78%,
+      rgba(0, 0, 0, 0.85) 87%,
+      transparent 100%
+    );
+
+  mask-image:
+    linear-gradient(
+      to right,
+      black 0%,
+      black 78%,
+      rgba(0, 0, 0, 0.85) 87%,
+      transparent 100%
+    );
+}
+
+
+/*
+   Purple glow over the image
+*/
+
+.fashion-image-wrapper::after {
+  content: "";
+
+  position: absolute;
+
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      to right,
+      transparent 55%,
+      rgba(15, 5, 35, 0.15) 70%,
+      rgba(11, 6, 29, 0.8) 100%
+    );
+
+  z-index: 2;
+}
+
+
+/* =========================================
+   RIGHT LOGIN SIDE
+========================================= */
+
+.login-side {
+  width: 47%;
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  padding: 50px 60px;
+
+  position: relative;
+
+  z-index: 5;
+}
+
+
+/* =========================================
+   LOGIN CARD
+========================================= */
+
+.login-card {
+  width: 100%;
+  max-width: 570px;
+
+  min-height: 650px;
+
+  padding: 45px 50px;
+
+  border-radius: 30px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(27, 12, 52, 0.90),
+      rgba(13, 7, 31, 0.94)
+    );
+
+  border: 1.5px solid rgba(241, 105, 255, 0.75);
+
+  box-shadow:
+    0 0 20px rgba(217, 70, 239, 0.22),
+    0 0 60px rgba(217, 70, 239, 0.15),
+    inset 0 0 35px rgba(255, 120, 230, 0.03);
+
+  backdrop-filter: blur(15px);
+
+  position: relative;
+}
+
+
+/* =========================================
+   PROFILE
+========================================= */
+
+.profile-icon {
+  width: 78px;
+  height: 78px;
+
+  margin: 0 auto 25px;
+
+  border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 35px;
+
+  border: 2px solid #ff9be9;
+
+  background:
+    radial-gradient(
+      circle,
+      rgba(255, 120, 220, 0.15),
+      rgba(30, 10, 50, 0.8)
+    );
+
+  box-shadow:
+    0 0 15px #f472e8,
+    0 0 35px rgba(217, 70, 239, 0.55);
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+.login-card h1 {
+  text-align: center;
+
+  font-family: Georgia, serif;
+
+  font-size: 40px;
+
+  font-weight: 400;
+
+  color: #fff;
+
+  letter-spacing: -0.5px;
+}
+
+.login-card h1 span {
+  color: #ff72d0;
+
+  text-shadow:
+    0 0 12px #ff72d0;
+}
+
+
+/* =========================================
+   SUBTITLE
+========================================= */
+
+.subtitle {
+  text-align: center;
+
+  margin-top: 10px;
+  margin-bottom: 38px;
+
+  color: #d4c3dc;
+
+  font-size: 17px;
+}
+
+
+/* =========================================
+   INPUT
+========================================= */
+
+.input-group {
+  position: relative;
+
+  width: 100%;
+
+  margin-bottom: 20px;
+}
+
+
+.input-group input {
+  width: 100%;
+
+  height: 65px;
+
+  padding:
+    0 55px;
+
+  border-radius: 16px;
+
+  border: 1px solid rgba(170, 130, 200, 0.55);
+
+  background:
+    rgba(255, 255, 255, 0.045);
+
+  color: white;
+
+  outline: none;
+
+  font-size: 16px;
+
+  transition: 0.3s;
+}
+
+
+.input-group input::placeholder {
+  color: #a99bb8;
+}
+
+
+.input-group input:focus {
+  border-color: #f472e8;
+
+  box-shadow:
+    0 0 15px rgba(244, 114, 232, 0.25);
+}
+
+
+.input-icon {
+  position: absolute;
+
+  left: 20px;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  color: #d48aff;
+
+  font-size: 22px;
+
+  z-index: 2;
+}
+
+
+.password-toggle {
+  position: absolute;
+
+  right: 18px;
+
+  top: 50%;
+
+  transform: translateY(-50%);
+
+  border: none;
+
+  background: transparent;
+
+  color: #d9a1ed;
+
+  cursor: pointer;
+
+  font-size: 19px;
+}
+
+
+/* =========================================
+   OPTIONS
+========================================= */
+
+.options {
+  width: 100%;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  margin: 8px 0 28px;
+
+  font-size: 14px;
+}
+
+
+.remember {
+  display: flex;
+
+  align-items: center;
+
+  gap: 9px;
+
+  color: #cfc1d8;
+
+  cursor: pointer;
+}
+
+
+.remember input {
+  width: 18px;
+  height: 18px;
+
+  accent-color: #f472e8;
+}
+
+
+.forgot {
+  border: none;
+
+  background: transparent;
+
+  color: #f472e8;
+
+  font-size: 14px;
+
+  cursor: pointer;
+}
+
+
+.forgot:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   LOGIN BUTTON
+========================================= */
+
+.login-button {
+  width: 100%;
+
+  height: 65px;
+
+  border: none;
+
+  border-radius: 35px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #f472b6,
+      #d946ef
+    );
+
+  color: white;
+
+  font-size: 18px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 0 25px rgba(236, 72, 153, 0.45);
+
+  transition: 0.3s;
+}
+
+
+.login-button:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 0 35px rgba(236, 72, 153, 0.75);
+}
+
+
+/* =========================================
+   DIVIDER
+========================================= */
+
+.divider {
+  display: flex;
+
+  align-items: center;
+
+  gap: 18px;
+
+  margin: 32px 0 25px;
+
+  color: #c4b4cc;
+}
+
+
+.divider span {
+  height: 1px;
+
+  flex: 1;
+
+  background:
+    linear-gradient(
+      to right,
+      transparent,
+      #604b70,
+      transparent
+    );
+}
+
+
+.divider p {
+  font-size: 16px;
+}
+
+
+/* =========================================
+   SOCIAL BUTTONS
+========================================= */
+
+.social-buttons {
+  display: flex;
+
+  justify-content: center;
+
+  gap: 25px;
+}
+
+
+.social-buttons button {
+  width: 58px;
+  height: 58px;
+
+  border-radius: 50%;
+
+  border: 1px solid #604c73;
+
+  background:
+    rgba(255, 255, 255, 0.05);
+
+  color: white;
+
+  font-size: 20px;
+
+  cursor: pointer;
+
+  transition: 0.3s;
+}
+
+
+.social-buttons button:hover {
+  border-color: #f472e8;
+
+  transform: translateY(-3px);
+
+  box-shadow:
+    0 0 18px rgba(217, 70, 239, 0.6);
+}
+
+
+/* =========================================
+   SIGN UP
+========================================= */
+
+.signup-text {
+  text-align: center;
+
+  margin-top: 35px;
+
+  color: #a99bad;
+
+  font-size: 15px;
+}
+
+
+.signup-text button {
+  border: none;
+
+  background: transparent;
+
+  color: #f472e8;
+
+  font-size: 15px;
+
+  cursor: pointer;
+
+  margin-left: 6px;
+}
+
+
+.signup-text button:hover {
+  text-decoration: underline;
+}
+
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 1000px) {
+
+  .page {
+    flex-direction: column;
+
+    overflow-y: auto;
+  }
+
+  .fashion-side {
+    width: 100%;
+
+    height: 550px;
+
+    min-height: 550px;
+  }
+
+  .fashion-image {
+    object-position: center center;
+
+    -webkit-mask-image:
+      linear-gradient(
+        to bottom,
+        black 0%,
+        black 75%,
+        transparent 100%
+      );
+
+    mask-image:
+      linear-gradient(
+        to bottom,
+        black 0%,
+        black 75%,
+        transparent 100%
+      );
+  }
+
+  .login-side {
+    width: 100%;
+
+    padding: 30px 20px;
+
+    margin-top: -80px;
+  }
+
+  .login-card {
+    max-width: 600px;
+  }
+}
+
+
+@media (max-width: 600px) {
+
+  .fashion-side {
+    height: 430px;
+
+    min-height: 430px;
+  }
+
+  .login-side {
+    padding: 20px 15px;
+  }
+
+  .login-card {
+    padding: 35px 22px;
+
+    min-height: auto;
+
+    border-radius: 25px;
+  }
+
+  .login-card h1 {
+    font-size: 32px;
+  }
+
+  .subtitle {
+    font-size: 15px;
+  }
+
+  .options {
+    font-size: 13px;
+  }
+}
