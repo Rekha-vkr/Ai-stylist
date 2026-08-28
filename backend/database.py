@@ -13,6 +13,8 @@ client = MongoClient(
     tlsCAFile=certifi.where()
 )
 
+db = client["ai_stylist"]
+
 client.admin.command("ping")
 
 print("MongoDB connection created successfully!")
