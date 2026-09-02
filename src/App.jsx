@@ -5,6 +5,12 @@ import fashionImage from "./assets/fashion-ai.png";
 
 function App() {
   const [showPassword, setShowPassword] = useState(false);
+  const [isRegistering, setIsRegistering] = useState(false);
+
+  const [registerName, setRegisterName] = useState("");
+  const [registerEmail, setRegisterEmail] = useState("");
+  const [registerPassword, setRegisterPassword] = useState("");
+  const [message, setMessage] = useState("");
 
   const handleLogin = (e) => {
     e.preventDefault();
@@ -20,12 +26,52 @@ function App() {
     alert(`Welcome to AI Stylist, ${username} ✨`);
   };
 
+  const handleRegister = async (e) => {
+    e.preventDefault();
+
+    setMessage("");
+
+    if (!registerName || !registerEmail || !registerPassword) {
+      setMessage("Please fill in all fields.");
+      return;
+    }
+
+    try {
+      const response = await fetch("http://127.0.0.1:8000/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: registerName,
+          email: registerEmail,
+          password: registerPassword,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setMessage("Account created successfully! ✨");
+
+        setRegisterName("");
+        setRegisterEmail("");
+        setRegisterPassword("");
+      } else {
+        setMessage(data.error || "Registration failed.");
+      }
+    } catch (error) {
+      setMessage(
+        "Cannot connect to the server. Please make sure FastAPI is running."
+      );
+    }
+  };
+
   return (
     <div className="page">
 
       {/* LEFT — FASHION IMAGE */}
       <section className="fashion-side">
-
         <div className="fashion-image-wrapper">
           <img
             src={fashionImage}
@@ -33,143 +79,228 @@ function App() {
             className="fashion-image"
           />
         </div>
-
       </section>
 
-
-      {/* RIGHT — LOGIN */}
+      {/* RIGHT SIDE */}
       <section className="login-side">
 
         <div className="login-card">
 
-          {/* Profile */}
           <div className="profile-icon">
             👒
           </div>
 
-          <h1>
-            Welcome Back <span>♡</span>
-          </h1>
+          {!isRegistering ? (
+            <>
+              {/* LOGIN */}
 
-          <p className="subtitle">
-            Sign in to your AI Stylist
-          </p>
+              <h1>
+                Welcome Back <span>♡</span>
+              </h1>
 
+              <p className="subtitle">
+                Sign in to your AI Stylist
+              </p>
 
-          <form onSubmit={handleLogin}>
+              <form onSubmit={handleLogin}>
 
-            {/* Username */}
-            <div className="input-group">
+                <div className="input-group">
+                  <span className="input-icon">
+                    ♙
+                  </span>
 
-              <span className="input-icon">
-                ♙
-              </span>
+                  <input
+                    type="text"
+                    name="username"
+                    placeholder="Email or Username"
+                  />
+                </div>
 
-              <input
-                type="text"
-                name="username"
-                placeholder="Email or Username"
-              />
+                <div className="input-group">
+                  <span className="input-icon">
+                    🔒
+                  </span>
 
-            </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    placeholder="Password"
+                  />
 
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
+                  >
+                    {showPassword ? "🙈" : "◉"}
+                  </button>
+                </div>
 
-            {/* Password */}
-            <div className="input-group">
+                <div className="options">
 
-              <span className="input-icon">
-                🔒
-              </span>
+                  <label className="remember">
+                    <input type="checkbox" />
+                    <span>Remember Me</span>
+                  </label>
 
-              <input
-                type={showPassword ? "text" : "password"}
-                name="password"
-                placeholder="Password"
-              />
+                  <button
+                    type="button"
+                    className="forgot"
+                    onClick={() =>
+                      alert("Password recovery coming soon ✨")
+                    }
+                  >
+                    Forgot Password?
+                  </button>
 
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() =>
-                  setShowPassword(!showPassword)
-                }
-              >
-                {showPassword ? "🙈" : "◉"}
-              </button>
+                </div>
 
-            </div>
+                <button
+                  type="submit"
+                  className="login-button"
+                >
+                  👗 &nbsp; Login &nbsp; →
+                </button>
 
+              </form>
 
-            {/* Options */}
-            <div className="options">
+              <div className="divider">
+                <span></span>
+                <p>Or</p>
+                <span></span>
+              </div>
 
-              <label className="remember">
-                <input type="checkbox" />
-                <span>Remember Me</span>
-              </label>
+              <div className="social-buttons">
+                <button type="button">G</button>
+                <button type="button">f</button>
+                <button type="button"></button>
+              </div>
 
-              <button
-                type="button"
-                className="forgot"
-                onClick={() =>
-                  alert("Password recovery coming soon ✨")
-                }
-              >
-                Forgot Password?
-              </button>
+              <p className="signup-text">
+                New to AI Stylist?
 
-            </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(true);
+                    setMessage("");
+                  }}
+                >
+                  Create Account →
+                </button>
+              </p>
+            </>
+          ) : (
+            <>
+              {/* REGISTRATION */}
 
+              <h1>
+                Create Account <span>♡</span>
+              </h1>
 
-            {/* Login */}
-            <button
-              type="submit"
-              className="login-button"
-            >
-              👗 &nbsp; Login &nbsp; →
-            </button>
+              <p className="subtitle">
+                Join your AI Stylist journey
+              </p>
 
-          </form>
+              <form onSubmit={handleRegister}>
 
+                {/* NAME */}
+                <div className="input-group">
+                  <span className="input-icon">
+                    👤
+                  </span>
 
-          {/* Divider */}
-          <div className="divider">
-            <span></span>
-            <p>Or</p>
-            <span></span>
-          </div>
+                  <input
+                    type="text"
+                    placeholder="Full Name"
+                    value={registerName}
+                    onChange={(e) =>
+                      setRegisterName(e.target.value)
+                    }
+                  />
+                </div>
 
+                {/* EMAIL */}
+                <div className="input-group">
+                  <span className="input-icon">
+                    ✉️
+                  </span>
 
-          {/* Social */}
-          <div className="social-buttons">
+                  <input
+                    type="email"
+                    placeholder="Email Address"
+                    value={registerEmail}
+                    onChange={(e) =>
+                      setRegisterEmail(e.target.value)
+                    }
+                  />
+                </div>
 
-            <button type="button">
-              G
-            </button>
+                {/* PASSWORD */}
+                <div className="input-group">
+                  <span className="input-icon">
+                    🔒
+                  </span>
 
-            <button type="button">
-              f
-            </button>
+                  <input
+                    type={
+                      showPassword ? "text" : "password"
+                    }
+                    placeholder="Password"
+                    value={registerPassword}
+                    onChange={(e) =>
+                      setRegisterPassword(e.target.value)
+                    }
+                  />
 
-            <button type="button">
-              
-            </button>
+                  <button
+                    type="button"
+                    className="password-toggle"
+                    onClick={() =>
+                      setShowPassword(!showPassword)
+                    }
+                  >
+                    {showPassword ? "🙈" : "◉"}
+                  </button>
+                </div>
 
-          </div>
+                <button
+                  type="submit"
+                  className="login-button"
+                >
+                  ✨ &nbsp; Create Account &nbsp; →
+                </button>
 
+                {message && (
+                  <p
+                    style={{
+                      textAlign: "center",
+                      marginTop: "15px",
+                    }}
+                  >
+                    {message}
+                  </p>
+                )}
 
-          {/* Signup */}
-          <p className="signup-text">
-            New to AI Stylist?
-            <button
-              type="button"
-              onClick={() =>
-                alert("Create Account coming soon ✨")
-              }
-            >
-              Create Account →
-            </button>
-          </p>
+              </form>
+
+              <p className="signup-text">
+                Already have an account?
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsRegistering(false);
+                    setMessage("");
+                  }}
+                >
+                  ← Back to Login
+                </button>
+              </p>
+            </>
+          )}
 
         </div>
 

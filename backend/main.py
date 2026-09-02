@@ -1,11 +1,19 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI
 from database import db
 from models.user import UserCreate
-from passlib.context import CryptContext
+from pwdlib import PasswordHash
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="AI Stylist API")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+password_hash = PasswordHash.recommended()
 
 
 @app.get("/")
@@ -24,27 +32,20 @@ def test_database():
 
 @app.post("/register")
 def register_user(user: UserCreate):
-    # Check if email already exists
-    existing_user = db.users.find_one({"email": user.email})
+    existing_user = db["users"].find_one({"email": user.email})
 
     if existing_user:
-        raise HTTPException(
-            status_code=400,
-            detail="Email already registered"
-        )
+        return {"error": "Email already registered"}
 
-    # Hash the password
-    hashed_password = pwd_context.hash(user.password)
+    hashed_password = password_hash.hash(user.password)
 
-    # Create user document
     new_user = {
         "name": user.name,
         "email": user.email,
         "password": hashed_password
     }
 
-    # Save user to MongoDB
-    result = db.users.insert_one(new_user)
+    result = db["users"].insert_one(new_user)
 
     return {
         "message": "User registered successfully!",

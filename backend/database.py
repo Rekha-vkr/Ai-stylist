@@ -1,7 +1,7 @@
-from pymongo import MongoClient
-import certifi
 import os
+from pymongo import MongoClient
 from dotenv import load_dotenv
+import certifi
 
 load_dotenv()
 
@@ -10,11 +10,12 @@ MONGO_URI = os.getenv("MONGO_URI")
 client = MongoClient(
     MONGO_URI,
     tls=True,
-    tlsCAFile=certifi.where()
+    tlsCAFile=certifi.where(),
+    serverSelectionTimeoutMS=10000
 )
-
-db = client["ai_stylist"]
 
 client.admin.command("ping")
 
-print("MongoDB connection created successfully!")
+db = client["ai_stylist"]
+
+print("MongoDB connected successfully!")
