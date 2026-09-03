@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,useEffect } from "react";
 import "./App.css";
 
 import fashionImage from "./assets/fashion-ai.png";
@@ -8,13 +8,27 @@ function App() {
   // =========================
   // LOGIN / USER STATE
   // =========================
+  const [showWardrobeForm, setShowWardrobeForm] = useState(false);
+
+const [clothingName, setClothingName] = useState("");
+const [clothingCategory, setClothingCategory] = useState("");
+const [clothingColor, setClothingColor] = useState("");
+const [clothingOccasion, setClothingOccasion] = useState("");
+const [clothingSeason, setClothingSeason] = useState("");
+const [wardrobeMessage, setWardrobeMessage] = useState("");
+
+const [wardrobeItems, setWardrobeItems] = useState([]);
+const [wardrobeLoading, setWardrobeLoading] = useState(false);
+const [selectedCategory, setSelectedCategory] = useState("All");
 
   const [isLoggedIn, setIsLoggedIn] = useState(
   localStorage.getItem("isLoggedIn") === "true"
+  
 );
   const [isRegistering, setIsRegistering] = useState(false);
 
   const [activePage, setActivePage] = useState("home");
+  
 
   // =========================
   // LOGIN STATE
@@ -38,6 +52,11 @@ function App() {
   const [registerPassword, setRegisterPassword] = useState("");
 
   const [message, setMessage] = useState("");
+  useEffect(() => {
+  if (isLoggedIn) {
+    fetchWardrobe();
+  }
+}, [isLoggedIn]);
 
   // =====================================================
 // LOGIN
@@ -145,6 +164,101 @@ const handleLogin = async (e) => {
       );
     }
   };
+  // =====================================================
+// ADD CLOTHING
+// =====================================================
+
+const handleAddClothing = async (e) => {
+  e.preventDefault();
+
+  setWardrobeMessage("");
+
+  if (
+    !clothingName ||
+    !clothingCategory ||
+    !clothingColor ||
+    !clothingOccasion ||
+    !clothingSeason
+  ) {
+    setWardrobeMessage("Please fill in all fields.");
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/wardrobe",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          item_name: clothingName,
+          category: clothingCategory,
+          color: clothingColor,
+          occasion: clothingOccasion,
+          season: clothingSeason,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+  setWardrobeMessage(
+    "Clothes added successfully! 👗✨"
+  );
+
+  setClothingName("");
+  setClothingCategory("");
+  setClothingColor("");
+  setClothingOccasion("");
+  setClothingSeason("");
+
+  fetchWardrobe();
+
+  setTimeout(() => {
+    setActivePage("clothes");
+    setWardrobeMessage("");
+  }, 1200);
+} else {
+      setWardrobeMessage(
+        data.detail || "Failed to add clothing item."
+      );
+    }
+  } catch (error) {
+    console.error("Wardrobe error:", error);
+
+    setWardrobeMessage(
+      "Cannot connect to the server."
+    );
+  }
+};
+// =====================================================
+// GET WARDROBE ITEMS
+// =====================================================
+
+const fetchWardrobe = async () => {
+  setWardrobeLoading(true);
+
+  try {
+    const response = await fetch(
+      "http://127.0.0.1:8000/wardrobe"
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setWardrobeItems(data);
+    } else {
+      console.error("Failed to fetch wardrobe:", data);
+    }
+  } catch (error) {
+    console.error("Wardrobe fetch error:", error);
+  } finally {
+    setWardrobeLoading(false);
+  }
+};
 
   // =====================================================
   // LOGOUT
@@ -571,7 +685,17 @@ const handleLogin = async (e) => {
           >
             My Wardrobe
           </button>
-
+          <button
+  className={
+    activePage === "clothes"
+      ? "nav-link active"
+      : "nav-link"
+  }
+  onClick={() => navigateTo("clothes")}
+>
+  My Clothes
+</button>
+          
 
           <button
             className={
@@ -726,9 +850,106 @@ const handleLogin = async (e) => {
                 digitally.
               </p>
 
-              <button className="feature-button">
-                + Add Clothes
+              <button
+                className="feature-button"
+                onClick={() => {
+                setShowWardrobeForm(true);
+                setWardrobeMessage("");
+                    } }>
+              + Add Clothes
               </button>
+              {showWardrobeForm && (
+  <form
+    className="recommendation-form"
+    onSubmit={handleAddClothing}
+  >
+    <label>Item Name</label>
+    <input
+      type="text"
+      placeholder="Example: White Shirt"
+      value={clothingName}
+      onChange={(e) =>
+        setClothingName(e.target.value)
+      }
+      required
+    />
+
+    <label>Category</label>
+    <select
+      value={clothingCategory}
+      onChange={(e) =>
+        setClothingCategory(e.target.value)
+      }
+      required
+    >
+      <option value="">Select Category</option>
+      <option value="Shirt">Shirt</option>
+      <option value="T-Shirt">T-Shirt</option>
+      <option value="Jeans">Jeans</option>
+      <option value="Trousers">Trousers</option>
+      <option value="Dress">Dress</option>
+      <option value="Skirt">Skirt</option>
+      <option value="Saree">Saree</option>
+      <option value="Accessories">Accessories</option>
+      <option value="Other">Other</option>
+    </select>
+
+    <label>Color</label>
+    <input
+      type="text"
+      placeholder="Example: White"
+      value={clothingColor}
+      onChange={(e) =>
+        setClothingColor(e.target.value)
+      }
+      required
+    />
+
+    <label>Occasion</label>
+    <select
+      value={clothingOccasion}
+      onChange={(e) =>
+        setClothingOccasion(e.target.value)
+      }
+      required
+    >
+      <option value="">Select Occasion</option>
+      <option value="College">College</option>
+      <option value="Casual">Casual</option>
+      <option value="Party">Party</option>
+      <option value="Formal">Formal</option>
+      <option value="Wedding">Wedding</option>
+    </select>
+
+    <label>Season</label>
+    <select
+      value={clothingSeason}
+      onChange={(e) =>
+        setClothingSeason(e.target.value)
+      }
+      required
+    >
+      <option value="">Select Season</option>
+      <option value="Summer">Summer</option>
+      <option value="Winter">Winter</option>
+      <option value="Rainy">Rainy</option>
+      <option value="All Season">All Season</option>
+    </select>
+
+    <button
+      type="submit"
+      className="feature-button"
+    >
+      Add to Wardrobe 👗
+    </button>
+
+    {wardrobeMessage && (
+      <p style={{ marginTop: "15px" }}>
+        {wardrobeMessage}
+      </p>
+    )}
+  </form>
+)}
 
             </div>
 
@@ -736,8 +957,317 @@ const handleLogin = async (e) => {
 
         </div>
       )}
+      {/* =================================================
+    MY CLOTHES
+================================================= */}
+
+{activePage === "clothes" && (
+
+  <div className="clothes-page">
+
+    {/* =================================================
+        HEADER
+    ================================================= */}
+
+    <div className="clothes-header">
+
+      <h1>
+        My Clothes
+      </h1>
+
+      <button
+        className="clothes-menu-button"
+        type="button"
+      >
+        ⋮
+      </button>
+
+    </div>
 
 
+    {/* =================================================
+        FILTER / SORT
+    ================================================= */}
+
+    <div className="clothes-controls">
+
+      <button
+        className="filter-button"
+        type="button"
+      >
+        ☷
+      </button>
+
+      <button
+        className="sort-button"
+        type="button"
+      >
+        Recently added ˅
+      </button>
+
+    </div>
+
+
+    {/* =================================================
+        CATEGORY TABS
+    ================================================= */}
+
+    <div className="category-tabs">
+
+      {[
+        "All",
+        "Tops",
+        "Pants",
+        "Dresses",
+        "Shoes",
+        "Bags",
+        "Accessories",
+        "Others"
+      ].map((category) => (
+
+        <button
+          key={category}
+          type="button"
+          className={
+            selectedCategory === category
+              ? "category-tab active"
+              : "category-tab"
+          }
+          onClick={() =>
+            setSelectedCategory(category)
+          }
+        >
+          {category}
+        </button>
+
+      ))}
+
+    </div>
+
+
+    {/* =================================================
+        CLOTHES GRID
+    ================================================= */}
+
+    {wardrobeLoading ? (
+
+      <p className="clothes-message">
+        Loading your clothes...
+      </p>
+
+    ) : (
+
+      <div className="clothes-grid">
+
+        {wardrobeItems
+          .filter((item) => {
+
+            /* ALL */
+
+            if (selectedCategory === "All") {
+              return true;
+            }
+
+
+            /* TOPS */
+
+            if (selectedCategory === "Tops") {
+              return (
+                item.category === "Shirt" ||
+                item.category === "T-Shirt"
+              );
+            }
+
+
+            /* PANTS */
+
+            if (selectedCategory === "Pants") {
+              return (
+                item.category === "Jeans" ||
+                item.category === "Trousers" ||
+                item.category === "Skirt"
+              );
+            }
+
+
+            /* DRESSES */
+
+            if (selectedCategory === "Dresses") {
+              return (
+                item.category === "Dress" ||
+                item.category === "Saree"
+              );
+            }
+
+
+            /* SHOES */
+
+            if (selectedCategory === "Shoes") {
+              return item.category === "Shoes";
+            }
+
+
+            /* BAGS */
+
+            if (selectedCategory === "Bags") {
+              return item.category === "Bags";
+            }
+
+
+            /* ACCESSORIES */
+
+            if (selectedCategory === "Accessories") {
+              return (
+                item.category === "Accessories"
+              );}
+              if (selectedCategory === "Others") {
+              return item.category === "Others";
+            }
+
+
+            return true;
+
+          })
+
+          .map((item) => (
+
+            <div
+              className="clothes-card"
+              key={item._id}
+            >
+
+              {/* CLOTHING IMAGE */}
+
+              <div className="clothes-card-image">
+
+                <span>
+                  👗
+                </span>
+
+              </div>
+
+
+              {/* CLOTHING DETAILS */}
+
+              <div className="clothes-card-info">
+
+                <h3>
+                  {item.item_name}
+                </h3>
+
+                <p className="clothes-category-name">
+                  {item.category}
+                </p>
+
+                <p>
+                  {item.color}
+                </p>
+
+              </div>
+
+            </div>
+
+          ))}
+
+
+        {/* =================================================
+            ADD ITEM CARD
+        ================================================= */}
+
+        <button
+          className="add-clothes-card"
+          type="button"
+          onClick={() => {
+
+            setActivePage("wardrobe");
+
+            setShowWardrobeForm(true);
+
+            setWardrobeMessage("");
+
+          }}
+        >
+
+          <div className="add-clothes-icon">
+            +
+          </div>
+
+          <span>
+            Add Items
+          </span>
+
+        </button>
+
+      </div>
+
+    )}
+
+
+    {/* =================================================
+        EMPTY CATEGORY MESSAGE
+    ================================================= */}
+
+    {!wardrobeLoading &&
+
+      wardrobeItems.filter((item) => {
+
+        if (selectedCategory === "All") {
+          return true;
+        }
+
+        if (selectedCategory === "Tops") {
+          return (
+            item.category === "Shirt" ||
+            item.category === "T-Shirt"
+          );
+        }
+
+        if (selectedCategory === "Pants") {
+          return (
+            item.category === "Jeans" ||
+            item.category === "Trousers" ||
+            item.category === "Skirt"
+          );
+        }
+
+        if (selectedCategory === "Dresses") {
+          return (
+            item.category === "Dress" ||
+            item.category === "Saree"
+          );
+        }
+
+        if (selectedCategory === "Shoes") {
+          return item.category === "Shoes";
+        }
+
+        if (selectedCategory === "Bags") {
+          return item.category === "Bags";
+        }
+
+        if (selectedCategory === "Accessories") {
+          return (
+            item.category === "Accessories"
+          );
+        }
+        if (selectedCategory === "Others") {
+          return item.category === "Others";
+        }
+
+
+        return true;
+
+      }).length === 0 && (
+
+        <p className="clothes-message">
+          No clothes in this category yet.
+        </p>
+
+      )}
+
+  </div>
+
+)}
       {/* =================================================
           AI RECOMMENDATION
       ================================================= */}

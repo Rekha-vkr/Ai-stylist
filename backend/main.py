@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from database import db
-from models.user import UserCreate, UserLogin
+from models.user import UserCreate, UserLogin,ClothingCreate
 from pwdlib import PasswordHash
 
 
@@ -141,3 +141,37 @@ def login_user(user: UserLogin):
             "email": existing_user["email"]
         }
     }
+    # =====================================================
+# ADD CLOTHING TO WARDROBE
+# =====================================================
+
+@app.post("/wardrobe")
+def add_clothing(clothing: ClothingCreate):
+
+    new_clothing = {
+        "item_name": clothing.item_name,
+        "category": clothing.category,
+        "color": clothing.color,
+        "occasion": clothing.occasion,
+        "season": clothing.season
+    }
+
+    result = db["wardrobe"].insert_one(new_clothing)
+
+    return {
+        "message": "Clothing item added successfully!",
+        "clothing_id": str(result.inserted_id)
+    }
+    # =====================================================
+# GET WARDROBE
+# =====================================================
+
+@app.get("/wardrobe")
+def get_wardrobe():
+
+    clothes = list(db["wardrobe"].find())
+
+    for clothing in clothes:
+        clothing["_id"] = str(clothing["_id"])
+
+    return clothes
