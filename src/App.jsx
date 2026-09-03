@@ -2,13 +2,16 @@ import { useState } from "react";
 import "./App.css";
 
 import fashionImage from "./assets/fashion-ai.png";
+import homeIllustration from "./assets/home-illustration.png";
 
 function App() {
   // =========================
   // LOGIN / USER STATE
   // =========================
 
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(
+  localStorage.getItem("isLoggedIn") === "true"
+);
   const [isRegistering, setIsRegistering] = useState(false);
 
   const [activePage, setActivePage] = useState("home");
@@ -66,18 +69,20 @@ const handleLogin = async (e) => {
 
     const data = await response.json();
 
-    if (response.ok) {
-      // Login successful
-      setIsLoggedIn(true);
-      setActivePage("home");
+    if (response.ok && data.message === "Login successful!") {
+  setIsLoggedIn(true);
+  localStorage.setItem("isLoggedIn", "true");
 
-      // Clear password
-      setLoginPassword("");
+  setActivePage("home");
 
-      console.log("Login successful:", data);
-    } else {
+  setLoginEmail("");
+  setLoginPassword("");
+
+  console.log("Login successful:", data);
+} else {
       alert(data.error || "Invalid email or password.");
     }
+
   } catch (error) {
     console.error("Login error:", error);
 
@@ -86,7 +91,6 @@ const handleLogin = async (e) => {
     );
   }
 };
-
   // =====================================================
   // REGISTER
   // This already connects to FastAPI + MongoDB
@@ -147,12 +151,13 @@ const handleLogin = async (e) => {
   // =====================================================
 
   const handleLogout = () => {
-    setIsLoggedIn(false);
-    setActivePage("home");
-    setLoginEmail("");
-    setLoginPassword("");
-  };
+  setIsLoggedIn(false);
+  localStorage.removeItem("isLoggedIn");
 
+  setActivePage("home");
+  setLoginEmail("");
+  setLoginPassword("");
+};
   // =====================================================
   // NAVIGATION
   // =====================================================
@@ -236,6 +241,7 @@ const handleLogin = async (e) => {
                         onChange={(e) =>
                           setLoginEmail(e.target.value)
                         }
+                        required
                       />
 
                     </div>
@@ -260,6 +266,7 @@ const handleLogin = async (e) => {
                         onChange={(e) =>
                           setLoginPassword(e.target.value)
                         }
+                        required
                       />
 
                       <button
@@ -620,106 +627,67 @@ const handleLogin = async (e) => {
 
       {activePage === "home" && (
 
-        <div className="dashboard-page">
+  <div
+    className="dashboard-page home-page-decorated"
+    style={{ backgroundImage: `url(${homeIllustration})` }}
+  >
 
-          <div className="dashboard-content">
+    <div className="dashboard-content">
 
-            <p className="about-label">
-              WELCOME TO AI STYLIST
-            </p>
+      <p className="about-label">
+        WELCOME TO AI STYLIST
+      </p>
 
-            <h1>
-              Style Smarter.
-              <br />
-              <span>Wear What You Own.</span>
-            </h1>
+      <h1>
+        Style Smarter.
+        <br />
+        <span>Wear What You Own.</span>
+      </h1>
 
-            <p className="about-intro">
-              Your intelligent personal stylist for creating
-              beautiful outfits from your existing wardrobe.
-            </p>
-
-
-            <div className="dashboard-cards">
-
-              <div
-                className="dashboard-card"
-                onClick={() => navigateTo("wardrobe")}
-              >
-                <div className="dashboard-icon">
-                  👚
-                </div>
-
-                <h2>
-                  My Wardrobe
-                </h2>
-
-                <p>
-                  Add and organize your clothes
-                  digitally.
-                </p>
-
-                <button>
-                  Open Wardrobe →
-                </button>
-              </div>
+      <p className="about-intro">
+        Your intelligent personal stylist for creating
+        beautiful outfits from your existing wardrobe.
+      </p>
 
 
-              <div
-                className="dashboard-card"
-                onClick={() =>
-                  navigateTo("recommendation")
-                }
-              >
-                <div className="dashboard-icon">
-                  ✨
-                </div>
+      <div className="dashboard-cards">
 
-                <h2>
-                  Outfit Recommendation
-                </h2>
-
-                <p>
-                  Get personalized outfit ideas
-                  from your wardrobe.
-                </p>
-
-                <button>
-                  Get Recommendations →
-                </button>
-              </div>
-
-
-              <div
-                className="dashboard-card"
-                onClick={() =>
-                  navigateTo("thrift")
-                }
-              >
-                <div className="dashboard-icon">
-                  ♻️
-                </div>
-
-                <h2>
-                  Thrift
-                </h2>
-
-                <p>
-                  Give unused clothes a second
-                  life through thrift.
-                </p>
-
-                <button>
-                  Explore Thrift →
-                </button>
-              </div>
-
-            </div>
-
-          </div>
-
+        <div
+          className="dashboard-card"
+          onClick={() => navigateTo("wardrobe")}
+        >
+          <div className="dashboard-icon">👚</div>
+          <h2>My Wardrobe</h2>
+          <p>Add and organize your clothes digitally.</p>
+          <button>Open Wardrobe →</button>
         </div>
-      )}
+
+        <div
+          className="dashboard-card"
+          onClick={() => navigateTo("recommendation")}
+        >
+          <div className="dashboard-icon">✨</div>
+          <h2>Outfit Recommendation</h2>
+          <p>Get personalized outfit ideas from your wardrobe.</p>
+          <button>Get Recommendations →</button>
+        </div>
+
+        <div
+          className="dashboard-card"
+          onClick={() => navigateTo("thrift")}
+        >
+          <div className="dashboard-icon">♻️</div>
+          <h2>Thrift</h2>
+          <p>Give unused clothes a second life through thrift.</p>
+          <button>Explore Thrift →</button>
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
 
 
       {/* =================================================

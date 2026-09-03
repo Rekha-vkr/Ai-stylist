@@ -1,1546 +1,730 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Manrope:wght@400;500;600;700&display=swap');
+
+:root {
+  /* Light theme (dashboard, wardrobe, recommendation, thrift, about) */
+  --bg-light: #FBF7FC;
+  --card-bg: #FFFFFF;
+  --card-border: rgba(40, 20, 60, 0.08);
+  --text-dark: #241238;
+  --muted-light: #6E6079;
+  --accent-purple: #8A2FD1;
+  --pill-bg: #F1E1FA;
+  --pill-text: #8A2FD1;
+
+  /* Dark theme (login/register only) */
+  --dark-bg: #170B29;
+  --dark-panel: #241338;
+  --dark-accent: #B24BF3;
+  --dark-accent-soft: #F3C7EC;
+  --dark-text: #F5F0FA;
+  --dark-muted: #C9BFD6;
+  --dark-border: rgba(245, 240, 250, 0.12);
+
+  /* Home page hero illustration â€” replace the url() with your actual
+     image path/import if it isn't already handled by JSX/inline style. */
+  --home-illustration: url('/assets/home-illustration.jpg');
+}
+
 * {
-  margin: 0;
-  padding: 0;
   box-sizing: border-box;
 }
 
 body {
-  font-family: "Segoe UI", sans-serif;
-  background: #0b061d;
-  color: white;
-  min-height: 100vh;
+  margin: 0;
+  background: var(--bg-light);
+  color: var(--text-dark);
+  font-family: 'Manrope', sans-serif;
 }
 
-
-/* =========================================
-   MAIN PAGE
-========================================= */
-
-.page {
-  min-height: 100vh;
-  width: 100%;
-
-  display: flex;
-
-  background:
-    radial-gradient(
-      circle at 15% 50%,
-      rgba(180, 40, 255, 0.25),
-      transparent 40%
-    ),
-    radial-gradient(
-      circle at 85% 50%,
-      rgba(255, 70, 190, 0.18),
-      transparent 40%
-    ),
-    linear-gradient(
-      135deg,
-      #09051c,
-      #16072e,
-      #0b061c
-    );
-
-  overflow: hidden;
+h1, h2, h3 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  margin: 0;
 }
-
-
-/* =========================================
-   LEFT SIDE
-========================================= */
-
-.fashion-side {
-  width: 53%;
-  min-height: 100vh;
-
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 45% 45%,
-      rgba(217, 70, 239, 0.25),
-      transparent 50%
-    );
-}
-
-
-/*
-   Image container
-
-   IMPORTANT:
-   No border/card around the image.
-   This makes the image blend naturally
-   into the page.
-*/
-
-.fashion-image-wrapper {
-  width: 100%;
-  height: 100%;
-
-  position: relative;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  overflow: hidden;
-}
-
-
-/* =========================================
-   FASHION IMAGE
-========================================= */
-
-.fashion-image {
-  width: 100%;
-  height: 100%;
-
-  object-fit: contain;
-
-  /*
-     Slightly move image so the important
-     fashion illustration remains visible.
-  */
-
-  object-position: center center;
-
-  display: block;
-
-  /*
-     Blend image into purple background.
-  */
-
-  opacity: 0.96;
-
-  filter:
-    saturate(1.05)
-    contrast(1.02)
-    brightness(0.95);
-
-  /*
-     Fade the RIGHT edge of the image.
-     This makes it merge into login side.
-  */
-
-  -webkit-mask-image:
-    linear-gradient(
-      to right,
-      black 0%,
-      black 78%,
-      rgba(0, 0, 0, 0.85) 87%,
-      transparent 100%
-    );
-
-  mask-image:
-    linear-gradient(
-      to right,
-      black 0%,
-      black 78%,
-      rgba(0, 0, 0, 0.85) 87%,
-      transparent 100%
-    );
-}
-
-
-/*
-   Purple glow over the image
-*/
-
-.fashion-image-wrapper::after {
-  content: "";
-
-  position: absolute;
-
-  inset: 0;
-
-  pointer-events: none;
-
-  background:
-    linear-gradient(
-      to right,
-      transparent 55%,
-      rgba(15, 5, 35, 0.15) 70%,
-      rgba(11, 6, 29, 0.8) 100%
-    );
-
-  z-index: 2;
-}
-
-
-/* =========================================
-   RIGHT LOGIN SIDE
-========================================= */
-
-.login-side {
-  width: 47%;
-  min-height: 100vh;
-
-  display: flex;
-
-  align-items: center;
-  justify-content: center;
-
-  padding: 50px 60px;
-
-  position: relative;
-
-  z-index: 5;
-}
-
-
-/* =========================================
-   LOGIN CARD
-========================================= */
-
-.login-card {
-  width: 100%;
-  max-width: 570px;
-
-  min-height: 650px;
-
-  padding: 45px 50px;
-
-  border-radius: 30px;
-
-  background:
-    linear-gradient(
-      145deg,
-      rgba(27, 12, 52, 0.90),
-      rgba(13, 7, 31, 0.94)
-    );
-
-  border: 1.5px solid rgba(241, 105, 255, 0.75);
-
-  box-shadow:
-    0 0 20px rgba(217, 70, 239, 0.22),
-    0 0 60px rgba(217, 70, 239, 0.15),
-    inset 0 0 35px rgba(255, 120, 230, 0.03);
-
-  backdrop-filter: blur(15px);
-
-  position: relative;
-}
-
-
-/* =========================================
-   PROFILE
-========================================= */
-
-.profile-icon {
-  width: 78px;
-  height: 78px;
-
-  margin: 0 auto 25px;
-
-  border-radius: 50%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  font-size: 35px;
-
-  border: 2px solid #ff9be9;
-
-  background:
-    radial-gradient(
-      circle,
-      rgba(255, 120, 220, 0.15),
-      rgba(30, 10, 50, 0.8)
-    );
-
-  box-shadow:
-    0 0 15px #f472e8,
-    0 0 35px rgba(217, 70, 239, 0.55);
-}
-
-
-/* =========================================
-   TITLE
-========================================= */
-
-.login-card h1 {
-  text-align: center;
-
-  font-family: Georgia, serif;
-
-  font-size: 40px;
-
-  font-weight: 400;
-
-  color: #fff;
-
-  letter-spacing: -0.5px;
-}
-
-.login-card h1 span {
-  color: #ff72d0;
-
-  text-shadow:
-    0 0 12px #ff72d0;
-}
-
-
-/* =========================================
-   SUBTITLE
-========================================= */
-
-.subtitle {
-  text-align: center;
-
-  margin-top: 10px;
-  margin-bottom: 38px;
-
-  color: #d4c3dc;
-
-  font-size: 17px;
-}
-
-
-/* =========================================
-   INPUT
-========================================= */
-
-.input-group {
-  position: relative;
-
-  width: 100%;
-
-  margin-bottom: 20px;
-}
-
-
-.input-group input {
-  width: 100%;
-
-  height: 65px;
-
-  padding:
-    0 55px;
-
-  border-radius: 16px;
-
-  border: 1px solid rgba(170, 130, 200, 0.55);
-
-  background:
-    rgba(255, 255, 255, 0.045);
-
-  color: white;
-
-  outline: none;
-
-  font-size: 16px;
-
-  transition: 0.3s;
-}
-
-
-.input-group input::placeholder {
-  color: #a99bb8;
-}
-
-
-.input-group input:focus {
-  border-color: #f472e8;
-
-  box-shadow:
-    0 0 15px rgba(244, 114, 232, 0.25);
-}
-
-
-.input-icon {
-  position: absolute;
-
-  left: 20px;
-
-  top: 50%;
-
-  transform: translateY(-50%);
-
-  color: #d48aff;
-
-  font-size: 22px;
-
-  z-index: 2;
-}
-
-
-.password-toggle {
-  position: absolute;
-
-  right: 18px;
-
-  top: 50%;
-
-  transform: translateY(-50%);
-
-  border: none;
-
-  background: transparent;
-
-  color: #d9a1ed;
-
-  cursor: pointer;
-
-  font-size: 19px;
-}
-
-
-/* =========================================
-   OPTIONS
-========================================= */
-
-.options {
-  width: 100%;
-
-  display: flex;
-
-  justify-content: space-between;
-
-  align-items: center;
-
-  margin: 8px 0 28px;
-
-  font-size: 14px;
-}
-
-
-.remember {
-  display: flex;
-
-  align-items: center;
-
-  gap: 9px;
-
-  color: #cfc1d8;
-
-  cursor: pointer;
-}
-
-
-.remember input {
-  width: 18px;
-  height: 18px;
-
-  accent-color: #f472e8;
-}
-
-
-.forgot {
-  border: none;
-
-  background: transparent;
-
-  color: #f472e8;
-
-  font-size: 14px;
-
-  cursor: pointer;
-}
-
-
-.forgot:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================================
-   LOGIN BUTTON
-========================================= */
-
-.login-button {
-  width: 100%;
-
-  height: 65px;
-
-  border: none;
-
-  border-radius: 35px;
-
-  background:
-    linear-gradient(
-      90deg,
-      #f472b6,
-      #d946ef
-    );
-
-  color: white;
-
-  font-size: 18px;
-
-  font-weight: 600;
-
-  cursor: pointer;
-
-  box-shadow:
-    0 0 25px rgba(236, 72, 153, 0.45);
-
-  transition: 0.3s;
-}
-
-
-.login-button:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 0 35px rgba(236, 72, 153, 0.75);
-}
-
-
-/* =========================================
-   DIVIDER
-========================================= */
-
-.divider {
-  display: flex;
-
-  align-items: center;
-
-  gap: 18px;
-
-  margin: 32px 0 25px;
-
-  color: #c4b4cc;
-}
-
-
-.divider span {
-  height: 1px;
-
-  flex: 1;
-
-  background:
-    linear-gradient(
-      to right,
-      transparent,
-      #604b70,
-      transparent
-    );
-}
-
-
-.divider p {
-  font-size: 16px;
-}
-
-
-/* =========================================
-   SOCIAL BUTTONS
-========================================= */
-
-.social-buttons {
-  display: flex;
-
-  justify-content: center;
-
-  gap: 25px;
-}
-
-
-.social-buttons button {
-  width: 58px;
-  height: 58px;
-
-  border-radius: 50%;
-
-  border: 1px solid #604c73;
-
-  background:
-    rgba(255, 255, 255, 0.05);
-
-  color: white;
-
-  font-size: 20px;
-
-  cursor: pointer;
-
-  transition: 0.3s;
-}
-
-
-.social-buttons button:hover {
-  border-color: #f472e8;
-
-  transform: translateY(-3px);
-
-  box-shadow:
-    0 0 18px rgba(217, 70, 239, 0.6);
-}
-
-
-/* =========================================
-   SIGN UP
-========================================= */
-
-.signup-text {
-  text-align: center;
-
-  margin-top: 35px;
-
-  color: #a99bad;
-
-  font-size: 15px;
-}
-
-
-.signup-text button {
-  border: none;
-
-  background: transparent;
-
-  color: #f472e8;
-
-  font-size: 15px;
-
-  cursor: pointer;
-
-  margin-left: 6px;
-}
-
-
-.signup-text button:hover {
-  text-decoration: underline;
-}
-
-
-/* =========================================
-   RESPONSIVE
-========================================= */
-
-@media (max-width: 1000px) {
-
-  .page {
-    flex-direction: column;
-
-    overflow-y: auto;
-  }
-
-  .fashion-side {
-    width: 100%;
-
-    height: 550px;
-
-    min-height: 550px;
-  }
-
-  .fashion-image {
-    object-position: center center;
-
-    -webkit-mask-image:
-      linear-gradient(
-        to bottom,
-        black 0%,
-        black 75%,
-        transparent 100%
-      );
-
-    mask-image:
-      linear-gradient(
-        to bottom,
-        black 0%,
-        black 75%,
-        transparent 100%
-      );
-  }
-
-  .login-side {
-    width: 100%;
-
-    padding: 30px 20px;
-
-    margin-top: -80px;
-  }
-
-  .login-card {
-    max-width: 600px;
-  }
-}
-
-
-@media (max-width: 600px) {
-
-  .fashion-side {
-    height: 430px;
-
-    min-height: 430px;
-  }
-
-  .login-side {
-    padding: 20px 15px;
-  }
-
-  .login-card {
-    padding: 35px 22px;
-
-    min-height: auto;
-
-    border-radius: 25px;
-  }
-
-  .login-card h1 {
-    font-size: 32px;
-  }
-
-  .subtitle {
-    font-size: 15px;
-  }
-
-  .options {
-    font-size: 13px;
-  }
-}
-/* =========================
-   APP CONTAINER
-========================= */
 
 .app-container {
   min-height: 100vh;
+  background: var(--bg-light);
+  position: relative;
+}
+
+/* Full-page illustration layer for the Home screen. This sits behind
+   the nav bar AND the hero/cards content, so the art reads as one
+   continuous background across the whole page instead of being
+   boxed into a single section. */
+.app-container.home-active {
+  background-color: #FCF4EF;
+}
+
+.app-container.home-active::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background-image: var(--home-illustration);
+  background-size: contain;
+  background-position: center 80px;
+  background-repeat: no-repeat;
+  pointer-events: none;
+
+  -webkit-mask-image: radial-gradient(
+    ellipse 90% 85% at center 45%,
+    black 45%,
+    transparent 85%
+  );
+  mask-image: radial-gradient(
+    ellipse 90% 85% at center 45%,
+    black 45%,
+    transparent 85%
+  );
+}
+
+.app-container.home-active .top-navigation,
+.app-container.home-active .dashboard-page {
+  position: relative;
+  z-index: 1;
+  background: transparent;
+}
+
+/* =====================================================
+   LOGIN / REGISTER SCREEN â€” DARK THEME
+===================================================== */
+
+.page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--dark-bg);
+}
+
+.fashion-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(120% 120% at 30% 20%, rgba(178, 75, 243, 0.18), var(--dark-bg) 65%);
+  padding: 40px;
+}
+
+.fashion-image-wrapper {
+  max-width: 420px;
   width: 100%;
 }
 
-
-/* =========================
-   TOP NAVIGATION
-========================= */
-
-.top-navigation {
-  height: 70px;
+.fashion-image {
   width: 100%;
+  height: auto;
+  border-radius: 20px;
+  box-shadow: 0 0 60px -10px rgba(178, 75, 243, 0.4);
+}
+
+.login-side {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: var(--dark-bg);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: radial-gradient(120% 120% at 30% 20%, rgba(178, 75, 243, 0.20), rgba(36, 19, 56, 0.92) 60%);
+  border: 1px solid rgba(178, 75, 243, 0.35);
+  box-shadow: 0 0 60px -10px rgba(178, 75, 243, 0.3);
+  border-radius: 20px;
+  padding: 40px;
+  color: var(--dark-text);
+}
+
+.profile-icon {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 12px;
+}
+
+.login-card h1 {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+  font-style: italic;
+  color: var(--dark-text);
+}
+
+.login-card h1 span {
+  color: var(--dark-accent-soft);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--dark-muted);
+  font-size: 0.9rem;
+  margin-bottom: 28px;
+}
+
+.input-group {
+  position: relative;
+  margin-bottom: 16px;
+}
+
+.input-group input {
+  width: 100%;
+  background: rgba(245, 240, 250, 0.05);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text);
+  border-radius: 10px;
+  padding: 14px 44px;
+  font-size: 0.9rem;
+  font-family: 'Manrope', sans-serif;
+}
+
+.input-group input:focus {
+  outline: none;
+  border-color: rgba(178, 75, 243, 0.6);
+}
+
+.input-group input::placeholder {
+  color: var(--dark-muted);
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.95rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--dark-muted);
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.options {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 7%;
-  box-sizing: border-box;
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom: 1px solid #eee0eb;
-  position: relative;
-  z-index: 10;
+  margin-bottom: 20px;
+  font-size: 0.8rem;
+}
+
+.remember {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--dark-muted);
+}
+
+.forgot {
+  background: none;
+  border: none;
+  color: var(--dark-accent-soft);
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.login-button {
+  width: 100%;
+  background: linear-gradient(135deg, #B24BF3, #8A2FD1);
+  box-shadow: 0 8px 24px -8px rgba(178, 75, 243, 0.6);
+  border: none;
+  color: white;
+  padding: 14px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: 'Manrope', sans-serif;
+  cursor: pointer;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 24px 0;
+  color: var(--dark-muted);
+  font-size: 0.8rem;
+}
+
+.divider span {
+  flex: 1;
+  height: 1px;
+  background: var(--dark-border);
+}
+
+.social-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.social-buttons button {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--dark-border);
+  background: rgba(245, 240, 250, 0.04);
+  color: var(--dark-text);
+  cursor: pointer;
+}
+
+.signup-text {
+  text-align: center;
+  color: var(--dark-muted);
+  font-size: 0.85rem;
+}
+
+.signup-text button {
+  background: none;
+  border: none;
+  color: var(--dark-accent-soft);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.85rem;
+  margin-left: 4px;
+}
+
+/* =====================================================
+   NAVIGATION â€” LIGHT THEME
+===================================================== */
+
+.top-navigation {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 48px;
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--bg-light);
 }
 
 .nav-logo {
-  font-size: 25px;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.3rem;
   font-weight: 700;
-  color: #9b4f8f;
-  font-family: Georgia, serif;
+  color: var(--accent-purple);
   cursor: pointer;
 }
 
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 35px;
+  gap: 32px;
 }
 
 .nav-link {
+  background: none;
   border: none;
-  background: transparent;
-  color: #6d596b;
-  font-size: 16px;
-  font-weight: 600;
+  color: var(--text-dark);
+  font-size: 0.9rem;
   cursor: pointer;
-  padding: 10px 5px;
-  position: relative;
-}
-
-.nav-link:hover {
-  color: #b05ca6;
+  font-family: 'Manrope', sans-serif;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
 }
 
 .nav-link.active {
-  color: #b05ca6;
+  color: var(--accent-purple);
+  border-bottom: 2px solid var(--accent-purple);
+  font-weight: 600;
 }
 
-.nav-link.active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2px;
-  background: #b05ca6;
-  border-radius: 2px;
+.logout-button {
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
+  color: var(--text-dark);
+  padding: 10px 20px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
 }
 
+/* =====================================================
+   DASHBOARD / HOME â€” LIGHT THEME
+===================================================== */
 
-/* =========================
-   ABOUT PAGE
-========================= */
-
+.dashboard-page,
+.feature-page,
 .about-page {
-  min-height: calc(100vh - 70px);
-  width: 100%;
-  padding: 70px 8%;
-  box-sizing: border-box;
-  background: linear-gradient(
-    135deg,
-    #fff5fb,
-    #f9eef8,
-    #fff
-  );
-  color: #3d2940;
-  overflow-y: auto;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 48px 80px;
+  background: var(--bg-light);
 }
 
-.about-content {
-  max-width: 1100px;
-  margin: auto;
+.dashboard-content {
   text-align: center;
 }
 
 .about-label {
-  font-size: 14px;
-  letter-spacing: 3px;
-  font-weight: 700;
-  color: #b05ca6;
-  margin-bottom: 15px;
+  display: inline-block;
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  font-size: 0.75rem;
+  letter-spacing: 0.06em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 20px;
 }
 
+.dashboard-content h1,
+.feature-content h1,
 .about-content h1 {
-  font-size: 52px;
-  line-height: 1.15;
-  margin: 0 0 25px;
-  font-family: Georgia, serif;
+  font-size: 2.6rem;
+  line-height: 1.2;
+  margin-bottom: 20px;
+  color: var(--text-dark);
 }
 
+.dashboard-content h1 span,
 .about-content h1 span {
-  color: #c45a9f;
+  color: var(--accent-purple);
 }
 
 .about-intro {
-  max-width: 700px;
-  margin: 0 auto 50px;
-  font-size: 18px;
+  color: var(--muted-light);
+  max-width: 560px;
   line-height: 1.7;
-  color: #6d596b;
+  margin: 0 auto 40px;
 }
 
+.dashboard-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  text-align: left;
+  position: relative;
+  z-index: 1;
+}
 
-/* =========================
-   ABOUT CARDS
-========================= */
+.dashboard-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 32px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px -12px rgba(40, 20, 60, 0.15);
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.dashboard-card:hover {
+  box-shadow: 0 12px 32px -12px rgba(138, 47, 209, 0.25);
+  transform: translateY(-2px);
+}
+
+.dashboard-icon {
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  margin-bottom: 20px;
+}
+
+.dashboard-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.dashboard-card p {
+  color: var(--muted-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.dashboard-card button {
+  background: var(--pill-bg);
+  border: none;
+  color: var(--accent-purple);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px 16px;
+  border-radius: 999px;
+}
+
+/* =====================================================
+   FEATURE PAGES (Wardrobe / Recommendation) â€” LIGHT
+===================================================== */
+
+.feature-content {
+  text-align: left;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.feature-icon {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+}
+
+.feature-content > p {
+  color: var(--muted-light);
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.coming-soon-card,
+.recommendation-form {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 8px 24px -12px rgba(40, 20, 60, 0.12);
+}
+
+.coming-soon-card h2 {
+  font-size: 1.4rem;
+  margin-bottom: 12px;
+  color: var(--text-dark);
+}
+
+.coming-soon-card p {
+  color: var(--muted-light);
+  line-height: 1.7;
+  margin-bottom: 24px;
+}
+
+.recommendation-form label {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--muted-light);
+  margin-bottom: 8px;
+}
+
+.recommendation-form select {
+  width: 100%;
+  background: var(--bg-light);
+  border: 1px solid var(--card-border);
+  color: var(--text-dark);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 20px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 0.9rem;
+}
+
+.feature-button {
+  background: var(--accent-purple);
+  border: none;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Manrope', sans-serif;
+}
+
+/* =====================================================
+   THRIFT â€” LIGHT
+===================================================== */
+
+.thrift-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+}
+
+.thrift-card {
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 8px 24px -12px rgba(40, 20, 60, 0.12);
+}
+
+.thrift-icon {
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  margin-bottom: 16px;
+}
+
+.thrift-card h2 {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: var(--text-dark);
+}
+
+.thrift-card p {
+  color: var(--muted-light);
+  font-size: 0.9rem;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+/* =====================================================
+   ABOUT US â€” LIGHT
+===================================================== */
+
+.about-content {
+  text-align: center;
+}
 
 .about-cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-  margin-bottom: 50px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 60px;
+  text-align: left;
 }
 
 .about-card {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(120, 70, 110, 0.12);
-  transition: transform 0.3s ease;
-}
-
-.about-card:hover {
-  transform: translateY(-8px);
+  background: var(--card-bg);
+  border: 1px solid var(--card-border);
+  border-radius: 18px;
+  padding: 32px;
+  box-shadow: 0 8px 24px -12px rgba(40, 20, 60, 0.12);
 }
 
 .about-icon {
-  font-size: 42px;
-  margin-bottom: 15px;
+  font-size: 1.4rem;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  background: var(--pill-bg);
+  margin-bottom: 16px;
 }
 
 .about-card h2 {
-  font-size: 21px;
-  margin-bottom: 12px;
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+  color: var(--text-dark);
 }
 
 .about-card p {
-  color: #6d596b;
+  color: var(--muted-light);
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
-
-/* =========================
-   MISSION
-========================= */
-
 .mission-section {
-  max-width: 800px;
-  margin: 0 auto 50px;
-  padding: 35px;
-  border-radius: 20px;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: 0 8px 25px rgba(120, 70, 110, 0.1);
+  border-top: 1px solid var(--card-border);
+  padding-top: 40px;
+  margin-bottom: 60px;
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .mission-section h2 {
-  font-family: Georgia, serif;
-  font-size: 30px;
-  margin-bottom: 15px;
+  font-size: 1.6rem;
+  margin-bottom: 16px;
+  color: var(--text-dark);
 }
 
 .mission-section p {
-  color: #6d596b;
+  color: var(--muted-light);
   line-height: 1.8;
-  font-size: 17px;
 }
 
-
-/* =========================
-   HOW IT WORKS
-========================= */
-
-.how-it-works {
-  margin-top: 50px;
-}
-
-.how-it-works > h2 {
-  font-family: Georgia, serif;
-  font-size: 32px;
-  margin-bottom: 35px;
+.how-it-works h2 {
+  font-size: 1.6rem;
+  margin-bottom: 32px;
+  color: var(--text-dark);
 }
 
 .steps {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 25px;
-}
-
-.step {
-  background: rgba(255, 255, 255, 0.8);
-  padding: 30px 25px;
-  border-radius: 20px;
-  box-shadow: 0 8px 25px rgba(120, 70, 110, 0.1);
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 24px;
+  text-align: left;
 }
 
 .step span {
-  font-size: 14px;
-  font-weight: 700;
-  color: #c45a9f;
-  letter-spacing: 2px;
+  display: inline-block;
+  font-family: 'Playfair Display', serif;
+  color: var(--accent-purple);
+  font-size: 1.4rem;
+  margin-bottom: 12px;
 }
 
 .step h3 {
-  font-size: 20px;
-  margin: 12px 0;
+  font-size: 1.1rem;
+  margin-bottom: 8px;
+  color: var(--text-dark);
 }
 
 .step p {
-  color: #6d596b;
+  color: var(--muted-light);
+  font-size: 0.9rem;
   line-height: 1.6;
 }
 
-
-/* =========================
-   MOBILE
-========================= */
-
-@media (max-width: 768px) {
-
-  .top-navigation {
-    height: 65px;
-    padding: 0 20px;
-  }
-
-  .nav-logo {
-    font-size: 21px;
-  }
-
-  .nav-links {
-    gap: 15px;
-  }
-
-  .nav-link {
-    font-size: 14px;
-  }
-
-  .about-page {
-    padding: 45px 20px;
-  }
-
-  .about-content h1 {
-    font-size: 38px;
-  }
-
-  .about-intro {
-    font-size: 16px;
-  }
-
-  .about-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .steps {
-    grid-template-columns: 1fr;
-  }
-}
-/* =========================================================
-   FEATURE PAGES
-========================================================= */
-
-.feature-page {
-  min-height: calc(100vh - 70px);
-  width: 100%;
-
-  padding: 70px 8%;
-
-  background: linear-gradient(
-    135deg,
-    #fff5fb,
-    #f9eef8,
-    #ffffff
-  );
-
-  overflow-y: auto;
-}
-
-.feature-content {
-  max-width: 1100px;
-  margin: 0 auto;
-
-  text-align: center;
-}
-
-.feature-icon {
-  width: 75px;
-  height: 75px;
-
-  margin: 0 auto 20px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  border-radius: 50%;
-
-  background: #f7e4f1;
-
-  font-size: 38px;
-}
-
-.feature-content h1 {
-  margin: 0 0 15px;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: 48px;
-
-  color: #3d2940;
-}
-
-.feature-content > p:not(.about-label) {
-  max-width: 700px;
-
-  margin: 0 auto 40px;
-
-  color: #6d596b;
-
-  font-size: 17px;
-
-  line-height: 1.7;
-}
-
-
-/* =========================================================
-   THRIFT CARDS
-========================================================= */
-
-.thrift-cards {
-  display: grid;
-
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 25px;
-
-  margin-top: 40px;
-}
-
-.thrift-card {
-  background: white;
-
-  padding: 35px 25px;
-
-  border-radius: 20px;
-
-  box-shadow:
-    0 8px 25px rgba(120, 70, 110, 0.12);
-
-  transition: 0.3s ease;
-}
-
-.thrift-card:hover {
-  transform: translateY(-7px);
-
-  box-shadow:
-    0 15px 35px rgba(120, 70, 110, 0.18);
-}
-
-.thrift-icon {
-  font-size: 42px;
-
-  margin-bottom: 15px;
-}
-
-.thrift-card h2 {
-  margin: 0 0 12px;
-
-  font-size: 22px;
-
-  color: #3d2940;
-}
-
-.thrift-card p {
-  margin: 0 0 20px;
-
-  color: #6d596b;
-
-  line-height: 1.6;
-}
-
-
-/* =========================================================
-   FEATURE BUTTON
-========================================================= */
-
-.feature-button {
-  border: none;
-
-  padding: 13px 25px;
-
-  border-radius: 25px;
-
-  background: linear-gradient(
-    135deg,
-    #b05ca6,
-    #c45a9f
-  );
-
-  color: white;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  transition: 0.3s ease;
-}
-
-.feature-button:hover {
-  transform: translateY(-2px);
-
-  box-shadow:
-    0 8px 20px rgba(176, 92, 166, 0.25);
-}
-
-
-/* =========================================================
-   FEATURE PAGE MOBILE
-========================================================= */
+/* =====================================================
+   RESPONSIVE
+===================================================== */
 
 @media (max-width: 900px) {
-
-  .thrift-cards {
-    grid-template-columns: 1fr;
+  .page {
+    flex-direction: column;
   }
-
-  .feature-content h1 {
-    font-size: 40px;
+  .fashion-side {
+    display: none;
+  }
+  .top-navigation {
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+  }
+  .nav-links {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+  }
+  .dashboard-page,
+  .feature-page,
+  .about-page {
+    padding: 20px 24px 60px;
   }
 }
 
-@media (max-width: 600px) {
+/* =====================================================
+   HOME PAGE BACKGROUND ILLUSTRATION â€” BLENDED
+===================================================== */
 
-  .feature-page {
-    padding: 45px 20px;
-  }
-
-  .feature-content h1 {
-    font-size: 34px;
-  }
-}
-/* =========================================================
-   HOME / DASHBOARD — PROFESSIONAL FASHION UI
-========================================================= */
-
-.dashboard-page {
-  min-height: calc(100vh - 70px);
-  padding: 70px 7%;
+.home-page-decorated {
   position: relative;
-  overflow: hidden;
-
-  background:
-    radial-gradient(
-      circle at 85% 15%,
-      rgba(196, 90, 159, 0.16),
-      transparent 28%
-    ),
-    radial-gradient(
-      circle at 10% 85%,
-      rgba(176, 92, 166, 0.10),
-      transparent 30%
-    ),
-    linear-gradient(
-      135deg,
-      #fff8fc 0%,
-      #fdf3fa 45%,
-      #ffffff 100%
-    );
-}
-
-
-/* Decorative background circles */
-
-.dashboard-page::before {
-  content: "";
-  position: absolute;
-  width: 280px;
-  height: 280px;
-  border-radius: 50%;
-
-  background: rgba(196, 90, 159, 0.07);
-
-  top: -100px;
-  right: -80px;
-}
-
-.dashboard-page::after {
-  content: "";
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-
-  background: rgba(176, 92, 166, 0.06);
-
-  bottom: -80px;
-  left: -60px;
-}
-
-
-/* Main content */
-
-.dashboard-content {
-  position: relative;
-  z-index: 2;
-
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-
-/* Small heading */
-
-.dashboard-content .about-label {
-  display: inline-block;
-
-  margin-bottom: 18px;
-  padding: 8px 16px;
-
-  border-radius: 30px;
-
-  background: rgba(176, 92, 166, 0.09);
-
-  color: #a14d96;
-
-  font-size: 12px;
-  font-weight: 800;
-  letter-spacing: 2px;
-}
-
-
-/* Main heading */
-
-.dashboard-content h1 {
-  margin: 0;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: clamp(46px, 6vw, 72px);
-
-  line-height: 1.08;
-
-  font-weight: 500;
-
-  color: #39283b;
-
-  letter-spacing: -2px;
-}
-
-
-/* Gradient heading */
-
-.dashboard-content h1 span {
-  background: linear-gradient(
-    135deg,
-    #a84f9c,
-    #c65b9f,
-    #8f4c98
-  );
-
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-
-  background-clip: text;
-}
-
-
-/* Introduction */
-
-.dashboard-content .about-intro {
-  max-width: 650px;
-
-  margin: 25px 0 50px;
-
-  color: #6e5b6c;
-
-  font-size: 17px;
-
-  line-height: 1.8;
-}
-
-
-/* =========================================================
-   DASHBOARD CARDS
-========================================================= */
-
-.dashboard-cards {
-  display: grid;
-
-  grid-template-columns: repeat(3, 1fr);
-
-  gap: 25px;
-
-  margin-top: 10px;
-}
-
-
-/* Individual card */
-
-.dashboard-card {
-  position: relative;
-
-  padding: 32px 28px;
-
-  min-height: 285px;
-
-  display: flex;
-  flex-direction: column;
-
-  background: rgba(255, 255, 255, 0.82);
-
-  border: 1px solid rgba(176, 92, 166, 0.12);
-
-  border-radius: 24px;
-
-  box-shadow:
-    0 10px 30px rgba(80, 45, 75, 0.07),
-    0 2px 8px rgba(80, 45, 75, 0.04);
-
-  backdrop-filter: blur(10px);
-
-  cursor: pointer;
-
-  transition:
-    transform 0.3s ease,
-    box-shadow 0.3s ease,
-    border-color 0.3s ease;
-}
-
-
-/* Card hover */
-
-.dashboard-card:hover {
-  transform: translateY(-9px);
-
-  border-color: rgba(176, 92, 166, 0.28);
-
-  box-shadow:
-    0 20px 45px rgba(95, 50, 90, 0.13),
-    0 5px 15px rgba(95, 50, 90, 0.07);
-}
-
-
-/* Card icon */
-
-.dashboard-icon {
-  width: 58px;
-  height: 58px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  margin-bottom: 25px;
-
-  border-radius: 17px;
-
-  background: linear-gradient(
-    135deg,
-    #f7e4f2,
-    #f3d9ed
-  );
-
-  font-size: 28px;
-
-  box-shadow:
-    inset 0 1px 1px rgba(255, 255, 255, 0.8);
-}
-
-
-/* Card heading */
-
-.dashboard-card h2 {
-  margin: 0 0 12px;
-
-  color: #3d2940;
-
-  font-family: Georgia, "Times New Roman", serif;
-
-  font-size: 23px;
-
-  font-weight: 600;
-}
-
-
-/* Card description */
-
-.dashboard-card p {
-  margin: 0;
-
-  color: #746374;
-
-  font-size: 14px;
-
-  line-height: 1.7;
-
-  flex: 1;
-}
-
-
-/* Card button */
-
-.dashboard-card button {
-  align-self: flex-start;
-
-  margin-top: 25px;
-
-  padding: 11px 0;
-
-  border: none;
-
+  min-height: 620px;
+  /* The illustration itself now lives on .app-container.home-active::before,
+     so this box stays fully transparent and just provides layout spacing â€”
+     the art shows through from behind the whole page, nav bar included. */
   background: transparent;
-
-  color: #a14d96;
-
-  font-size: 14px;
-
-  font-weight: 700;
-
-  cursor: pointer;
-
-  transition: 0.25s ease;
 }
 
-
-.dashboard-card button:hover {
-  color: #803a78;
-
-  transform: translateX(5px);
+.home-page-decorated .dashboard-content {
+  position: relative;
+  z-index: 1;
 }
 
-
-/* =========================================================
-   SPECIAL CARD DETAILS
-========================================================= */
-
-/* First card */
-
-.dashboard-card:nth-child(1) .dashboard-icon {
-  background: linear-gradient(
-    135deg,
-    #f8e5f2,
-    #f3d6eb
-  );
-}
-
-
-/* Second card */
-
-.dashboard-card:nth-child(2) .dashboard-icon {
-  background: linear-gradient(
-    135deg,
-    #eee3f8,
-    #e7d6f2
-  );
-}
-
-
-/* Third card */
-
-.dashboard-card:nth-child(3) .dashboard-icon {
-  background: linear-gradient(
-    135deg,
-    #e7f3eb,
-    #dceee2
-  );
-}
-
-
-/* =========================================================
-   RESPONSIVE
-========================================================= */
-
-@media (max-width: 1000px) {
-
-  .dashboard-page {
-    padding: 60px 5%;
+@media (max-width: 900px) {
+  .app-container.home-active::before {
+    display: none;
   }
-
-  .dashboard-cards {
-    grid-template-columns: repeat(2, 1fr);
+  .app-container.home-active {
+    background-color: var(--bg-light);
   }
-
-}
-
-
-@media (max-width: 700px) {
-
-  .dashboard-page {
-    padding: 45px 22px;
-  }
-
-  .dashboard-content h1 {
-    font-size: 44px;
-    letter-spacing: -1px;
-  }
-
-  .dashboard-content .about-intro {
-    font-size: 15px;
-    margin-bottom: 35px;
-  }
-
-  .dashboard-cards {
-    grid-template-columns: 1fr;
-  }
-
-  .dashboard-card {
-    min-height: 240px;
-  }
-
-}
-
-
-@media (max-width: 450px) {
-
-  .dashboard-page {
-    padding: 35px 18px;
-  }
-
-  .dashboard-content h1 {
-    font-size: 38px;
-  }
-
-  .dashboard-content .about-label {
-    font-size: 10px;
-    letter-spacing: 1.5px;
-  }
-
 }
