@@ -15,7 +15,12 @@ const [clothingCategory, setClothingCategory] = useState("");
 const [clothingColor, setClothingColor] = useState("");
 const [clothingOccasion, setClothingOccasion] = useState("");
 const [clothingSeason, setClothingSeason] = useState("");
+const [clothingImage, setClothingImage] = useState(null);
 const [wardrobeMessage, setWardrobeMessage] = useState("");
+const [sortOrder, setSortOrder] = useState("recent");
+const [filterOccasion, setFilterOccasion] = useState("All");
+const [filterSeason, setFilterSeason] = useState("All");
+const [showFilters, setShowFilters] = useState(false);
 
 const [wardrobeItems, setWardrobeItems] = useState([]);
 const [wardrobeLoading, setWardrobeLoading] = useState(false);
@@ -164,11 +169,8 @@ const handleLogin = async (e) => {
       );
     }
   };
-  // =====================================================
-// ADD CLOTHING
-// =====================================================
-
-const handleAddClothing = async (e) => {
+  //ADD CLOTHING//
+  const handleAddClothing = async (e) => {
   e.preventDefault();
 
   setWardrobeMessage("");
@@ -185,47 +187,52 @@ const handleAddClothing = async (e) => {
   }
 
   try {
+    const formData = new FormData();
+
+    formData.append("item_name", clothingName);
+    formData.append("category", clothingCategory);
+    formData.append("color", clothingColor);
+    formData.append("occasion", clothingOccasion);
+    formData.append("season", clothingSeason);
+
+    if (clothingImage) {
+      formData.append("image", clothingImage);
+    }
+
     const response = await fetch(
       "http://127.0.0.1:8000/wardrobe",
       {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          item_name: clothingName,
-          category: clothingCategory,
-          color: clothingColor,
-          occasion: clothingOccasion,
-          season: clothingSeason,
-        }),
+        body: formData,
       }
     );
 
     const data = await response.json();
 
     if (response.ok) {
-  setWardrobeMessage(
-    "Clothes added successfully! 👗✨"
-  );
+      setWardrobeMessage(
+        "Clothes added successfully! 👗✨"
+      );
 
-  setClothingName("");
-  setClothingCategory("");
-  setClothingColor("");
-  setClothingOccasion("");
-  setClothingSeason("");
+      setClothingName("");
+      setClothingCategory("");
+      setClothingColor("");
+      setClothingOccasion("");
+      setClothingSeason("");
+      setClothingImage(null);
 
-  fetchWardrobe();
+      fetchWardrobe();
 
-  setTimeout(() => {
-    setActivePage("clothes");
-    setWardrobeMessage("");
-  }, 1200);
-} else {
+      setTimeout(() => {
+        setActivePage("clothes");
+        setWardrobeMessage("");
+      }, 1200);
+    } else {
       setWardrobeMessage(
         data.detail || "Failed to add clothing item."
       );
     }
+
   } catch (error) {
     console.error("Wardrobe error:", error);
 
@@ -234,7 +241,7 @@ const handleAddClothing = async (e) => {
     );
   }
 };
-// =====================================================
+  // =====================================================
 // GET WARDROBE ITEMS
 // =====================================================
 
@@ -257,6 +264,39 @@ const fetchWardrobe = async () => {
     console.error("Wardrobe fetch error:", error);
   } finally {
     setWardrobeLoading(false);
+  }
+};
+const handleDeleteClothing = async (clothingId) => {
+  const confirmDelete = window.confirm(
+    "Are you sure you want to delete this clothing item?"
+  );
+
+  if (!confirmDelete) {
+    return;
+  }
+
+  try {
+    const response = await fetch(
+      `http://127.0.0.1:8000/wardrobe/${clothingId}`,
+      {
+        method: "DELETE",
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+      setWardrobeItems((currentItems) =>
+        currentItems.filter(
+          (item) => item._id !== clothingId
+        )
+      );
+    } else {
+      alert(data.detail || "Failed to delete clothing item.");
+    }
+  } catch (error) {
+    console.error("Delete clothing error:", error);
+    alert("Cannot connect to server.");
   }
 };
 
@@ -873,6 +913,15 @@ const fetchWardrobe = async () => {
       }
       required
     />
+    <label>Clothing Image</label>
+
+<input
+  type="file"
+  accept="image/*"
+  onChange={(e) =>
+    setClothingImage(e.target.files[0])
+  }
+/>
 
     <label>Category</label>
     <select
@@ -883,15 +932,21 @@ const fetchWardrobe = async () => {
       required
     >
       <option value="">Select Category</option>
-      <option value="Shirt">Shirt</option>
-      <option value="T-Shirt">T-Shirt</option>
-      <option value="Jeans">Jeans</option>
-      <option value="Trousers">Trousers</option>
-      <option value="Dress">Dress</option>
-      <option value="Skirt">Skirt</option>
-      <option value="Saree">Saree</option>
-      <option value="Accessories">Accessories</option>
-      <option value="Other">Other</option>
+
+<option value="Shirt">Shirt</option>
+<option value="T-Shirt">T-Shirt</option>
+
+<option value="Jeans">Jeans</option>
+<option value="Trousers">Trousers</option>
+
+<option value="Dress">Dress</option>
+<option value="Saree">Saree</option>
+
+<option value="Shoes">Shoes</option>
+<option value="Bags">Bags</option>
+
+<option value="Accessories">Accessories</option>
+<option value="Others">Others</option>
     </select>
 
     <label>Color</label>
@@ -992,20 +1047,126 @@ const fetchWardrobe = async () => {
     <div className="clothes-controls">
 
       <button
-        className="filter-button"
-        type="button"
-      >
-        ☷
-      </button>
-
+  className="filter-button"
+  type="button"
+  onClick={() => setShowFilters(!showFilters)}
+>
+  ☷ Filter
+</button>
       <button
-        className="sort-button"
-        type="button"
+  className="sort-button"
+  type="button"
+  onClick={() => {
+    setSortOrder(
+      sortOrder === "recent"
+        ? "oldest"
+        : "recent"
+    );
+  }}
+>
+  {sortOrder === "recent"
+    ? "Recently added ˅"
+    : "Oldest added ˅"}
+</button>
+    </div>
+    {showFilters && (
+
+  <div className="filter-panel">
+
+    <div className="filter-group">
+
+      <label>
+        Occasion
+      </label>
+
+      <select
+        value={filterOccasion}
+        onChange={(e) =>
+          setFilterOccasion(e.target.value)
+        }
       >
-        Recently added ˅
-      </button>
+        <option value="All">
+          All Occasions
+        </option>
+
+        <option value="Casual">
+          Casual
+        </option>
+
+        <option value="College">
+          College
+        </option>
+
+        <option value="Party">
+          Party
+        </option>
+
+        <option value="Formal">
+          Formal
+        </option>
+
+        <option value="Wedding">
+          Wedding
+        </option>
+
+        <option value="Travel">
+          Travel
+        </option>
+      </select>
 
     </div>
+
+
+    <div className="filter-group">
+
+      <label>
+        Season
+      </label>
+
+      <select
+        value={filterSeason}
+        onChange={(e) =>
+          setFilterSeason(e.target.value)
+        }
+      >
+        <option value="All">
+          All Seasons
+        </option>
+
+        <option value="Summer">
+          Summer
+        </option>
+
+        <option value="Winter">
+          Winter
+        </option>
+
+        <option value="Monsoon">
+          Monsoon
+        </option>
+
+        <option value="All Season">
+          All Season
+        </option>
+      </select>
+
+    </div>
+
+
+    <button
+      className="clear-filter-button"
+      type="button"
+      onClick={() => {
+        setFilterOccasion("All");
+        setFilterSeason("All");
+      }}
+    >
+      Clear Filters
+    </button>
+
+  </div>
+
+)}
 
 
     {/* =================================================
@@ -1059,8 +1220,21 @@ const fetchWardrobe = async () => {
 
       <div className="clothes-grid">
 
-        {wardrobeItems
+        {[...wardrobeItems]
           .filter((item) => {
+            if (
+  filterOccasion !== "All" &&
+  item.occasion !== filterOccasion
+) {
+  return false;
+}
+
+if (
+  filterSeason !== "All" &&
+  item.season !== filterSeason
+) {
+  return false;
+}
 
             /* ALL */
 
@@ -1127,9 +1301,18 @@ const fetchWardrobe = async () => {
 
             return true;
 
-          })
+})
+.sort((a, b) => {
+  const dateA = new Date(a.created_at || 0);
+  const dateB = new Date(b.created_at || 0);
 
-          .map((item) => (
+  if (sortOrder === "recent") {
+    return dateB - dateA;
+  }
+
+  return dateA - dateB;
+})
+.map((item) => (
 
             <div
               className="clothes-card"
@@ -1138,13 +1321,20 @@ const fetchWardrobe = async () => {
 
               {/* CLOTHING IMAGE */}
 
-              <div className="clothes-card-image">
+<div className="clothes-card-image">
 
-                <span>
-                  👗
-                </span>
+  {item.image ? (
+    <img
+      src={`http://127.0.0.1:8000${item.image}`}
+      alt={item.item_name}
+    />
+  ) : (
+    <span>
+      👗
+    </span>
+  )}
 
-              </div>
+</div>
 
 
               {/* CLOTHING DETAILS */}
@@ -1164,6 +1354,13 @@ const fetchWardrobe = async () => {
                 </p>
 
               </div>
+              <button
+  className="delete-clothing-button"
+  type="button"
+  onClick={() => handleDeleteClothing(item._id)}
+>
+  Delete
+</button>
 
             </div>
 
