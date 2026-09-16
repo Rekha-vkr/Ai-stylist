@@ -25,6 +25,7 @@ const [showFilters, setShowFilters] = useState(false);
 const [wardrobeItems, setWardrobeItems] = useState([]);
 const [wardrobeLoading, setWardrobeLoading] = useState(false);
 const [selectedCategory, setSelectedCategory] = useState("All");
+const [editingItem, setEditingItem] = useState(null);
 
   const [isLoggedIn, setIsLoggedIn] = useState(
   localStorage.getItem("isLoggedIn") === "true"
@@ -1204,267 +1205,420 @@ const handleDeleteClothing = async (clothingId) => {
       ))}
 
     </div>
-
-
     {/* =================================================
-        CLOTHES GRID
-    ================================================= */}
+    CLOTHES GRID
+================================================= */}
 
-    {wardrobeLoading ? (
+{wardrobeLoading ? (
 
-      <p className="clothes-message">
-        Loading your clothes...
-      </p>
+  <p className="clothes-message">
+    Loading your clothes...
+  </p>
 
-    ) : (
+) : (
 
-      <div className="clothes-grid">
+  <>
 
-        {[...wardrobeItems]
-          .filter((item) => {
-            if (
-  filterOccasion !== "All" &&
-  item.occasion !== filterOccasion
-) {
-  return false;
-}
+    {/* EDIT CLOTHING FORM */}
 
-if (
-  filterSeason !== "All" &&
-  item.season !== filterSeason
-) {
-  return false;
-}
+    {editingItem && (
 
-            /* ALL */
+      <div className="edit-clothing-form">
 
-            if (selectedCategory === "All") {
-              return true;
+        <h2>Edit Clothing</h2>
+
+        <div className="edit-form-group">
+
+          <label>Clothing Name</label>
+
+          <input
+            type="text"
+            value={editingItem.item_name}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                item_name: e.target.value,
+              })
             }
+          />
+
+        </div>
 
 
-            /* TOPS */
+        <div className="edit-form-group">
 
-            if (selectedCategory === "Tops") {
-              return (
-                item.category === "Shirt" ||
-                item.category === "T-Shirt"
-              );
+          <label>Category</label>
+
+          <select
+            value={editingItem.category}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                category: e.target.value,
+              })
             }
+          >
+
+            <option value="Shirt">Shirt</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Jeans">Jeans</option>
+            <option value="Trousers">Trousers</option>
+            <option value="Dress">Dress</option>
+            <option value="Saree">Saree</option>
+            <option value="Shoes">Shoes</option>
+            <option value="Bags">Bags</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Others">Others</option>
+
+          </select>
+
+        </div>
 
 
-            /* PANTS */
+        <div className="edit-form-group">
 
-            if (selectedCategory === "Pants") {
-              return (
-                item.category === "Jeans" ||
-                item.category === "Trousers" ||
-                item.category === "Skirt"
-              );
+          <label>Color</label>
+
+          <input
+            type="text"
+            value={editingItem.color}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                color: e.target.value,
+              })
             }
+          />
+
+        </div>
 
 
-            /* DRESSES */
+        <div className="edit-form-group">
 
-            if (selectedCategory === "Dresses") {
-              return (
-                item.category === "Dress" ||
-                item.category === "Saree"
-              );
+          <label>Occasion</label>
+
+          <select
+            value={editingItem.occasion}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                occasion: e.target.value,
+              })
             }
+          >
+
+            <option value="Casual">Casual</option>
+            <option value="College">College</option>
+            <option value="Party">Party</option>
+            <option value="Formal">Formal</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Travel">Travel</option>
+
+          </select>
+
+        </div>
 
 
-            /* SHOES */
+        <div className="edit-form-group">
 
-            if (selectedCategory === "Shoes") {
-              return item.category === "Shoes";
+          <label>Season</label>
+
+          <select
+            value={editingItem.season}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                season: e.target.value,
+              })
             }
+          >
+
+            <option value="Summer">Summer</option>
+            <option value="Winter">Winter</option>
+            <option value="Monsoon">Monsoon</option>
+            <option value="All Season">All Season</option>
+
+          </select>
+
+        </div>
 
 
-            /* BAGS */
+        <div className="edit-form-buttons">
 
-            if (selectedCategory === "Bags") {
-              return item.category === "Bags";
-            }
+          <button
+            type="button"
+            onClick={() => setEditingItem(null)}
+          >
+            Cancel
+          </button>
 
-
-            /* ACCESSORIES */
-
-            if (selectedCategory === "Accessories") {
-              return (
-                item.category === "Accessories"
-              );}
-              if (selectedCategory === "Others") {
-              return item.category === "Others";
-            }
-
-
-            return true;
-
-})
-.sort((a, b) => {
-  const dateA = new Date(a.created_at || 0);
-  const dateB = new Date(b.created_at || 0);
-
-  if (sortOrder === "recent") {
-    return dateB - dateA;
-  }
-
-  return dateA - dateB;
-})
-.map((item) => (
-
-            <div
-              className="clothes-card"
-              key={item._id}
-            >
-
-              {/* CLOTHING IMAGE */}
-
-<div className="clothes-card-image">
-
-  {item.image ? (
-    <img
-      src={`http://127.0.0.1:8000${item.image}`}
-      alt={item.item_name}
-    />
-  ) : (
-    <span>
-      👗
-    </span>
-  )}
-
-</div>
-
-
-              {/* CLOTHING DETAILS */}
-
-              <div className="clothes-card-info">
-
-                <h3>
-                  {item.item_name}
-                </h3>
-
-                <p className="clothes-category-name">
-                  {item.category}
-                </p>
-
-                <p>
-                  {item.color}
-                </p>
-
-              </div>
-              <button
-  className="delete-clothing-button"
+          <button
   type="button"
-  onClick={() => handleDeleteClothing(item._id)}
+  onClick={async () => {
+    try {
+      const formData = new FormData();
+
+      formData.append(
+        "item_name",
+        editingItem.item_name
+      );
+
+      formData.append(
+        "category",
+        editingItem.category
+      );
+
+      formData.append(
+        "color",
+        editingItem.color
+      );
+
+      formData.append(
+        "occasion",
+        editingItem.occasion
+      );
+
+      formData.append(
+        "season",
+        editingItem.season
+      );
+
+      const response = await fetch(
+        `http://127.0.0.1:8000/wardrobe/${editingItem._id}`,
+        {
+          method: "PUT",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        alert("Clothing item updated successfully! ✨");
+
+        setEditingItem(null);
+
+        fetchWardrobe();
+      } else {
+        alert(
+          data.detail ||
+          "Failed to update clothing item."
+        );
+      }
+
+    } catch (error) {
+      console.error(
+        "Update clothing error:",
+        error
+      );
+
+      alert("Cannot connect to server.");
+    }
+  }}
 >
-  Delete
+  Save Changes
 </button>
 
-            </div>
-
-          ))}
-
-
-        {/* =================================================
-            ADD ITEM CARD
-        ================================================= */}
-
-        <button
-          className="add-clothes-card"
-          type="button"
-          onClick={() => {
-
-            setActivePage("wardrobe");
-
-            setShowWardrobeForm(true);
-
-            setWardrobeMessage("");
-
-          }}
-        >
-
-          <div className="add-clothes-icon">
-            +
-          </div>
-
-          <span>
-            Add Items
-          </span>
-
-        </button>
+        </div>
 
       </div>
 
     )}
 
 
-    {/* =================================================
-        EMPTY CATEGORY MESSAGE
-    ================================================= */}
+    {/* CLOTHES GRID */}
+    <div className="clothes-grid">
+            {[...wardrobeItems]
+              .filter((item) => {
+                if (
+                  filterOccasion !== "All" &&
+                  item.occasion !== filterOccasion
+                ) {
+                  return false;
+                }
 
-    {!wardrobeLoading &&
+                if (
+                  filterSeason !== "All" &&
+                  item.season !== filterSeason
+                ) {
+                  return false;
+                }
 
-      wardrobeItems.filter((item) => {
+                if (selectedCategory === "All") {
+                  return true;
+                }
 
-        if (selectedCategory === "All") {
-          return true;
-        }
+                if (selectedCategory === "Tops") {
+                  return (
+                    item.category === "Shirt" ||
+                    item.category === "T-Shirt"
+                  );
+                }
 
-        if (selectedCategory === "Tops") {
-          return (
-            item.category === "Shirt" ||
-            item.category === "T-Shirt"
-          );
-        }
+                if (selectedCategory === "Pants") {
+                  return (
+                    item.category === "Jeans" ||
+                    item.category === "Trousers" ||
+                    item.category === "Skirt"
+                  );
+                }
 
-        if (selectedCategory === "Pants") {
-          return (
-            item.category === "Jeans" ||
-            item.category === "Trousers" ||
-            item.category === "Skirt"
-          );
-        }
+                if (selectedCategory === "Dresses") {
+                  return (
+                    item.category === "Dress" ||
+                    item.category === "Saree"
+                  );
+                }
 
-        if (selectedCategory === "Dresses") {
-          return (
-            item.category === "Dress" ||
-            item.category === "Saree"
-          );
-        }
+                if (selectedCategory === "Shoes") {
+                  return item.category === "Shoes";
+                }
 
-        if (selectedCategory === "Shoes") {
-          return item.category === "Shoes";
-        }
+                if (selectedCategory === "Bags") {
+                  return item.category === "Bags";
+                }
 
-        if (selectedCategory === "Bags") {
-          return item.category === "Bags";
-        }
+                if (selectedCategory === "Accessories") {
+                  return item.category === "Accessories";
+                }
 
-        if (selectedCategory === "Accessories") {
-          return (
-            item.category === "Accessories"
-          );
-        }
-        if (selectedCategory === "Others") {
-          return item.category === "Others";
-        }
+                if (selectedCategory === "Others") {
+                  return item.category === "Others";
+                }
 
+                return true;
+              })
+              .sort((a, b) => {
+                const dateA = new Date(a.created_at || 0);
+                const dateB = new Date(b.created_at || 0);
 
-        return true;
+                if (sortOrder === "recent") {
+                  return dateB - dateA;
+                }
 
-      }).length === 0 && (
+                return dateA - dateB;
+              })
+              .map((item) => (
+                <div className="clothes-card" key={item._id}>
+                  <div className="clothes-card-image">
+                    {item.image ? (
+                      <img
+                        src={`http://127.0.0.1:8000${item.image}`}
+                        alt={item.item_name}
+                      />
+                    ) : (
+                      <span>👗</span>
+                    )}
+                  </div>
 
-        <p className="clothes-message">
-          No clothes in this category yet.
-        </p>
+                  <div className="clothes-card-info">
+                    <h3>{item.item_name}</h3>
+                    <p className="clothes-category-name">
+                      {item.category}
+                    </p>
+                    <p>
+                      {item.color} • {item.occasion} • {item.season}
+                    </p>
 
+                    <button
+                      className="edit-clothing-button"
+                      type="button"
+                      onClick={() => setEditingItem(item)}
+                    >
+                      Edit
+                    </button>
+
+                    <button
+                      className="delete-clothing-button"
+                      type="button"
+                      onClick={() =>
+                        handleDeleteClothing(item._id)
+                      }
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+            <button
+              className="add-clothes-card"
+              type="button"
+              onClick={() => setShowWardrobeForm(true)}
+            >
+              <span>＋</span>
+              <p>Add Clothes</p>
+            </button>
+          </div>
+
+        </>
       )}
+    
+    {/* EMPTY CATEGORY MESSAGE */}
 
+    {wardrobeItems.filter((item) => {
+
+      if (selectedCategory === "All") {
+        return true;
+      }
+
+      if (selectedCategory === "Tops") {
+
+        return (
+          item.category === "Shirt" ||
+          item.category === "T-Shirt"
+        );
+
+      }
+
+      if (selectedCategory === "Pants") {
+
+        return (
+          item.category === "Jeans" ||
+          item.category === "Trousers" ||
+          item.category === "Skirt"
+        );
+
+      }
+
+      if (selectedCategory === "Dresses") {
+
+        return (
+          item.category === "Dress" ||
+          item.category === "Saree"
+        );
+
+      }
+
+      if (selectedCategory === "Shoes") {
+        return item.category === "Shoes";
+      }
+
+      if (selectedCategory === "Bags") {
+        return item.category === "Bags";
+      }
+
+      if (selectedCategory === "Accessories") {
+        return item.category === "Accessories";
+      }
+
+      if (selectedCategory === "Others") {
+        return item.category === "Others";
+      }
+
+      return true;
+
+    }).length === 0 && (
+
+      <p className="clothes-message">
+        No clothes in this category yet.
+      </p>
+
+    )}
   </div>
 
 )}
+    
       {/* =================================================
           AI RECOMMENDATION
       ================================================= */}

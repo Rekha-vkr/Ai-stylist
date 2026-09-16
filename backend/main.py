@@ -291,4 +291,50 @@ def delete_clothing(clothing_id: str):
         "message": "Clothing item deleted successfully!",
         "clothing_id": clothing_id
     }
-    
+    # UPDATE WARDROBE ITEM
+@app.put("/wardrobe/{clothing_id}")
+def update_clothing(
+    clothing_id: str,
+    item_name: str = Form(...),
+    category: str = Form(...),
+    color: str = Form(...),
+    occasion: str = Form(...),
+    season: str = Form(...)
+):
+
+    try:
+        object_id = ObjectId(clothing_id)
+
+    except Exception:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid clothing ID."
+        )
+
+    existing_clothing = db["wardrobe"].find_one(
+        {"_id": object_id}
+    )
+
+    if not existing_clothing:
+        raise HTTPException(
+            status_code=404,
+            detail="Clothing item not found."
+        )
+
+    updated_data = {
+        "item_name": item_name,
+        "category": category,
+        "color": color,
+        "occasion": occasion,
+        "season": season
+    }
+
+    db["wardrobe"].update_one(
+        {"_id": object_id},
+        {"$set": updated_data}
+    )
+
+    return {
+        "message": "Clothing item updated successfully!",
+        "clothing_id": clothing_id
+    }
