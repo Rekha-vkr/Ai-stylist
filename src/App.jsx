@@ -1,4 +1,4 @@
-import { useState,useEffect } from "react";
+import { useState,useEffect,useRef} from "react";
 import "./App.css";
 
 import fashionImage from "./assets/fashion-ai.png";
@@ -27,6 +27,13 @@ const [wardrobeLoading, setWardrobeLoading] = useState(false);
 const [selectedCategory, setSelectedCategory] = useState("All");
 const [editingItem, setEditingItem] = useState(null);
 
+const [recommendationOccasion, setRecommendationOccasion] = useState("");
+const [recommendationStyle, setRecommendationStyle] = useState("");
+const [recommendedOutfit, setRecommendedOutfit] = useState([]);
+const [cameraOpen, setCameraOpen] = useState(false);
+const [cameraStream, setCameraStream] = useState(null);
+const [capturedImage, setCapturedImage] = useState(null);
+
   const [isLoggedIn, setIsLoggedIn] = useState(
   localStorage.getItem("isLoggedIn") === "true"
   
@@ -34,6 +41,7 @@ const [editingItem, setEditingItem] = useState(null);
   const [isRegistering, setIsRegistering] = useState(false);
 
   const [activePage, setActivePage] = useState("home");
+  const videoRef=useRef(null);
   
 
   // =========================
@@ -95,8 +103,10 @@ const handleLogin = async (e) => {
     const data = await response.json();
 
     if (response.ok && data.message === "Login successful!") {
-  setIsLoggedIn(true);
+  
   localStorage.setItem("isLoggedIn", "true");
+  localStorage.setItem("userId",data.user.id);
+  setIsLoggedIn(true);
 
   setActivePage("home");
 
@@ -195,6 +205,7 @@ const handleLogin = async (e) => {
     formData.append("color", clothingColor);
     formData.append("occasion", clothingOccasion);
     formData.append("season", clothingSeason);
+    formData.append("user_id", localStorage.getItem("userId"));
 
     if (clothingImage) {
       formData.append("image", clothingImage);
@@ -250,8 +261,10 @@ const fetchWardrobe = async () => {
   setWardrobeLoading(true);
 
   try {
+    const userId = localStorage.getItem("userId");
+
     const response = await fetch(
-      "http://127.0.0.1:8000/wardrobe"
+      `http://127.0.0.1:8000/wardrobe?user_id=${encodeURIComponent(userId)}`
     );
 
     const data = await response.json();
@@ -277,13 +290,15 @@ const handleDeleteClothing = async (clothingId) => {
   }
 
   try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/wardrobe/${clothingId}`,
-      {
-        method: "DELETE",
-      }
-    );
+    const userId = localStorage.getItem("userId");
 
+const response = await fetch(
+  `http://127.0.0.1:8000/wardrobe/${clothingId}?user_id=${encodeURIComponent(userId)}`,
+  {
+    method: "DELETE"
+  }
+);
+     
     const data = await response.json();
 
     if (response.ok) {
@@ -684,9 +699,33 @@ const handleDeleteClothing = async (clothingId) => {
   // =====================================================
   // LOGGED-IN WEBSITE
   // =====================================================
+  // =====================================================
+// CAMERA
+// =====================================================
+
+const openCamera = async () => {
+  try {
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Camera is not supported by this browser.");
+      return;
+    }
+
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true,
+      audio: false,
+    });
+
+    setCameraStream(stream);
+    setCameraOpen(true);
+  } catch (error) {
+    console.error("Camera error:", error);
+    alert("Cannot access camera. Please allow camera permission.");
+  }
+};
 
   return (
     <div className="app-container">
+      
 
       {/* =========================
           NAVIGATION
@@ -784,6 +823,7 @@ const handleDeleteClothing = async (clothingId) => {
         </div>
 
       </nav>
+
 
 
       {/* =================================================
@@ -899,6 +939,110 @@ const handleDeleteClothing = async (clothingId) => {
                     } }>
               + Add Clothes
               </button>
+              <button
+  type="button"
+  className="feature-button camera-button"
+  onClick={openCamera}
+>
+  📷 Open Camera
+</button>
+{cameraOpen && (
+  <div className="camera-section">
+
+    <h2>📷 Camera</h2>
+
+    <video
+      ref={videoRef}
+      autoPlay
+      playsInline
+      className="camera-preview"
+      ref={(video) => {
+        videoRef.current = video;
+
+        if (video && cameraStream) {
+          video.srcObject = cameraStream;
+        }
+      }}
+    />
+
+    <div className="camera-buttons">
+
+      <button
+        type="button"
+        className="feature-button"
+        onClick={() => {
+          const canvas = document.createElement("canvas");
+
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+
+          const context = canvas.getContext("2d");
+
+          context.drawImage(
+            videoRef.current,
+            0,
+            0,
+            canvas.width,
+            canvas.height
+          );
+
+          const image = canvas.toDataURL("image/jpeg");
+
+          setCapturedImage(image);
+
+          if (cameraStream) {
+            cameraStream.getTracks().forEach((track) => {
+              track.stop();
+            });
+          }
+
+          setCameraOpen(false);
+        }}
+      >
+        📸 Capture
+      </button>
+
+      <button
+        type="button"
+        className="feature-button"
+        onClick={() => {
+          if (cameraStream) {
+            cameraStream.getTracks().forEach((track) => {
+              track.stop();
+            });
+          }
+
+          setCameraOpen(false);
+        }}
+      >
+        ✕ Close
+      </button>
+
+    </div>
+
+  </div>
+)}
+{capturedImage && (
+  <div className="captured-image-section">
+
+    <h2>📸 Captured Image</h2>
+
+    <img
+      src={capturedImage}
+      alt="Captured"
+      className="captured-image"
+    />
+
+    <button
+      type="button"
+      className="feature-button"
+      onClick={openCamera}
+    >
+      🔄 Retake
+    </button>
+
+  </div>
+)}
               {showWardrobeForm && (
   <form
     className="recommendation-form"
@@ -1221,210 +1365,7 @@ const handleDeleteClothing = async (clothingId) => {
 
     {/* EDIT CLOTHING FORM */}
 
-    {editingItem && (
-
-      <div className="edit-clothing-form">
-
-        <h2>Edit Clothing</h2>
-
-        <div className="edit-form-group">
-
-          <label>Clothing Name</label>
-
-          <input
-            type="text"
-            value={editingItem.item_name}
-            onChange={(e) =>
-              setEditingItem({
-                ...editingItem,
-                item_name: e.target.value,
-              })
-            }
-          />
-
-        </div>
-
-
-        <div className="edit-form-group">
-
-          <label>Category</label>
-
-          <select
-            value={editingItem.category}
-            onChange={(e) =>
-              setEditingItem({
-                ...editingItem,
-                category: e.target.value,
-              })
-            }
-          >
-
-            <option value="Shirt">Shirt</option>
-            <option value="T-Shirt">T-Shirt</option>
-            <option value="Jeans">Jeans</option>
-            <option value="Trousers">Trousers</option>
-            <option value="Dress">Dress</option>
-            <option value="Saree">Saree</option>
-            <option value="Shoes">Shoes</option>
-            <option value="Bags">Bags</option>
-            <option value="Accessories">Accessories</option>
-            <option value="Others">Others</option>
-
-          </select>
-
-        </div>
-
-
-        <div className="edit-form-group">
-
-          <label>Color</label>
-
-          <input
-            type="text"
-            value={editingItem.color}
-            onChange={(e) =>
-              setEditingItem({
-                ...editingItem,
-                color: e.target.value,
-              })
-            }
-          />
-
-        </div>
-
-
-        <div className="edit-form-group">
-
-          <label>Occasion</label>
-
-          <select
-            value={editingItem.occasion}
-            onChange={(e) =>
-              setEditingItem({
-                ...editingItem,
-                occasion: e.target.value,
-              })
-            }
-          >
-
-            <option value="Casual">Casual</option>
-            <option value="College">College</option>
-            <option value="Party">Party</option>
-            <option value="Formal">Formal</option>
-            <option value="Wedding">Wedding</option>
-            <option value="Travel">Travel</option>
-
-          </select>
-
-        </div>
-
-
-        <div className="edit-form-group">
-
-          <label>Season</label>
-
-          <select
-            value={editingItem.season}
-            onChange={(e) =>
-              setEditingItem({
-                ...editingItem,
-                season: e.target.value,
-              })
-            }
-          >
-
-            <option value="Summer">Summer</option>
-            <option value="Winter">Winter</option>
-            <option value="Monsoon">Monsoon</option>
-            <option value="All Season">All Season</option>
-
-          </select>
-
-        </div>
-
-
-        <div className="edit-form-buttons">
-
-          <button
-            type="button"
-            onClick={() => setEditingItem(null)}
-          >
-            Cancel
-          </button>
-
-          <button
-  type="button"
-  onClick={async () => {
-    try {
-      const formData = new FormData();
-
-      formData.append(
-        "item_name",
-        editingItem.item_name
-      );
-
-      formData.append(
-        "category",
-        editingItem.category
-      );
-
-      formData.append(
-        "color",
-        editingItem.color
-      );
-
-      formData.append(
-        "occasion",
-        editingItem.occasion
-      );
-
-      formData.append(
-        "season",
-        editingItem.season
-      );
-
-      const response = await fetch(
-        `http://127.0.0.1:8000/wardrobe/${editingItem._id}`,
-        {
-          method: "PUT",
-          body: formData,
-        }
-      );
-
-      const data = await response.json();
-
-      if (response.ok) {
-        alert("Clothing item updated successfully! ✨");
-
-        setEditingItem(null);
-
-        fetchWardrobe();
-      } else {
-        alert(
-          data.detail ||
-          "Failed to update clothing item."
-        );
-      }
-
-    } catch (error) {
-      console.error(
-        "Update clothing error:",
-        error
-      );
-
-      alert("Cannot connect to server.");
-    }
-  }}
->
-  Save Changes
-</button>
-
-        </div>
-
-      </div>
-
-    )}
-
+    
 
     {/* CLOTHES GRID */}
     <div className="clothes-grid">
@@ -1523,9 +1464,12 @@ const handleDeleteClothing = async (clothingId) => {
                     <button
                       className="edit-clothing-button"
                       type="button"
-                      onClick={() => setEditingItem(item)}
+                      onClick={() => {
+                      setEditingItem(item);
+                      setActivePage("edit");
+                    }}
                     >
-                      Edit
+                    Edit
                     </button>
 
                     <button
@@ -1618,103 +1562,499 @@ const handleDeleteClothing = async (clothingId) => {
   </div>
 
 )}
+{/* =================================================
+    EDIT CLOTHING
+================================================= */}
+
+{activePage === "edit" && editingItem && (
+
+  <div className="edit-page">
+
+    <div className="edit-page-header">
+
+      <button
+        className="edit-back-button"
+        type="button"
+        onClick={() => {
+          setEditingItem(null);
+          setActivePage("clothes");
+        }}
+      >
+        ← Back to My Clothes
+      </button>
+
+    </div>
+
+
+    <div className="edit-page-content">
+
+      <h1>
+        Edit Clothing
+      </h1>
+
+      <p className="edit-page-subtitle">
+        Update the details of your clothing item
+      </p>
+
+
+      <div className="edit-form">
+
+        <div className="edit-form-group">
+
+          <label>
+            Clothing Name
+          </label>
+
+          <input
+            type="text"
+            value={editingItem.item_name}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                item_name: e.target.value
+              })
+            }
+          />
+
+        </div>
+
+
+        <div className="edit-form-group">
+
+          <label>
+            Category
+          </label>
+
+          <select
+            value={editingItem.category}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                category: e.target.value
+              })
+            }
+          >
+
+            <option value="Shirt">Shirt</option>
+            <option value="T-Shirt">T-Shirt</option>
+            <option value="Jeans">Jeans</option>
+            <option value="Trousers">Trousers</option>
+            <option value="Skirt">Skirt</option>
+            <option value="Dress">Dress</option>
+            <option value="Saree">Saree</option>
+            <option value="Shoes">Shoes</option>
+            <option value="Bags">Bags</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Others">Others</option>
+
+          </select>
+
+        </div>
+
+
+        <div className="edit-form-group">
+
+          <label>
+            Color
+          </label>
+
+          <input
+            type="text"
+            value={editingItem.color}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                color: e.target.value
+              })
+            }
+          />
+
+        </div>
+
+
+        <div className="edit-form-group">
+
+          <label>
+            Occasion
+          </label>
+
+          <select
+            value={editingItem.occasion}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                occasion: e.target.value
+              })
+            }
+          >
+
+            <option value="Casual">Casual</option>
+            <option value="College">College</option>
+            <option value="Party">Party</option>
+            <option value="Formal">Formal</option>
+            <option value="Wedding">Wedding</option>
+            <option value="Travel">Travel</option>
+
+          </select>
+
+        </div>
+
+
+        <div className="edit-form-group">
+
+          <label>
+            Season
+          </label>
+
+          <select
+            value={editingItem.season}
+            onChange={(e) =>
+              setEditingItem({
+                ...editingItem,
+                season: e.target.value
+              })
+            }
+          >
+
+            <option value="Summer">Summer</option>
+            <option value="Winter">Winter</option>
+            <option value="Monsoon">Monsoon</option>
+            <option value="All Season">All Season</option>
+
+          </select>
+
+        </div>
+
+
+        <div className="edit-form-buttons">
+
+          <button
+            className="edit-cancel-button"
+            type="button"
+            onClick={() => {
+              setEditingItem(null);
+              setActivePage("clothes");
+            }}
+          >
+            Cancel
+          </button>
+
+
+          <button
+            className="edit-save-button"
+            type="button"
+            onClick={async () => {
+
+              try {
+
+                const formData = new FormData();
+
+                formData.append(
+                  "item_name",
+                  editingItem.item_name
+                );
+
+                formData.append(
+                  "category",
+                  editingItem.category
+                );
+
+                formData.append(
+                  "color",
+                  editingItem.color
+                );
+
+                formData.append(
+                  "occasion",
+                  editingItem.occasion
+                );
+
+                formData.append(
+                  "season",
+                  editingItem.season
+                );
+
+
+                const userId = localStorage.getItem("userId");
+
+const response = await fetch(
+  `http://127.0.0.1:8000/wardrobe/${editingItem._id}?user_id=${encodeURIComponent(userId)}`,
+  {
+    method: "PUT",
+    body: formData,
+  }
+);
+
+
+                const data = await response.json();
+
+
+                if (response.ok) {
+
+                  alert(
+                    "Clothing item updated successfully! ✨"
+                  );
+
+                  setEditingItem(null);
+
+                  await fetchWardrobe();
+
+                  setActivePage("clothes");
+
+                } else {
+
+                  alert(
+                    data.detail ||
+                    "Failed to update clothing item."
+                  );
+
+                }
+
+              } catch (error) {
+
+                console.error(
+                  "Update clothing error:",
+                  error
+                );
+
+                alert(
+                  "Cannot connect to server."
+                );
+
+              }
+
+            }}
+          >
+            Save Changes
+          </button>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+)}
+
     
-      {/* =================================================
-          AI RECOMMENDATION
-      ================================================= */}
+{/* =================================================
+    AI STYLIST
+================================================= */}
 
-      {activePage === "recommendation" && (
+{activePage === "recommendation" && (
 
-        <div className="feature-page">
+  <div className="feature-page">
 
-          <div className="feature-content">
+    <div className="feature-content">
 
-            <div className="feature-icon">
-              ✨
-            </div>
+      <div className="feature-icon">
+        ✨
+      </div>
 
-            <h1>
-              AI Outfit Stylist
-            </h1>
+      <p className="about-label">
+        AI PERSONAL STYLIST
+      </p>
+
+      <h1>
+        Create Your Outfit
+      </h1>
+
+      <p>
+        Choose an occasion and style preference.
+        AI Stylist will suggest an outfit from your wardrobe.
+      </p>
+
+      <div className="recommendation-form">
+
+        {/* OCCASION */}
+
+        <label>
+          Occasion
+        </label>
+
+        <select
+          value={recommendationOccasion}
+          onChange={(e) =>
+            setRecommendationOccasion(e.target.value)
+          }
+        >
+          <option value="">
+            Select Occasion
+          </option>
+
+          <option value="College">
+            College
+          </option>
+
+          <option value="Casual">
+            Casual
+          </option>
+
+          <option value="Party">
+            Party
+          </option>
+
+          <option value="Formal">
+            Formal
+          </option>
+
+          <option value="Wedding">
+            Wedding
+          </option>
+
+          <option value="Travel">
+            Travel
+          </option>
+        </select>
+
+
+        {/* STYLE */}
+
+        <label>
+          Style Preference
+        </label>
+
+        <select
+          value={recommendationStyle}
+          onChange={(e) =>
+            setRecommendationStyle(e.target.value)
+          }
+        >
+          <option value="">
+            Select Style
+          </option>
+
+          <option value="Casual">
+            Casual
+          </option>
+
+          <option value="Elegant">
+            Elegant
+          </option>
+
+          <option value="Traditional">
+            Traditional
+          </option>
+
+          <option value="Trendy">
+            Trendy
+          </option>
+        </select>
+
+
+        {/* GENERATE */}
+
+        <button
+          type="button"
+          className="feature-button"
+          onClick={() => {
+
+            if (
+              !recommendationOccasion ||
+              !recommendationStyle
+            ) {
+              alert("Please select occasion and style.");
+              return;
+            }
+
+            const matchingItems = wardrobeItems.filter(
+              (item) =>
+                item.occasion === recommendationOccasion
+            );
+
+            if (matchingItems.length === 0) {
+              alert(
+                "No clothes found for this occasion. Try another occasion or add more clothes."
+              );
+              return;
+            }
+
+            const outfit = matchingItems.slice(0, 3);
+
+            setRecommendedOutfit(outfit);
+
+          }}
+        >
+          ✨ Generate Outfit
+        </button>
+
+
+        {/* RECOMMENDATION RESULT */}
+
+        {recommendedOutfit.length > 0 && (
+
+          <div className="ai-result">
+
+            <h2>
+              ✨ Your Outfit
+            </h2>
 
             <p>
-              Tell us your occasion and preferences.
-              AI will help create your look.
+              {recommendationStyle} look for{" "}
+              {recommendationOccasion}
             </p>
 
 
-            <div className="recommendation-form">
+            <div className="ai-outfit-grid">
 
-              <label>
-                Occasion
-              </label>
+              {recommendedOutfit.map((item) => (
 
-              <select>
-                <option>
-                  Select Occasion
-                </option>
+                <div
+                  className="ai-outfit-card"
+                  key={item._id}
+                >
 
-                <option>
-                  College
-                </option>
+                  <div className="ai-outfit-image">
 
-                <option>
-                  Casual
-                </option>
+                    {item.image ? (
 
-                <option>
-                  Party
-                </option>
+                      <img
+                        src={`http://127.0.0.1:8000${item.image}`}
+                        alt={item.item_name}
+                      />
 
-                <option>
-                  Formal
-                </option>
+                    ) : (
 
-                <option>
-                  Wedding
-                </option>
-              </select>
+                      <span>
+                        👗
+                      </span>
+
+                    )}
+
+                  </div>
 
 
-              <label>
-                Style Preference
-              </label>
+                  <h3>
+                    {item.item_name}
+                  </h3>
 
-              <select>
-                <option>
-                  Select Style
-                </option>
+                  <p>
+                    {item.category}
+                  </p>
 
-                <option>
-                  Casual
-                </option>
+                  <p>
+                    {item.color}
+                  </p>
 
-                <option>
-                  Elegant
-                </option>
+                </div>
 
-                <option>
-                  Traditional
-                </option>
-
-                <option>
-                  Trendy
-                </option>
-              </select>
-
-
-              <button className="feature-button">
-                ✨ Generate Outfit
-              </button>
+              ))}
 
             </div>
 
           </div>
 
-        </div>
-      )}
+        )}
 
+      </div>
 
+    </div>
+
+  </div>
+
+)}
       {/* =================================================
           THRIFT
       ================================================= */}
@@ -1991,6 +2331,8 @@ const handleDeleteClothing = async (clothingId) => {
 
     </div>
   );
+  
 }
+
 
 export default App;

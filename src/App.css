@@ -1298,3 +1298,243 @@ h1, h2, h3 {
   }
 
 }
+/* =========================
+   EDIT & DELETE BUTTONS
+   ========================= */
+
+.edit-clothing-button,
+.delete-clothing-button {
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  margin-top: 12px;
+  margin-right: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Edit button */
+.edit-clothing-button {
+  background: #f2e8ed;
+  color: #5b4650;
+}
+
+.edit-clothing-button:hover {
+  background: #e6d7df;
+  transform: translateY(-1px);
+}
+
+/* Delete button */
+.delete-clothing-button {
+  background: #f8e1e1;
+  color: #a34b4b;
+}
+
+.delete-clothing-button:hover {
+  background: #efcccc;
+  transform: translateY(-1px);
+}
+
+/* Button click effect */
+.edit-clothing-button:active,
+.delete-clothing-button:active {
+  transform: translateY(0);
+}
+/* =========================
+   FULL SCREEN EDIT PAGE
+   ========================= */
+
+.edit-page {
+  min-height: 100vh;
+  width: 100%;
+  background: #faf7f8;
+  padding: 30px 40px 60px;
+  box-sizing: border-box;
+}
+
+.edit-page-header {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.edit-back-button {
+  border: none;
+  background: transparent;
+  color: #5b4650;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px 0;
+}
+
+.edit-back-button:hover {
+  color: #8b6675;
+}
+
+.edit-page-content {
+  width: 100%;
+  max-width: 650px;
+  margin: 35px auto 0;
+  background: #ffffff;
+  padding: 40px;
+  border-radius: 20px;
+  box-shadow: 0 8px 30px rgba(80, 50, 65, 0.08);
+  box-sizing: border-box;
+}
+
+.edit-page-content h1 {
+  margin: 0;
+  text-align: center;
+  color: #3d2935;
+  font-size: 30px;
+}
+
+.edit-page-subtitle {
+  text-align: center;
+  color: #888;
+  margin: 8px 0 30px;
+  font-size: 14px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.edit-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.edit-form-group label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #555;
+}
+
+.edit-form-group input,
+.edit-form-group select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid #ddd0d7;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #444;
+  font-size: 15px;
+  outline: none;
+}
+
+.edit-form-group input:focus,
+.edit-form-group select:focus {
+  border-color: #b9a0ac;
+  box-shadow: 0 0 0 3px rgba(185, 160, 172, 0.12);
+}
+
+.edit-form-buttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 10px;
+}
+
+.edit-cancel-button,
+.edit-save-button {
+  border: none;
+  border-radius: 10px;
+  padding: 12px 22px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.edit-cancel-button {
+  background: #f2eaee;
+  color: #5b4650;
+}
+
+.edit-cancel-button:hover {
+  background: #e7dce1;
+}
+
+.edit-save-button {
+  background: #5b4650;
+  color: #ffffff;
+}
+
+.edit-save-button:hover {
+  background: #493640;
+  transform: translateY(-1px);
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .edit-page {
+    padding: 20px;
+  }
+
+  .edit-page-content {
+    padding: 25px 20px;
+    margin-top: 25px;
+  }
+
+  .edit-page-content h1 {
+    font-size: 25px;
+  }
+
+  .edit-form-buttons {
+    flex-direction: column;
+  }
+
+  .edit-cancel-button,
+  .edit-save-button {
+    width: 100%;
+  }
+}
+.feature-page img {
+  max-width: 300px;
+  max-height: 300px;
+  width: auto;
+  height: auto;
+  object-fit: contain;
+}
+.camera-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.camera-preview {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 15px;
+  display: block;
+  margin: 20px auto;
+}
+
+.camera-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.captured-image-section {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.captured-image {
+  width: 100%;
+  max-width: 500px;
+  max-height: 500px;
+  object-fit: contain;
+  border-radius: 15px;
+  display: block;
+  margin: 20px auto;
+}

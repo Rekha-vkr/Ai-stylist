@@ -162,6 +162,7 @@ def login_user(user: UserLogin):
 
 @app.post("/wardrobe")
 async def add_clothing(
+    user_id:str=Form(...),
     item_name: str = Form(...),
     category: str = Form(...),
     color: str = Form(...),
@@ -193,6 +194,7 @@ async def add_clothing(
         image_path = f"/uploads/{unique_filename}"
 
     new_clothing = {
+        "user_id":user_id,
         "item_name": item_name,
         "category": category,
         "color": color,
@@ -216,26 +218,23 @@ async def add_clothing(
 # =====================================================
 
 @app.get("/wardrobe")
-def get_wardrobe():
+def get_wardrobe(user_id: str):
 
     clothes = list(
-        db["wardrobe"].find()
+        db["wardrobe"].find({"user_id": user_id})
     )
 
     for clothing in clothes:
-        clothing["_id"] = str(
-            clothing["_id"]
-        )
+        clothing["_id"] = str(clothing["_id"])
 
     return clothes
-
 
 # =====================================================
 # DELETE CLOTHING FROM WARDROBE
 # =====================================================
 
 @app.delete("/wardrobe/{clothing_id}")
-def delete_clothing(clothing_id: str):
+def delete_clothing(clothing_id: str,user_id:str):
 
     # Check whether the ID is a valid MongoDB ObjectId
     try:
@@ -249,7 +248,8 @@ def delete_clothing(clothing_id: str):
 
     # Find the clothing item
     clothing = db["wardrobe"].find_one(
-        {"_id": object_id}
+        {"_id": object_id,
+        "user_id": user_id}
     )
 
     # Clothing item doesn't exist
@@ -295,6 +295,7 @@ def delete_clothing(clothing_id: str):
 @app.put("/wardrobe/{clothing_id}")
 def update_clothing(
     clothing_id: str,
+    user_id:str,
     item_name: str = Form(...),
     category: str = Form(...),
     color: str = Form(...),
@@ -312,7 +313,7 @@ def update_clothing(
         )
 
     existing_clothing = db["wardrobe"].find_one(
-        {"_id": object_id}
+        {"_id": object_id,"user_id":user_id}
     )
 
     if not existing_clothing:
