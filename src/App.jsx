@@ -33,7 +33,11 @@ const [recommendedOutfit, setRecommendedOutfit] = useState([]);
 const [cameraOpen, setCameraOpen] = useState(false);
 const [cameraStream, setCameraStream] = useState(null);
 const [capturedImage, setCapturedImage] = useState(null);
-
+const [selectedOccasion, setSelectedOccasion] = useState("");
+const [selectedStyle, setSelectedStyle] = useState("");
+const [aiRecommendation, setAiRecommendation] = useState("");
+const [aiLoading, setAiLoading] = useState(false);
+const [wardrobePrefill, setWardrobePrefill] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(
   localStorage.getItem("isLoggedIn") === "true"
   
@@ -180,6 +184,22 @@ const handleLogin = async (e) => {
       );
     }
   };
+  const dataURLtoFile = (dataurl, filename) => {
+  const arr = dataurl.split(",");
+  const mime = arr[0].match(/:(.*?);/)[1];
+  const bstr = atob(arr[1]);
+
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, {
+    type: mime,
+  });
+};
   //ADD CLOTHING//
   const handleAddClothing = async (e) => {
   e.preventDefault();
@@ -207,10 +227,16 @@ const handleLogin = async (e) => {
     formData.append("season", clothingSeason);
     formData.append("user_id", localStorage.getItem("userId"));
 
-    if (clothingImage) {
-      formData.append("image", clothingImage);
-    }
+if (capturedImage) {
+  const cameraFile = dataURLtoFile(
+    capturedImage,
+    "camera-photo.jpg"
+  );
 
+  formData.append("image", cameraFile);
+} else if (clothingImage) {
+  formData.append("image", clothingImage);
+}
     const response = await fetch(
       "http://127.0.0.1:8000/wardrobe",
       {
@@ -232,6 +258,8 @@ const handleLogin = async (e) => {
       setClothingOccasion("");
       setClothingSeason("");
       setClothingImage(null);
+      setCapturedImage(null);
+
 
       fetchWardrobe();
 
@@ -1025,7 +1053,7 @@ const openCamera = async () => {
 {capturedImage && (
   <div className="captured-image-section">
 
-    <h2>📸 Captured Image</h2>
+    <h2>📸 Your Photo</h2>
 
     <img
       src={capturedImage}
@@ -1033,13 +1061,28 @@ const openCamera = async () => {
       className="captured-image"
     />
 
-    <button
-      type="button"
-      className="feature-button"
-      onClick={openCamera}
-    >
-      🔄 Retake
-    </button>
+    <div className="camera-buttons">
+
+      <button
+        type="button"
+        className="feature-button"
+        onClick={openCamera}
+      >
+        🔄 Retake
+      </button>
+
+      <button
+        type="button"
+        className="feature-button"
+        onClick={() => {
+          setActivePage("wardrobe");
+          setShowWardrobeForm(true);
+        }}
+      >
+        👗 Save to My Clothes
+      </button>
+
+    </div>
 
   </div>
 )}
@@ -1866,121 +1909,272 @@ const response = await fetch(
         AI Stylist will suggest an outfit from your wardrobe.
       </p>
 
-      <div className="recommendation-form">
+     <div className="recommendation-form">
 
-        {/* OCCASION */}
+  <label>
+    Occasion
+  </label>
 
-        <label>
-          Occasion
-        </label>
+  <select
+    value={selectedOccasion}
+    onChange={(e) =>
+      setSelectedOccasion(e.target.value)
+    }
+  >
+    <option value="">
+      Select Occasion
+    </option>
 
-        <select
-          value={recommendationOccasion}
-          onChange={(e) =>
-            setRecommendationOccasion(e.target.value)
-          }
-        >
-          <option value="">
-            Select Occasion
-          </option>
+    <option value="College">
+      College
+    </option>
 
-          <option value="College">
-            College
-          </option>
+    <option value="Casual">
+      Casual
+    </option>
 
-          <option value="Casual">
-            Casual
-          </option>
+    <option value="Party">
+      Party
+    </option>
 
-          <option value="Party">
-            Party
-          </option>
+    <option value="Formal">
+      Formal
+    </option>
 
-          <option value="Formal">
-            Formal
-          </option>
+    <option value="Wedding">
+      Wedding
+    </option>
 
-          <option value="Wedding">
-            Wedding
-          </option>
-
-          <option value="Travel">
-            Travel
-          </option>
-        </select>
+    <option value="Travel">
+      Travel
+    </option>
+  </select>
 
 
-        {/* STYLE */}
+  <label>
+    Style Preference
+  </label>
 
-        <label>
-          Style Preference
-        </label>
+  <select
+    value={selectedStyle}
+    onChange={(e) =>
+      setSelectedStyle(e.target.value)
+    }
+  >
+    <option value="">
+      Select Style
+    </option>
 
-        <select
-          value={recommendationStyle}
-          onChange={(e) =>
-            setRecommendationStyle(e.target.value)
-          }
-        >
-          <option value="">
-            Select Style
-          </option>
+    <option value="Casual">
+      Casual
+    </option>
 
-          <option value="Casual">
-            Casual
-          </option>
+    <option value="Elegant">
+      Elegant
+    </option>
 
-          <option value="Elegant">
-            Elegant
-          </option>
+    <option value="Traditional">
+      Traditional
+    </option>
 
-          <option value="Traditional">
-            Traditional
-          </option>
+    <option value="Trendy">
+      Trendy
+    </option>
 
-          <option value="Trendy">
-            Trendy
-          </option>
-        </select>
+    <option value="Minimal">
+      Minimal
+    </option>
+  </select>
 
 
-        {/* GENERATE */}
+  {/* CAMERA */}
+
+  <button
+    type="button"
+    className="feature-button camera-button"
+    onClick={openCamera}
+  >
+    📷 Open Camera
+  </button>
+
+
+  {/* CAPTURED IMAGE */}
+
+  {capturedImage && (
+    <div className="captured-image-section">
+
+      <h2>📸 Your Photo</h2>
+
+      <img
+        src={capturedImage}
+        alt="Captured"
+        className="captured-image"
+      />
+
+      <button
+        type="button"
+        className="feature-button"
+        onClick={openCamera}
+      >
+        🔄 Retake
+      </button>
+
+    </div>
+  )}
+
+
+  {/* CAMERA PREVIEW */}
+
+  {cameraOpen && (
+    <div className="camera-section">
+
+      <h2>📷 Camera</h2>
+      <video
+  autoPlay
+  playsInline
+  className="camera-preview"
+  ref={(video) => {
+    videoRef.current = video;
+
+    if (video && cameraStream) {
+      video.srcObject = cameraStream;
+    }
+  }}
+/>
+
+      
+
+      <div className="camera-buttons">
 
         <button
           type="button"
           className="feature-button"
           onClick={() => {
 
-            if (
-              !recommendationOccasion ||
-              !recommendationStyle
-            ) {
-              alert("Please select occasion and style.");
-              return;
-            }
+            if (!videoRef.current) return;
 
-            const matchingItems = wardrobeItems.filter(
-              (item) =>
-                item.occasion === recommendationOccasion
+            const canvas =
+              document.createElement("canvas");
+
+            canvas.width =
+              videoRef.current.videoWidth;
+
+            canvas.height =
+              videoRef.current.videoHeight;
+
+            const context =
+              canvas.getContext("2d");
+
+            context.drawImage(
+              videoRef.current,
+              0,
+              0,
+              canvas.width,
+              canvas.height
             );
 
-            if (matchingItems.length === 0) {
-              alert(
-                "No clothes found for this occasion. Try another occasion or add more clothes."
-              );
-              return;
+            const image =
+              canvas.toDataURL("image/jpeg");
+
+            setCapturedImage(image);
+
+            if (cameraStream) {
+              cameraStream
+                .getTracks()
+                .forEach((track) => track.stop());
             }
 
-            const outfit = matchingItems.slice(0, 3);
-
-            setRecommendedOutfit(outfit);
-
+            setCameraOpen(false);
           }}
         >
-          ✨ Generate Outfit
+          📸 Capture
         </button>
 
 
+        <button
+          type="button"
+          className="feature-button"
+          onClick={() => {
+
+            if (cameraStream) {
+              cameraStream
+                .getTracks()
+                .forEach((track) => track.stop());
+            }
+
+            setCameraOpen(false);
+          }}
+        >
+          ✕ Close
+        </button>
+
+      </div>
+
+    </div>
+  )}
+
+
+  {/* GENERATE */}
+
+  <button
+    type="button"
+    className="feature-button"
+    onClick={() => {
+
+      if (!selectedOccasion) {
+        alert("Please select an occasion.");
+        return;
+      }
+
+      if (!selectedStyle) {
+        alert("Please select your style preference.");
+        return;
+      }
+
+      if (!capturedImage) {
+        alert("Please capture a photo first.");
+        return;
+      }
+
+      setAiLoading(true);
+
+      setTimeout(() => {
+
+        setAiRecommendation(
+          `For a ${selectedOccasion} occasion with a ${selectedStyle} style, your AI Stylist will create an outfit using your wardrobe.`
+        );
+
+        setAiLoading(false);
+
+      }, 1500);
+
+    }}
+  >
+    {aiLoading
+      ? "✨ Creating Your Look..."
+      : "✨ Generate Outfit"}
+  </button>
+
+
+  {/* AI RESULT */}
+
+  {aiRecommendation && (
+    <div className="ai-recommendation-result">
+
+      <h2>
+        ✨ Your AI Stylist Recommendation
+      </h2>
+
+      <p>
+        {aiRecommendation}
+      </p>
+
+    </div>
+  )}
+
+</div>
+
+        
         {/* RECOMMENDATION RESULT */}
 
         {recommendedOutfit.length > 0 && (
@@ -2051,8 +2245,6 @@ const response = await fetch(
       </div>
 
     </div>
-
-  </div>
 
 )}
       {/* =================================================
