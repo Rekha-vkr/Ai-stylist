@@ -226,24 +226,94 @@ const handleLogin = async (e) => {
     formData.append("occasion", clothingOccasion);
     formData.append("season", clothingSeason);
     formData.append("user_id", localStorage.getItem("userId"));
+    let imageFile = null;
 
 if (capturedImage) {
-  const cameraFile = dataURLtoFile(
+  imageFile = dataURLtoFile(
     capturedImage,
     "camera-photo.jpg"
   );
-
-  formData.append("image", cameraFile);
 } else if (clothingImage) {
-  formData.append("image", clothingImage);
+  imageFile = clothingImage;
 }
-    const response = await fetch(
-      "http://127.0.0.1:8000/wardrobe",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+
+if (!imageFile) {
+  setWardrobeMessage("Please select or capture a clothing image.");
+  return;
+}
+
+// =====================================================
+// STEP 1: GENERATE AI CATALOG IMAGE
+// =====================================================
+
+const extractFormData = new FormData();
+
+extractFormData.append("image", imageFile);
+extractFormData.append("category", clothingCategory);
+
+setWardrobeMessage(
+  "Creating your AI catalog image... ✨"
+);
+
+const extractResponse = await fetch(
+  "http://127.0.0.1:8000/extract-clothing",
+  {
+    method: "POST",
+    body: extractFormData,
+  }
+);
+
+const extractData = await extractResponse.json();
+
+if (!extractResponse.ok) {
+  throw new Error(
+    extractData.detail ||
+    "Failed to create AI catalog image."
+  );
+}
+
+console.log(
+  "AI catalog image:",
+  extractData.image
+);
+
+// =====================================================
+// STEP 2: SAVE AI IMAGE TO WARDROBE
+// =====================================================
+
+const generatedImageResponse = await fetch(
+  `http://127.0.0.1:8000${extractData.image}`
+);
+
+const generatedImageBlob =
+  await generatedImageResponse.blob();
+
+const generatedImageFile = new File(
+  [generatedImageBlob],
+  "ai-catalog-image.png",
+  {
+    type: "image/png",
+  }
+);
+
+formData.append(
+  "image",
+  generatedImageFile
+);
+
+setWardrobeMessage(
+  "Saving clothing to your wardrobe... 👗"
+);
+
+const response = await fetch(
+  "http://127.0.0.1:8000/wardrobe",
+  {
+    method: "POST",
+    body: formData,
+  }
+);
+
+
 
     const data = await response.json();
 
