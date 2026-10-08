@@ -1,5 +1,15 @@
 .env
+
+# Python environments
 venv/
 venv313/
+.venv/
+.venv-mflux/
+
+# Python cache
 __pycache__/
+*.pyc
+
+# Generated/uploaded files
 uploads/
+catalog_test.png
