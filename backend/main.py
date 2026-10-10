@@ -1372,267 +1372,458 @@ def get_thrift_outfit(user_id: str):
 
     return outfit
 # =====================================================
-# OUTFIT RECOMMENDATION
+# AI OUTFIT RECOMMENDATION ENGINE
 # =====================================================
+
+NEUTRAL_COLORS = {
+    "black", "white", "grey", "gray", "beige", "cream", "brown", "tan", "navy",
+    "khaki", "off-white", "charcoal", "denim", "ivory", "nude", "camel"
+}
+
+COMPLEMENTARY_PAIRS = [
+    ("blue", "orange"), ("blue", "tan"), ("blue", "brown"), ("blue", "white"),
+    ("navy", "white"), ("navy", "beige"), ("navy", "pink"), ("navy", "burgundy"),
+    ("black", "white"), ("black", "red"), ("black", "pink"), ("black", "grey"),
+    ("pink", "grey"), ("pink", "white"), ("pink", "navy"), ("green", "beige"),
+    ("olive", "cream"), ("olive", "white"), ("yellow", "navy"), ("maroon", "gold"),
+    ("red", "black"), ("red", "white"), ("burgundy", "cream"), ("brown", "cream")
+]
+
+
+def classify_wardrobe_item(item):
+    cat = str(item.get("category", "")).lower().strip()
+    name = str(item.get("item_name", "")).lower().strip()
+
+    # 1. Footwear
+    footwear_keys = ["shoe", "footwear", "sneaker", "heel", "sandal", "boot", "loafer", "flats", "flat", "slippers"]
+    if any(k in cat for k in footwear_keys) or any(k in name for k in footwear_keys):
+        return "footwear"
+
+    # 2. Accessories
+    acc_keys = ["bag", "handbag", "backpack", "tote", "clutch", "purse", "jewel", "necklace", "earring", "bracelet", "ring", "sunglass", "glasses", "watch", "belt", "scarf", "accessor"]
+    if any(k in cat for k in acc_keys) or any(k in name for k in acc_keys):
+        return "accessory"
+
+    # 3. One-piece outfits
+    one_piece_keys = ["dress", "saree", "sari", "gown", "jumpsuit", "lehenga", "anarkali", "suit"]
+    if any(k in cat for k in one_piece_keys) or any(k in name for k in one_piece_keys):
+        return "one_piece"
+
+    # 4. Bottoms
+    bottom_keys = ["pant", "trouser", "jean", "skirt", "short", "lower", "legging", "palazzo", "denim", "bottom"]
+    if any(k in cat for k in bottom_keys) or any(k in name for k in bottom_keys):
+        return "bottom"
+
+    # 5. Tops
+    top_keys = ["upper", "shirt", "t-shirt", "tshirt", "top", "blouse", "hoodie", "sweater", "jacket", "blazer", "kurta", "tee", "crop top"]
+    if any(k in cat for k in top_keys) or any(k in name for k in top_keys):
+        return "top"
+
+    return "top"
+
+
+def evaluate_color_pair(c1_raw, c2_raw):
+    c1 = str(c1_raw or "").lower().strip()
+    c2 = str(c2_raw or "").lower().strip()
+    if not c1 or not c2:
+        return 12
+    if c1 == c2:
+        return 20
+    is_n1 = any(n in c1 for n in NEUTRAL_COLORS)
+    is_n2 = any(n in c2 for n in NEUTRAL_COLORS)
+    if is_n1 and is_n2:
+        return 30
+    if is_n1 or is_n2:
+        return 28
+    for p1, p2 in COMPLEMENTARY_PAIRS:
+        if (p1 in c1 and p2 in c2) or (p2 in c1 and p1 in c2):
+            return 32
+    return 14
+
+
+def score_item_for_occasion(item, occasion_lower):
+    item_occ = str(item.get("occasion", "")).lower()
+    item_cat = str(item.get("category", "")).lower()
+    item_name = str(item.get("item_name", "")).lower()
+    item_style = str(item.get("style", "")).lower()
+
+    score = 0
+    if occasion_lower in item_occ:
+        score += 45
+    elif "all" in item_occ or not item_occ:
+        score += 20
+
+    if occasion_lower == "college":
+        if any(k in item_name or k in item_cat for k in ["t-shirt", "tshirt", "tee", "shirt", "jeans", "denim", "pant", "sneaker", "backpack", "tote"]):
+            score += 35
+        if any(k in item_name or k in item_cat for k in ["saree", "gown", "heavy", "wedding"]):
+            score -= 50
+        if any(k in item_style for k in ["casual", "minimal", "trendy", "streetwear"]):
+            score += 20
+
+    elif occasion_lower == "wedding":
+        if any(k in item_name or k in item_cat for k in ["saree", "sari", "gown", "dress", "lehenga", "anarkali", "heel", "jewel", "clutch", "traditional"]):
+            score += 45
+        if any(k in item_name or k in item_cat for k in ["t-shirt", "tshirt", "hoodie", "distressed"]):
+            score -= 50
+        if any(k in item_style for k in ["traditional", "elegant", "glam"]):
+            score += 25
+
+    elif occasion_lower == "formal":
+        if any(k in item_name or k in item_cat for k in ["shirt", "blazer", "trouser", "formal", "skirt", "loafer", "pump"]):
+            score += 35
+        if any(k in item_style for k in ["formal", "minimal", "elegant"]):
+            score += 25
+
+    elif occasion_lower == "party":
+        if any(k in item_name or k in item_cat for k in ["dress", "skirt", "heel", "party", "chic", "top", "shimmer"]):
+            score += 35
+        if any(k in item_style for k in ["trendy", "elegant", "party"]):
+            score += 20
+
+    elif occasion_lower in ["casual", "travel"]:
+        if any(k in item_name or k in item_cat for k in ["t-shirt", "shirt", "jeans", "sneaker", "flat", "bag", "pant"]):
+            score += 30
+
+    return score
+
+
+def generate_stylist_analysis(outfit, occasion, style_pref=""):
+    top_item = next((i for i in outfit if i.get("outfit_role") == "Top"), None)
+    bottom_item = next((i for i in outfit if i.get("outfit_role") == "Bottom"), None)
+    shoes_item = next((i for i in outfit if i.get("outfit_role") == "Footwear"), None)
+    acc_item = next((i for i in outfit if i.get("outfit_role") == "Accessory"), None)
+    dress_item = next((i for i in outfit if i.get("outfit_role") == "One-Piece"), None)
+
+    color_palette = [i.get("color") for i in outfit if i.get("color")]
+
+    # 1. Try Gemini AI if client is available
+    if gemini_client and GEMINI_API_KEY:
+        try:
+            items_str = "\n".join([
+                f"- [{i.get('outfit_role', 'Piece')}]: {i.get('item_name', '')} (Color: {i.get('color', 'N/A')}, Category: {i.get('category', 'N/A')})"
+                for i in outfit
+            ])
+            prompt = f"""You are a luxury Vogue celebrity fashion stylist.
+Client Occasion: {occasion.upper()}
+Style Vibe: {style_pref or 'Effortless Chic'}
+Outfit Pieces:
+{items_str}
+
+Analyze this coordinated set and explain why it is perfect for the occasion, analyzing color harmony and style.
+Return ONLY valid JSON matching this schema:
+{{
+  "headline": "A short, chic lookbook title with an emoji or heart (e.g. 'Effortless Campus Minimalism ♡')",
+  "occasion_fit": "A thoughtful 2-3 sentence explanation of why this outfit set works brilliantly for {occasion}.",
+  "color_harmony": "A 2-3 sentence analysis of how these specific colors complement each other and balance the look.",
+  "style_notes": "A 2-sentence note on the silhouette, fit, and proportions between the pieces.",
+  "styling_tips": "1-2 actionable tips on how to wear it (e.g. tucking, accessories, rolling sleeves, layering)."
+}}
+"""
+            response = gemini_client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+            text = response.text.strip()
+            if text.startswith("```"):
+                text = text.replace("```json", "").replace("```", "").strip()
+            import json
+            parsed = json.loads(text)
+            if "occasion_fit" in parsed and "color_harmony" in parsed:
+                return {
+                    "headline": parsed.get("headline", f"Curated Look for {occasion} ♡"),
+                    "occasion_fit": parsed.get("occasion_fit", ""),
+                    "color_harmony": parsed.get("color_harmony", ""),
+                    "style_notes": parsed.get("style_notes", ""),
+                    "styling_tips": parsed.get("styling_tips", "")
+                }
+        except Exception as gemini_err:
+            print("Gemini stylist analysis fallback:", repr(gemini_err))
+
+    # 2. Expert Algorithmic Stylist Generator
+    occ_lower = occasion.lower()
+    top_name = top_item.get("item_name", "top") if top_item else (dress_item.get("item_name", "dress") if dress_item else "piece")
+    top_color = top_item.get("color", "") if top_item else (dress_item.get("color", "") if dress_item else "")
+    bottom_name = bottom_item.get("item_name", "bottoms") if bottom_item else ""
+    bottom_color = bottom_item.get("color", "") if bottom_item else ""
+    shoes_name = shoes_item.get("item_name", "footwear") if shoes_item else ""
+    shoes_color = shoes_item.get("color", "") if shoes_item else ""
+
+    if occ_lower == "college":
+        headline = "Effortless Campus Chic ♡"
+        if top_item and bottom_item:
+            occ_fit = (
+                f"For a busy college day, comfort, durability, and effortless style are paramount. "
+                f"The {top_color.title() + ' ' if top_color else ''}{top_name} offers relaxed breathability for lectures and study sessions, "
+                f"while the {bottom_color.title() + ' ' if bottom_color else ''}{bottom_name} provides practical ease of movement across campus."
+            )
+            if shoes_item:
+                occ_fit += f" Anchored by {shoes_color.title() + ' ' if shoes_color else ''}{shoes_name}, you stay comfortable during long walks while maintaining a trendy streetwear aesthetic."
+        elif dress_item:
+            occ_fit = (
+                f"For an easygoing college day, the {top_color.title() + ' ' if top_color else ''}{top_name} delivers breezy, one-step styling that feels light, comfortable, and effortlessly put-together."
+            )
+        else:
+            occ_fit = f"Selected for campus ease, this piece provides an approachable, comfortable look suited for daily college routines."
+
+        color_harm = (
+            f"The palette combines {top_color or 'neutral'} and {bottom_color or 'complementary'} tones to create a balanced, unfussy aesthetic. "
+            f"The contrast keeps the outfit crisp and fresh without requiring complicated coordination."
+        )
+        style_notes = "A relaxed-proportioned upper paired with clean-lined bottoms establishes a flattering, casual silhouette suited for all-day campus wear."
+        style_tips = "Pro-Tip: Try a relaxed half-tuck at the waistband. Carry a canvas tote or backpack, and keep jewellery minimal for a breezy student vibe."
+
+    elif occ_lower == "wedding":
+        headline = "Royal Wedding Elegance ✨"
+        if dress_item:
+            occ_fit = (
+                f"For a wedding celebration, timeless grace and luxurious draping take center stage. "
+                f"The {top_color.title() + ' ' if top_color else ''}{top_name} commands celebratory radiance and opulent poise, ideal for ceremonies and receptions."
+            )
+            if shoes_item:
+                occ_fit += f" Paired with {shoes_color.title() + ' ' if shoes_color else ''}{shoes_name}, the ensemble elevates your posture and complements traditional grandeur."
+        else:
+            occ_fit = (
+                f"For a wedding occasion, the refined {top_color.title() + ' ' if top_color else ''}{top_name} combined with the sophisticated {bottom_color.title() + ' ' if bottom_color else ''}{bottom_name} creates a distinguished, celebratory aesthetic."
+            )
+            if shoes_item:
+                occ_fit += f" Finished with {shoes_name}, this set achieves formal harmony."
+
+        color_harm = (
+            f"The palette of {', '.join(color_palette) if color_palette else 'rich festive tones'} captures festive warmth. "
+            f"Luminous and harmonious hues reflect celebratory ambient lighting gracefully."
+        )
+        style_notes = "Elongated draping and sculpted proportions create a stately, regal silhouette that photographs exquisitely from every angle."
+        style_tips = "Pro-Tip: Pair with statement earrings or a classic necklace. Opt for a chic clutch and soft glam makeup to let the garments shine."
+
+    elif occ_lower == "formal":
+        headline = "Tailored Executive Poise 💼"
+        occ_fit = (
+            f"In a professional or formal environment, clean tailoring and sharp lines project competence and poise. "
+            f"The {top_color.title() + ' ' if top_color else ''}{top_name} delivers structured polish, while the {bottom_color.title() + ' ' if bottom_color else ''}{bottom_name} creates an authoritative, streamlined presence."
+        )
+        if shoes_item:
+            occ_fit += f" Polished {shoes_name} ties the professional look together seamlessly."
+        color_harm = "Subdued, professional color tones project quiet luxury and timeless sophistication without unnecessary visual distraction."
+        style_notes = "Structured shoulders and tailored leg contours balance the body's natural lines, creating a composed and empowered silhouette."
+        style_tips = "Pro-Tip: Ensure a crisp press, wear a classic wristwatch or minimalist necklace, and carry a structured handbag for an impeccable boardroom presence."
+
+    elif occ_lower == "party":
+        headline = "Glamorous Evening Chic 🍸"
+        occ_fit = (
+            f"For an evening party or festive night out, this look brings dynamic energy and magnetic charm. "
+            f"The eye-catching {top_name} catches the light, complemented by dance-ready confidence."
+        )
+        if shoes_item:
+            occ_fit += f" Elevated by {shoes_name}, it creates an alluring party-ready silhouette."
+        color_harm = "Bold contrast or rich evening undertones create an alluring, camera-ready palette that stands out effortlessly in social settings."
+        style_notes = "Flattering contours and playful cut lines accentuate movement, striking the perfect balance between high-end glam and wearable comfort."
+        style_tips = "Pro-Tip: Add a bold lip, subtle metallic accents, and a compact clutch to elevate the after-dark energy."
+
+    else:
+        headline = f"Effortless {occasion.title()} Ease 🌿"
+        occ_fit = (
+            f"For {occasion}, ease of wear and functional style are essential. "
+            f"The harmonious combination of {top_name} with {bottom_name or 'complementary pieces'} provides a versatile, effortlessly chic uniform."
+        )
+        if shoes_item:
+            occ_fit += f" Supported by comfortable {shoes_name}, you stay ready for any spontaneous plan."
+        color_harm = "Calming tones with subtle grounding neutrals evoke a relaxed, unhurried modern aesthetic."
+        style_notes = "Breathable, balanced tailoring allows natural movement while retaining a clean, contemporary profile."
+        style_tips = "Pro-Tip: Layer with lightweight outerwear or sunglasses, and roll the cuffs slightly for an easy off-duty aesthetic."
+
+    return {
+        "headline": headline,
+        "occasion_fit": occ_fit,
+        "color_harmony": color_harm,
+        "style_notes": style_notes,
+        "styling_tips": style_tips
+    }
+
 
 @app.get("/recommend-outfit")
 def recommend_outfit(
     user_id: str,
-    occasion: str
+    occasion: str,
+    style: str = ""
 ):
-
     clothes = list(
         db["wardrobe"].find({"user_id": user_id})
     )
 
     if not clothes:
         return {
-            "message": "No wardrobe items found.",
-            "outfit": []
+            "message": "No wardrobe items found. Add clothes to your wardrobe first!",
+            "outfit": [],
+            "occasion": occasion,
+            "style": style or "Curated Chic",
+            "analysis": None
         }
 
     occasion_lower = occasion.lower()
 
-    # -------------------------------------------------
-    # Filter by occasion
-    # -------------------------------------------------
-
-    occasion_items = []
+    # Categorize wardrobe pieces into fashion roles
+    tops = []
+    bottoms = []
+    one_pieces = []
+    footwear = []
+    accessories = []
 
     for item in clothes:
+        role = classify_wardrobe_item(item)
+        if role == "top":
+            tops.append(item)
+        elif role == "bottom":
+            bottoms.append(item)
+        elif role == "one_piece":
+            one_pieces.append(item)
+        elif role == "footwear":
+            footwear.append(item)
+        elif role == "accessory":
+            accessories.append(item)
 
-        item_occasion = str(
-            item.get("occasion", "")
-        ).lower()
+    candidates = []
 
-        if (
-            item_occasion == occasion_lower
-            or item_occasion == "all"
-            or item_occasion == ""
-        ):
-            occasion_items.append(item)
+    def pick_best_footwear(base_items):
+        if not footwear:
+            return None
+        return max(
+            footwear,
+            key=lambda f: score_item_for_occasion(f, occasion_lower) + sum(evaluate_color_pair(b.get("color"), f.get("color")) for b in base_items)
+        )
 
-    if not occasion_items:
-        occasion_items = clothes
+    def pick_best_accessory(base_items):
+        if not accessories:
+            return None
+        return max(
+            accessories,
+            key=lambda a: score_item_for_occasion(a, occasion_lower) + sum(evaluate_color_pair(b.get("color"), a.get("color")) for b in base_items)
+        )
 
+    # 1. Separates Combinations (Top + Bottom + Footwear + Accessory)
+    for top in tops:
+        for bottom in bottoms:
+            base_score = (
+                score_item_for_occasion(top, occasion_lower)
+                + score_item_for_occasion(bottom, occasion_lower)
+                + evaluate_color_pair(top.get("color"), bottom.get("color"))
+                + 30  # High bonus for a complete Top + Bottom pair
+            )
 
-    
-    # -------------------------------------------------
-    # Categorize wardrobe
-    # -------------------------------------------------
+            # Bonus for College, Casual, Formal, Travel
+            if occasion_lower in ["college", "casual", "formal", "travel"]:
+                base_score += 35
 
-    upper_items = []
-    lower_items = []
-    dress_items = []
-    shoe_items = []
+            chosen_set = [top, bottom]
+            current_score = base_score
 
-    for item in occasion_items:
-
-        category = str(
-            item.get("category", "")
-        ).lower()
-
-        if category in [
-            "upper", "shirt", "tshirt",
-            "t-shirt", "top", "blouse"
-        ]:
-            upper_items.append(item)
-
-        elif category in [
-            "lower", "pants", "trousers",
-            "jeans", "skirt"
-        ]:
-            lower_items.append(item)
-
-        elif category in ["dress", "gown"]:
-            dress_items.append(item)
-
-        elif category in ["shoe", "shoes", "footwear"]:
-            shoe_items.append(item)
-
-
-    # -------------------------------------------------
-    # Score outfit combinations
-    # -------------------------------------------------
-    def score_item(item):
-        score = 0
-
-        item_occasion = str(
-            item.get("occasion", "")
-        ).lower()
-
-        # Strong match for the requested occasion
-        if item_occasion == occasion_lower:
-            score += 50
-        elif item_occasion == "all":
-            score += 25
-        elif item_occasion == "":
-            score += 10
-
-        return score
-
-
-
-    def color_compatibility(first, second):
-        color1 = str(
-            first.get("color", "")
-        ).lower()
-
-        color2 = str(
-            second.get("color", "")
-        ).lower()
-
-        if not color1 or not color2:
-            return 0
-
-        if color1 == color2:
-            return 5
-
-        neutral_colors = {
-            "black",
-            "white",
-            "grey",
-            "gray",
-            "beige",
-            "cream",
-            "brown",
-            "navy"
-        }
-
-        if color1 in neutral_colors or color2 in neutral_colors:
-            return 15
-
-        return 8
-
-
-    best_outfit = []
-    best_score = -1
-
-
-    # Dress-based outfits
-    if dress_items:
-
-        for dress in dress_items:
-
-            current_score = score_item(dress)
-
-            if shoe_items:
-                for shoe in shoe_items:
-
-                    combination_score = (
-                        current_score
-                        + score_item(shoe)
-                        + color_compatibility(dress, shoe)
-                    )
-
-                    if combination_score > best_score:
-                        best_score = combination_score
-                        best_outfit = [
-                            dress,
-                            shoe
-                        ]
-
-            elif current_score > best_score:
-
-                best_score = current_score
-                best_outfit = [dress]
-
-
-    # Upper + lower outfits
-    elif upper_items and lower_items:
-
-        for upper in upper_items:
-
-            for lower in lower_items:
-
-                combination_score = (
-                    score_item(upper)
-                    + score_item(lower)
-                    + color_compatibility(
-                        upper,
-                        lower
-                    )
+            best_f = pick_best_footwear([top, bottom])
+            if best_f:
+                chosen_set.append(best_f)
+                current_score += (
+                    score_item_for_occasion(best_f, occasion_lower)
+                    + evaluate_color_pair(bottom.get("color"), best_f.get("color"))
+                    + 35  # Big bonus for coordinating footwear
                 )
 
-                if shoe_items:
+            best_a = pick_best_accessory(chosen_set)
+            if best_a:
+                chosen_set.append(best_a)
+                current_score += (
+                    score_item_for_occasion(best_a, occasion_lower)
+                    + 20  # Bonus for accessories
+                )
 
-                    for shoe in shoe_items:
+            candidates.append({"items": chosen_set, "score": current_score, "type": "separates"})
 
-                        full_score = (
-                            combination_score
-                            + score_item(shoe)
-                            + color_compatibility(
-                                lower,
-                                shoe
-                            )
-                        )
+    # 2. One-Piece Combinations (Dress / Saree + Footwear + Accessory)
+    for piece in one_pieces:
+        base_score = score_item_for_occasion(piece, occasion_lower) + 25
 
-                        if full_score > best_score:
+        if occasion_lower in ["wedding", "party"]:
+            base_score += 45
 
-                            best_score = full_score
+        chosen_set = [piece]
+        current_score = base_score
 
-                            best_outfit = [
-                                upper,
-                                lower,
-                                shoe
-                            ]
-
-                elif combination_score > best_score:
-
-                    best_score = combination_score
-
-                    best_outfit = [
-                        upper,
-                        lower
-                    ]
-
-
-    # Fallback if only one category exists
-    elif upper_items:
-
-        best_outfit = [
-            max(
-                upper_items,
-                key=score_item
+        best_f = pick_best_footwear([piece])
+        if best_f:
+            chosen_set.append(best_f)
+            current_score += (
+                score_item_for_occasion(best_f, occasion_lower)
+                + evaluate_color_pair(piece.get("color"), best_f.get("color"))
+                + 35
             )
-        ]
 
-    elif lower_items:
-
-        best_outfit = [
-            max(
-                lower_items,
-                key=score_item
+        best_a = pick_best_accessory(chosen_set)
+        if best_a:
+            chosen_set.append(best_a)
+            current_score += (
+                score_item_for_occasion(best_a, occasion_lower)
+                + 25
             )
-        ]
 
+        candidates.append({"items": chosen_set, "score": current_score, "type": "one_piece"})
 
-    outfit = best_outfit
+    # 3. Graceful fallbacks if user wardrobe is missing certain pieces
+    if not candidates:
+        if tops:
+            chosen_set = [max(tops, key=lambda t: score_item_for_occasion(t, occasion_lower))]
+            best_f = pick_best_footwear(chosen_set)
+            if best_f:
+                chosen_set.append(best_f)
+            candidates.append({"items": chosen_set, "score": 15, "type": "top_only"})
+        elif bottoms:
+            chosen_set = [max(bottoms, key=lambda b: score_item_for_occasion(b, occasion_lower))]
+            best_f = pick_best_footwear(chosen_set)
+            if best_f:
+                chosen_set.append(best_f)
+            candidates.append({"items": chosen_set, "score": 15, "type": "bottom_only"})
+        elif one_pieces:
+            candidates.append({"items": [one_pieces[0]], "score": 15, "type": "one_piece"})
+        elif clothes:
+            candidates.append({"items": clothes[:3], "score": 5, "type": "raw"})
 
-    # -------------------------------------------------
-    # Convert ObjectIds
-    # -------------------------------------------------
+    if not candidates:
+        return {
+            "message": "Couldn't generate an outfit from your wardrobe. Try adding more tops, bottoms, or shoes!",
+            "outfit": [],
+            "occasion": occasion,
+            "style": style or "Curated Chic",
+            "analysis": None
+        }
 
+    # Select the winning outfit combination
+    best_candidate = max(candidates, key=lambda c: c["score"])
+    outfit = best_candidate["items"]
+
+    # Assign distinct outfit_role tags and format _id
     for item in outfit:
         item["_id"] = str(item["_id"])
+        role = classify_wardrobe_item(item)
+        if role == "top":
+            item["outfit_role"] = "Top"
+        elif role == "bottom":
+            item["outfit_role"] = "Bottom"
+        elif role == "one_piece":
+            item["outfit_role"] = "One-Piece"
+        elif role == "footwear":
+            item["outfit_role"] = "Footwear"
+        elif role == "accessory":
+            item["outfit_role"] = "Accessory"
+        else:
+            item["outfit_role"] = "Piece"
 
-
-    if outfit:
-        recommendation = (
-            f"Here is a outfit for your "
-            f"{occasion} occasion using clothes "
-            f"from your wardrobe."
-        )
-    else:
-        recommendation = (
-            "I couldn't create an outfit from "
-            "your current wardrobe. "
-            "Try adding more clothing items."
-        )
+    # Generate deep stylist analysis
+    analysis = generate_stylist_analysis(outfit, occasion, style)
+    color_palette = [item.get("color") for item in outfit if item.get("color")]
 
     return {
-        "message": recommendation,
+        "message": analysis.get("headline", f"Curated Look for {occasion} ♡"),
         "occasion": occasion,
+        "style": style or "Curated Chic",
+        "color_palette": color_palette,
+        "analysis": analysis,
         "outfit": outfit
     }
 
