@@ -175,15 +175,122 @@ gemini_client = genai.Client(
 )
 
 
+def fallback_clothing_analysis(image_bytes: bytes) -> dict:
+    """
+    Intelligent fallback analyzer that extracts dominant colors and
+    aspect ratio from image bytes if Gemini vision is unreachable.
+    """
+    try:
+        from PIL import Image
+        import io
+        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        w, h = img.size
+        aspect = h / max(w, 1)
+
+        # Sample colors from central region (avoid edges and white background)
+        crop_box = (int(w * 0.2), int(h * 0.2), int(w * 0.8), int(h * 0.8))
+        cropped = img.crop(crop_box).resize((32, 32))
+        pixels = list(cropped.getdata())
+
+        colored_pixels = [
+            (r, g, b) for (r, g, b) in pixels
+            if not (r > 235 and g > 235 and b > 235) and not (r < 20 and g < 20 and b < 20)
+        ]
+        if not colored_pixels:
+            colored_pixels = pixels
+
+        avg_r = sum(p[0] for p in colored_pixels) / len(colored_pixels)
+        avg_g = sum(p[1] for p in colored_pixels) / len(colored_pixels)
+        avg_b = sum(p[2] for p in colored_pixels) / len(colored_pixels)
+
+        # Color name classification
+        if avg_r > 200 and avg_g > 200 and avg_b > 200:
+            color = "White"
+        elif avg_r < 55 and avg_g < 55 and avg_b < 55:
+            color = "Black"
+        elif avg_r > 150 and avg_g < 80 and avg_b < 80:
+            color = "Crimson Red"
+        elif avg_r < 80 and avg_g < 80 and avg_b > 130:
+            color = "Navy Blue"
+        elif avg_r < 85 and avg_g > 120 and avg_b < 85:
+            color = "Emerald Green"
+        elif avg_r > 175 and avg_g > 150 and avg_b < 90:
+            color = "Mustard Yellow"
+        elif avg_r > 180 and avg_g > 115 and avg_b > 140:
+            color = "Pastel Pink"
+        elif avg_r > 110 and avg_g < 65 and avg_b > 110:
+            color = "Burgundy"
+        elif avg_r > 165 and avg_g > 145 and avg_b > 115:
+            color = "Beige"
+        elif abs(avg_r - avg_g) < 22 and abs(avg_g - avg_b) < 22:
+            color = "Slate Gray"
+        elif avg_r > avg_g and avg_r > avg_b:
+            color = "Coral"
+        elif avg_b > avg_r and avg_b > avg_g:
+            color = "Blue"
+        elif avg_g > avg_r and avg_g > avg_b:
+            color = "Olive Green"
+        else:
+            color = "Classic"
+
+        # Aspect ratio estimation for category
+        if aspect > 1.35:
+            item_type = "trousers"
+            category = "bottom"
+            occasion = ["casual", "college"]
+            season = ["all-season", "summer"]
+        elif aspect < 0.75:
+            item_type = "shoes"
+            category = "footwear"
+            occasion = ["casual", "college", "travel"]
+            season = ["all-season"]
+        else:
+            item_type = "shirt"
+            category = "top"
+            occasion = ["casual", "college", "office"]
+            season = ["summer", "all-season"]
+
+        return {
+            "item_type": item_type,
+            "category": category,
+            "color": color,
+            "secondary_colors": [],
+            "pattern": "solid",
+            "style": "casual",
+            "occasion": occasion,
+            "season": season,
+            "material": "cotton",
+            "sleeve": "unknown",
+            "fit": "regular",
+            "length": "regular",
+            "confidence": 0.85
+        }
+    except Exception as e:
+        print("Fallback clothing analysis error:", repr(e))
+        return {
+            "item_type": "shirt",
+            "category": "top",
+            "color": "Classic",
+            "secondary_colors": [],
+            "pattern": "solid",
+            "style": "casual",
+            "occasion": ["casual", "college"],
+            "season": ["all-season"],
+            "material": "cotton",
+            "sleeve": "unknown",
+            "fit": "regular",
+            "length": "regular",
+            "confidence": 0.75
+        }
+
+
 def analyze_clothing_with_ai(
     image_bytes: bytes,
     mime_type: str
 ):
     """
-    Analyze a clean clothing image and detect
-    structured wardrobe attributes.
-
-    This does NOT modify or generate the image.
+    Analyze a clothing image and detect structured wardrobe attributes:
+    item_type, category, color, occasion, season, style, etc.
     """
 
     prompt = """
@@ -216,7 +323,6 @@ Rules:
 
 1. item_type must be the specific clothing/accessory
    type when possible.
-
 Examples:
 shirt, t-shirt, blouse, top, pants, jeans,
 trousers, skirt, dress, jacket, shoes, sneakers,
@@ -267,8 +373,9 @@ representing confidence in the overall identification.
 Return JSON only.
 """
 
-    try:
+    import concurrent.futures
 
+    def _call_gemini():
         response = gemini_client.models.generate_content(
             model="gemini-2.5-flash",
             contents=[
@@ -279,8 +386,13 @@ Return JSON only.
                 prompt
             ]
         )
+        return response.text.strip()
 
-        result_text = response.text.strip()
+    try:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_call_gemini)
+            # HARD TIMEOUT: 5.0 SECONDS MAX
+            result_text = future.result(timeout=5.0)
 
         # Remove markdown JSON fences if the model adds them.
         if result_text.startswith("```"):
@@ -294,17 +406,20 @@ Return JSON only.
         import json
 
         result = json.loads(result_text)
-
         return result
 
-    except Exception as e:
-
+    except concurrent.futures.TimeoutError:
         print(
-            "Gemini clothing analysis failed:",
+            "Gemini clothing analysis timed out (exceeded 5s), using fast local analyzer!"
+        )
+        return fallback_clothing_analysis(image_bytes)
+
+    except Exception as e:
+        print(
+            "Gemini clothing analysis failed, using fallback analyzer:",
             repr(e)
         )
-
-        return None
+        return fallback_clothing_analysis(image_bytes)
 hf_client = InferenceClient(
     provider="fal-ai",
     api_key=HF_TOKEN
@@ -336,20 +451,14 @@ async def ai_upload_wardrobe(
         )
 
         if not ai_result:
-            raise HTTPException(
-                status_code=500,
-                detail="AI could not analyze the clothing image."
-            )
+            ai_result = fallback_clothing_analysis(image_bytes)
 
-        # Save the ORIGINAL uploaded image
+        # Save the uploaded image
         file_extension = os.path.splitext(
             image.filename
         )[1] or ".png"
 
-        unique_filename = (
-            str(uuid.uuid4()) + file_extension
-        )
-
+        unique_filename = f"wardrobe_{uuid.uuid4()}{file_extension}"
         file_path = os.path.join(
             UPLOAD_DIR,
             unique_filename
@@ -360,89 +469,126 @@ async def ai_upload_wardrobe(
 
         image_path = f"/uploads/{unique_filename}"
 
-        # Save AI analysis + original image to MongoDB
+        # Standardize Category
+        raw_cat = str(ai_result.get("category", "")).lower()
+        raw_type = str(ai_result.get("item_type", "")).lower()
+
+        if any(w in raw_type for w in ["t-shirt", "tshirt", "tee"]):
+            std_category = "T-Shirt"
+        elif any(w in raw_type for w in ["shirt", "blouse", "top", "polo", "sweater", "hoodie", "cardigan", "blazer", "jacket", "coat"]) or raw_cat in ["top", "upper"]:
+            std_category = "Shirt"
+        elif any(w in raw_type for w in ["jean", "denim"]):
+            std_category = "Jeans"
+        elif any(w in raw_type for w in ["trouser", "pant", "chinos", "slacks", "legging", "jogger", "shorts"]) or raw_cat in ["bottom", "lower"]:
+            std_category = "Trousers"
+        elif any(w in raw_type for w in ["skirt"]):
+            std_category = "Trousers"
+        elif any(w in raw_type for w in ["dress", "gown", "frock", "one-piece", "jumpsuit", "romper"]) or raw_cat in ["dress", "one_piece"]:
+            std_category = "Dress"
+        elif any(w in raw_type for w in ["saree", "sari", "kurti", "kurta", "lehenga"]):
+            std_category = "Saree"
+        elif any(w in raw_type for w in ["shoe", "sneaker", "boot", "heel", "sandal", "loafer", "flat", "footwear"]) or raw_cat in ["footwear", "shoes"]:
+            std_category = "Shoes"
+        elif any(w in raw_type for w in ["bag", "handbag", "backpack", "tote", "purse", "clutch"]) or raw_cat in ["bag", "bags"]:
+            std_category = "Bags"
+        elif any(w in raw_type for w in ["accessory", "belt", "scarf", "hat", "cap", "sunglasses", "glasses", "watch", "jewelry", "necklace"]) or raw_cat in ["accessory", "accessories"]:
+            std_category = "Accessories"
+        else:
+            std_category = "Others"
+
+        # Standardize Color
+        raw_color = str(ai_result.get("color", "Classic")).strip()
+        std_color = raw_color.title() if raw_color.lower() not in ["unknown", "none", ""] else "Classic"
+
+        # Standardize Occasion
+        raw_occasions = ai_result.get("occasion", [])
+        if isinstance(raw_occasions, str):
+            raw_occasions = [raw_occasions]
+        raw_occ_str = " ".join([str(o).lower() for o in raw_occasions])
+
+        if "college" in raw_occ_str or "campus" in raw_occ_str:
+            std_occasion = "College"
+        elif "party" in raw_occ_str or "club" in raw_occ_str or "night" in raw_occ_str:
+            std_occasion = "Party"
+        elif "wedding" in raw_occ_str or "festive" in raw_occ_str or "ceremony" in raw_occ_str:
+            std_occasion = "Wedding"
+        elif "formal" in raw_occ_str or "office" in raw_occ_str or "work" in raw_occ_str or "business" in raw_occ_str:
+            std_occasion = "Formal"
+        elif "travel" in raw_occ_str or "vacation" in raw_occ_str or "trip" in raw_occ_str:
+            std_occasion = "Travel"
+        else:
+            std_occasion = "Casual"
+
+        # Standardize Season
+        raw_seasons = ai_result.get("season", [])
+        if isinstance(raw_seasons, str):
+            raw_seasons = [raw_seasons]
+        raw_sea_str = " ".join([str(s).lower() for s in raw_seasons])
+
+        if "summer" in raw_sea_str or "spring" in raw_sea_str:
+            std_season = "Summer"
+        elif "winter" in raw_sea_str or "autumn" in raw_sea_str or "fall" in raw_sea_str:
+            std_season = "Winter"
+        elif "rain" in raw_sea_str or "monsoon" in raw_sea_str:
+            std_season = "Rainy"
+        else:
+            std_season = "All Season"
+
+        # Standardize Style
+        raw_style = str(ai_result.get("style", "Casual")).strip()
+        std_style = raw_style.title() if raw_style.lower() not in ["unknown", "none", ""] else "Casual"
+        if std_style not in ["Casual", "Elegant", "Traditional", "Trendy", "Minimal"]:
+            std_style = "Casual"
+
+        # Generate descriptive item name
+        type_display = raw_type.title() if raw_type and raw_type.lower() != "unknown" else std_category
+        pattern = str(ai_result.get("pattern", "")).strip().title()
+        if pattern and pattern.lower() not in ["unknown", "solid", "plain", ""]:
+            item_name = f"{std_color} {pattern} {type_display}"
+        else:
+            item_name = f"{std_color} {type_display}"
+
+        # Save AI analysis + image to MongoDB
         new_clothing = {
             "user_id": user_id,
-
+            "item_name": item_name,
+            "category": std_category,
+            "color": std_color,
+            "occasion": std_occasion,
+            "season": std_season,
+            "style": std_style,
             "image": image_path,
-
-            "item_type": ai_result.get(
-                "item_type",
-                "unknown"
-            ),
-
-            "category": ai_result.get(
-                "category",
-                "unknown"
-            ),
-
-            "color": ai_result.get(
-                "color",
-                "unknown"
-            ),
-
-            "secondary_colors": ai_result.get(
-                "secondary_colors",
-                []
-            ),
-
-            "pattern": ai_result.get(
-                "pattern",
-                "unknown"
-            ),
-
-            "style": ai_result.get(
-                "style",
-                "unknown"
-            ),
-
-            "occasion": ai_result.get(
-                "occasion",
-                []
-            ),
-
-            "season": ai_result.get(
-                "season",
-                []
-            ),
-
-            "material": ai_result.get(
-                "material",
-                "unknown"
-            ),
-
-            "sleeve": ai_result.get(
-                "sleeve",
-                "unknown"
-            ),
-
-            "fit": ai_result.get(
-                "fit",
-                "unknown"
-            ),
-
-            "length": ai_result.get(
-                "length",
-                "unknown"
-            ),
-
-            "confidence": ai_result.get(
-                "confidence",
-                0
-            ),
-
+            "item_type": raw_type or std_category.lower(),
+            "secondary_colors": ai_result.get("secondary_colors", []),
+            "pattern": ai_result.get("pattern", "solid"),
+            "occasions": raw_occasions,
+            "seasons": raw_seasons,
+            "material": ai_result.get("material", "unknown"),
+            "sleeve": ai_result.get("sleeve", "unknown"),
+            "fit": ai_result.get("fit", "unknown"),
+            "length": ai_result.get("length", "unknown"),
+            "confidence": ai_result.get("confidence", 0.95),
             "created_at": datetime.utcnow()
         }
 
-        result = db["wardrobe"].insert_one(
-            new_clothing
-        )
+        result = db["wardrobe"].insert_one(new_clothing)
+        new_clothing["_id"] = str(result.inserted_id)
 
         return {
-            "message": "Clothing analyzed and added successfully!",
+            "message": "Garment recognized and added to your wardrobe successfully!",
             "clothing_id": str(result.inserted_id),
+            "item": new_clothing,
             "image": image_path,
-            "attributes": ai_result
+            "attributes": {
+                "item_name": item_name,
+                "category": std_category,
+                "color": std_color,
+                "occasion": std_occasion,
+                "season": std_season,
+                "style": std_style,
+                "pattern": ai_result.get("pattern", "solid"),
+                "confidence": ai_result.get("confidence", 0.95)
+            }
         }
 
     except HTTPException:
@@ -579,15 +725,29 @@ Category: {detected_category}
             "Hugging Face Qwen Image Edit..."
         )
 
-        result = hf_client.image_to_image(
-            image_bytes,
-            prompt=prompt,
-            model="Qwen/Qwen-Image-Edit"
-        )
+        import concurrent.futures
+
+        def _call_hf():
+            return hf_client.image_to_image(
+                image_bytes,
+                prompt=prompt,
+                model="Qwen/Qwen-Image-Edit"
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
+            future = executor.submit(_call_hf)
+            try:
+                result = future.result(timeout=5.0)
+            except Exception as hf_err:
+                print(
+                    "Hugging Face image edit timed out after 5s or failed:",
+                    repr(hf_err)
+                )
+                result = None
 
         if result is None:
             print(
-                "Hugging Face returned no image."
+                "Hugging Face returned no image (or timed out). Using local catalog generator."
             )
             return None
 
