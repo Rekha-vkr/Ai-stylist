@@ -84,6 +84,11 @@ function App() {
   const [recommendationAnalysis, setRecommendationAnalysis] = useState(null);
   const [recommendationColorPalette, setRecommendationColorPalette] = useState([]);
   const [isGeneratingOutfit, setIsGeneratingOutfit] = useState(false);
+  const [outfitVariation, setOutfitVariation] = useState(0);
+  const [totalVariations, setTotalVariations] = useState(1);
+  const [isReGenerating, setIsReGenerating] = useState(false);
+  const [recommendationHistory, setRecommendationHistory] = useState([]);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // =========================
   // CAMERA STATE
@@ -94,21 +99,138 @@ function App() {
   const videoRef = useRef(null);
 
   // =========================
-  // FETCH WARDROBE ON LOGIN
+  // FETCH WARDROBE & STYLIST ARCHIVE ON LOGIN
   // =========================
   useEffect(() => {
     if (isLoggedIn) {
       fetchWardrobe();
+      fetchStylistHistory();
     }
   }, [isLoggedIn]);
 
-  // Attach camera stream to <video> when modal opens
+  // Page-specific data loaders
   useEffect(() => {
     if (activePage === "thrift") {
       loadThriftListings();
       loadSavedThriftListings();
+    } else if (activePage === "recommendation" && isLoggedIn) {
+      fetchStylistHistory();
     }
-  }, [activePage]);
+  }, [activePage, isLoggedIn]);
+
+  const fetchStylistHistory = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    try {
+      setIsLoadingHistory(true);
+      const res = await fetch(`${API}/stylist/history?user_id=${userId}`);
+      if (res.ok) {
+        const data = await res.json();
+        setRecommendationHistory(data.history || []);
+      }
+    } catch (err) {
+      console.error("Error fetching stylist history:", err);
+    } finally {
+      setIsLoadingHistory(false);
+    }
+  };
+
+  const handleDeleteStylistHistory = async (historyId) => {
+    const userId = localStorage.getItem("userId");
+    try {
+      const res = await fetch(`${API}/stylist/history/${historyId}?user_id=${userId}`, {
+        method: "DELETE"
+      });
+      if (res.ok) {
+        setRecommendationHistory((prev) => prev.filter((item) => item._id !== historyId));
+      }
+    } catch (err) {
+      console.error("Error deleting stylist history item:", err);
+    }
+  };
+
+  const handleRestoreLook = (historyItem) => {
+    if (!historyItem) return;
+    setRecommendedOutfit(historyItem.outfit || []);
+    setRecommendationOccasion(historyItem.occasion || "");
+    setSelectedOccasion(historyItem.occasion || "");
+    if (historyItem.style) setSelectedStyle(historyItem.style);
+    setRecommendationStyle(historyItem.style || "Curated Chic");
+    setAiRecommendation(historyItem.headline || historyItem.message || `Curated Look for ${historyItem.occasion} ♡`);
+    setRecommendationAnalysis(historyItem.analysis || null);
+    setRecommendationColorPalette(historyItem.color_palette || []);
+    window.scrollTo({ top: 120, behavior: "smooth" });
+  };
+
+  const handleGenerateOutfit = async (isVariation = false) => {
+    if (!selectedOccasion) {
+      setAiRecommendation("Please select an occasion first.");
+      return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    if (!userId) {
+      setAiRecommendation("Please log in again before generating an outfit.");
+      return;
+    }
+
+    const nextVariation = isVariation ? outfitVariation + 1 : 0;
+
+    try {
+      if (isVariation) {
+        setIsReGenerating(true);
+      } else {
+        setIsGeneratingOutfit(true);
+      }
+
+      const params = new URLSearchParams({
+        user_id: userId,
+        occasion: selectedOccasion,
+        variation: nextVariation.toString()
+      });
+      if (selectedStyle) {
+        params.append("style", selectedStyle);
+      }
+      if (isVariation && recommendedOutfit.length > 0) {
+        const excludeIds = recommendedOutfit.map((i) => i._id).join(",");
+        params.append("exclude_ids", excludeIds);
+      }
+
+      const response = await fetch(`${API}/recommend-outfit?${params.toString()}`);
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to generate outfit.");
+      }
+
+      setRecommendedOutfit(data.outfit || []);
+      setRecommendationOccasion(data.occasion || selectedOccasion);
+      setRecommendationStyle(data.style || selectedStyle || "Curated Chic");
+      setAiRecommendation(
+        data.message || `Curated Look for ${selectedOccasion} ♡`
+      );
+      setRecommendationAnalysis(data.analysis || null);
+      setRecommendationColorPalette(data.color_palette || []);
+      setOutfitVariation(nextVariation);
+      setTotalVariations(data.total_variations || 1);
+
+      // Refresh stylist history immediately so newly curated look appears
+      fetchStylistHistory();
+    } catch (error) {
+      console.error("Outfit recommendation error:", error);
+      setAiRecommendation(
+        error.message || "Something went wrong while generating your outfit."
+      );
+      if (!isVariation) {
+        setRecommendedOutfit([]);
+        setRecommendationAnalysis(null);
+        setRecommendationColorPalette([]);
+      }
+    } finally {
+      setIsGeneratingOutfit(false);
+      setIsReGenerating(false);
+    }
+  };
 
   
 
@@ -282,45 +404,194 @@ function App() {
     if (selectedCategory === "All") return true;
 
     const cat = (item.category || "").toLowerCase();
+    const subCat = (item.sub_category || "").toLowerCase();
     const type = (item.item_type || "").toLowerCase();
+    const name = (item.item_name || "").toLowerCase();
 
+    const matchesAny = (keywords) =>
+      keywords.some((t) => cat.includes(t) || subCat.includes(t) || type.includes(t) || name.includes(t));
+
+    // 1. INDIAN & ETHNIC WEAR
+    if (
+      selectedCategory === "Indian & Ethnic Wear" ||
+      selectedCategory === "Indian Attire"
+    ) {
+      return (
+        cat === "indian & ethnic wear" ||
+        cat === "indian attire" ||
+        matchesAny([
+          "saree", "sari", "half saree", "langa voni", "dhavani", "pattu pavadai",
+          "lehenga", "ghagra", "chaniya", "anarkali", "kurti", "kurta", "salwar",
+          "sherwani", "bandhgala", "nehru jacket", "modi vest", "achkan", "dhoti",
+          "veshti", "mundu", "lungi", "sharara", "gharara", "dupatta", "chunni",
+          "phulkari", "kanchipuram", "banarasi", "chanderi", "paithani", "chikankari",
+          "kaftan", "caftan", "indo-western", "indo western", "kimono", "hanbok",
+          "cheongsam", "qipao", "abaya", "dirndl", "ethnic"
+        ])
+      );
+    }
+
+    // 2. JEWELRY
+    if (selectedCategory === "Jewelry" || selectedCategory === "Jewels") {
+      return (
+        cat === "jewelry" ||
+        matchesAny([
+          "jewel", "necklace", "choker", "earring", "jhumka", "jhumki", "chandbali",
+          "bangle", "kada", "kangan", "bracelet", "ring", "anklet", "payal", "pajeb",
+          "tikka", "maang tikka", "mathapatti", "borla", "passa", "nath", "nose ring",
+          "mangalsutra", "haar", "hasli", "polki", "kundan", "diamond ring", "gold chain",
+          "hathphool", "kamarbandh", "tagdi", "bichhiya", "toe ring", "brooch"
+        ])
+      );
+    }
+
+    // 3. FOOTWEAR
+    if (
+      selectedCategory === "Footwear" ||
+      selectedCategory === "Shoes & Heels" ||
+      selectedCategory === "Shoes"
+    ) {
+      return (
+        cat === "footwear" ||
+        cat === "shoes" ||
+        cat === "heels" ||
+        cat === "boots" ||
+        cat === "sandals" ||
+        matchesAny([
+          "heel", "stilettos", "stiletto", "pumps", "wedge", "platform heel",
+          "boots", "boot", "shoes", "shoe", "sneakers", "sneaker", "trainer",
+          "loafers", "loafer", "flats", "flat", "sandals", "sandal", "slides",
+          "flip-flop", "jutti", "mojari", "kolhapuri", "khussa", "oxford",
+          "brogue", "derby", "mules", "espadrille", "slippers", "chappal"
+        ])
+      );
+    }
+
+    // 4. HATS & HEADWEAR
+    if (
+      selectedCategory === "Hats & Headwear" ||
+      selectedCategory === "Hats" ||
+      selectedCategory === "Caps"
+    ) {
+      return (
+        cat === "hats & headwear" ||
+        cat === "hats" ||
+        cat === "caps" ||
+        matchesAny([
+          "hat", "hats", "cap", "caps", "fedora", "panama hat", "sun hat",
+          "wide brim", "bucket hat", "boater", "cowboy hat", "bowler", "beret",
+          "baseball cap", "snapback", "trucker", "beanie", "skull cap", "turban",
+          "pagri", "pagdi", "safa", "pheta", "fascinator", "headwrap", "visor"
+        ])
+      );
+    }
+
+    // 5. BAGS & PURSES
+    if (selectedCategory === "Bags & Purses" || selectedCategory === "Bags") {
+      return (
+        cat === "bags & purses" ||
+        cat === "bags" ||
+        cat === "clutch" ||
+        matchesAny([
+          "bag", "bags", "handbag", "backpack", "tote", "purse", "clutch",
+          "potli", "batua", "hobo", "shoulder bag", "crossbody", "sling bag",
+          "satchel", "fanny pack", "belt bag", "duffel", "duffle", "jhola",
+          "minaudiere", "wristlet", "wallet"
+        ])
+      );
+    }
+
+    // 6. TOPS
     if (selectedCategory === "Tops") {
-      return ["shirt", "t-shirt", "top", "blouse", "upper", "tops", "sweater", "hoodie", "jacket", "cardigan"].some(
-        (t) => cat.includes(t) || type.includes(t)
+      return (
+        cat === "tops" ||
+        cat === "shirt" ||
+        cat === "t-shirt" ||
+        cat === "upper" ||
+        matchesAny([
+          "shirt", "t-shirt", "tshirt", "top", "blouse", "upper", "tops", "sweater",
+          "hoodie", "jacket", "cardigan", "polo", "crop top", "tank", "tee",
+          "blazer", "coat", "sweatshirt", "corset", "bustier", "peplum", "vest",
+          "waistcoat", "shrug", "poncho"
+        ])
       );
     }
 
-    if (selectedCategory === "Pants") {
-      return ["jeans", "trousers", "skirt", "pants", "lower", "bottom", "bottoms", "shorts", "chinos"].some(
-        (t) => cat.includes(t) || type.includes(t)
+    // 7. PANTS & BOTTOMS
+    if (selectedCategory === "Pants" || selectedCategory === "Bottoms") {
+      return (
+        cat === "pants" ||
+        cat === "bottoms" ||
+        cat === "jeans" ||
+        cat === "trousers" ||
+        cat === "skirt" ||
+        cat === "shorts" ||
+        cat === "lower" ||
+        cat === "bottom" ||
+        matchesAny([
+          "jeans", "trousers", "skirt", "pants", "pant", "lower", "bottom",
+          "bottoms", "shorts", "short", "chinos", "denim", "cargo", "jogger",
+          "flare", "slacks", "leggings", "jeggings", "palazzo", "culottes", "sweatpants"
+        ])
       );
     }
 
-    if (selectedCategory === "Dresses") {
-      return ["dress", "saree", "one_piece", "gown", "frock", "kurti", "lehenga"].some(
-        (t) => cat.includes(t) || type.includes(t)
+    // 8. DRESSES & GOWNS
+    if (
+      selectedCategory === "Dresses & Gowns" ||
+      selectedCategory === "Gowns & Dresses" ||
+      selectedCategory === "Dresses"
+    ) {
+      return (
+        cat === "dresses & gowns" ||
+        cat === "gown" ||
+        cat === "dress" ||
+        matchesAny([
+          "gown", "evening gown", "ballgown", "grand gown", "dress", "dresses",
+          "frock", "jumpsuit", "romper", "one-piece", "one_piece", "slip dress",
+          "cocktail dress", "maxi dress", "bodycon", "sundress"
+        ])
       );
     }
 
-    if (selectedCategory === "Shoes") {
-      return ["shoes", "footwear", "sneakers", "boots", "heels", "sandals", "loafers", "flats"].some(
-        (t) => cat.includes(t) || type.includes(t)
-      );
-    }
-
-    if (selectedCategory === "Bags") {
-      return ["bags", "bag", "handbag", "backpack", "tote", "purse", "clutch"].some(
-        (t) => cat.includes(t) || type.includes(t)
-      );
-    }
-
+    // 9. ACCESSORIES
     if (selectedCategory === "Accessories") {
-      return ["accessories", "accessory", "belt", "scarf", "hat", "cap", "sunglasses", "watch", "jewelry"].some(
-        (t) => cat.includes(t) || type.includes(t)
+      // Exclude items that belong to dedicated categories (jewelry, hats, bags, footwear)
+      if (
+        categoryMatches(item, "Jewelry") ||
+        categoryMatches(item, "Hats & Headwear") ||
+        categoryMatches(item, "Bags & Purses") ||
+        categoryMatches(item, "Footwear")
+      ) {
+        return false;
+      }
+
+      return (
+        cat === "accessories" ||
+        matchesAny([
+          "accessory", "accessories", "sunglasses", "sunglass", "glasses", "shades",
+          "eyewear", "spectacles", "belt", "belts", "watch", "watches", "wristwatch",
+          "scarf", "scarves", "shawl", "muffler", "stole", "bandana", "tie", "necktie",
+          "bow tie", "bowtie", "pocket square", "cufflinks", "hair accessories",
+          "headband", "scrunchie", "hair clip"
+        ])
       );
     }
 
-    if (selectedCategory === "Others") return true;
+    // 10. OTHERS
+    if (selectedCategory === "Others") {
+      return (
+        !categoryMatches(item, "Indian & Ethnic Wear") &&
+        !categoryMatches(item, "Jewelry") &&
+        !categoryMatches(item, "Footwear") &&
+        !categoryMatches(item, "Hats & Headwear") &&
+        !categoryMatches(item, "Bags & Purses") &&
+        !categoryMatches(item, "Tops") &&
+        !categoryMatches(item, "Pants") &&
+        !categoryMatches(item, "Dresses & Gowns") &&
+        !categoryMatches(item, "Accessories")
+      );
+    }
 
     return true;
   };
@@ -330,6 +601,7 @@ function App() {
   // =====================================================
   const handleAiAutoUploadClothing = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
+    if (isAiUploading) return;
     setWardrobeMessage("");
     setDetectedAttributes(null);
 
@@ -351,15 +623,13 @@ function App() {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => {
       controller.abort();
-    }, 10000);
+    }, 28000);
 
     try {
+      const activeUserId = localStorage.getItem("userId") || "string@1234";
       const formData = new FormData();
       formData.append("image", imageFile);
-      formData.append(
-        "user_id",
-        localStorage.getItem("userId") || "string@1234"
-      );
+      formData.append("user_id", activeUserId);
 
       const response = await fetch(`${API}/wardrobe/ai-upload`, {
         method: "POST",
@@ -383,10 +653,18 @@ function App() {
         `✨ Recognized & Saved: "${attrs.item_name || "Garment"}"`
       );
 
-      // Refresh wardrobe items
-      await fetchWardrobe();
+      // 1. Immediately inject the newly created item into React state (ZERO refresh needed!)
+      if (data.item) {
+        setWardrobeItems((prev) => [
+          data.item,
+          ...prev.filter((it) => it._id !== data.item._id),
+        ]);
+      }
 
-      // Reset image inputs
+      // 2. Automatically select 'All' category so the newly added garment is guaranteed visible
+      setSelectedCategory("All");
+
+      // 3. Clear inputs
       setClothingImage(null);
       setCapturedImage(null);
       setClothingName("");
@@ -396,13 +674,16 @@ function App() {
       setClothingStyle("");
       setClothingSeason("");
 
-      // Smoothly close after displaying detection badges
+      // 4. Background re-fetch to sync with server
+      fetchWardrobe();
+
+      // 5. Automatically dismiss the upload form after 1.2s celebration so user sees the new item in their wardrobe
       setTimeout(() => {
         setIsAiUploading(false);
         setShowWardrobeForm(false);
         setWardrobeMessage("");
         setDetectedAttributes(null);
-      }, 3000);
+      }, 1200);
     } catch (error) {
       clearTimeout(timeoutId);
       console.error("AI Wardrobe Upload error:", error);
@@ -582,7 +863,7 @@ function App() {
     setWardrobeLoading(true);
 
     try {
-      const userId = localStorage.getItem("userId");
+      const userId = localStorage.getItem("userId") || "string@1234";
 
       const response = await fetch(
         `${API}/wardrobe?user_id=${encodeURIComponent(userId)}`
@@ -1352,6 +1633,12 @@ const handleCreateThriftListing = async () => {
                       <span>Category</span>
                       <strong>{detectedAttributes.category || "Top"}</strong>
                     </div>
+                    {detectedAttributes.sub_category && (
+                      <div className="ai-detected-badge-item">
+                        <span>Type</span>
+                        <strong>{detectedAttributes.sub_category}</strong>
+                      </div>
+                    )}
                     <div className="ai-detected-badge-item">
                       <span>Color</span>
                       <strong>{detectedAttributes.color || "Classic"}</strong>
@@ -1444,15 +1731,15 @@ const handleCreateThriftListing = async () => {
                         onChange={(e) => setClothingCategory(e.target.value)}
                       >
                         <option value="">Select Category</option>
-                        <option value="Shirt">Shirt</option>
-                        <option value="T-Shirt">T-Shirt</option>
-                        <option value="Jeans">Jeans</option>
-                        <option value="Trousers">Trousers</option>
-                        <option value="Dress">Dress</option>
-                        <option value="Saree">Saree</option>
-                        <option value="Shoes">Shoes</option>
-                        <option value="Bags">Bags</option>
-                        <option value="Accessories">Accessories</option>
+                        <option value="Indian & Ethnic Wear">Indian & Ethnic Wear (Saree, Lehenga, Kurta, Sherwani, Anarkali, Dhoti)</option>
+                        <option value="Jewelry">Jewelry & Jewels (Necklaces, Jhumkas, Bangles, Rings, Maang Tikka, Payal, Nath)</option>
+                        <option value="Footwear">Footwear (Heels, Boots, Sneakers, Juttis, Mojaris, Loafers, Sandals)</option>
+                        <option value="Hats & Headwear">Hats & Headwear (Fedoras, Caps, Beanies, Turbans, Berets)</option>
+                        <option value="Bags & Purses">Bags & Purses (Handbags, Totes, Clutches, Potlis, Backpacks)</option>
+                        <option value="Tops">Tops (Shirts, T-Shirts, Blouses, Crop Tops, Sweaters, Blazers, Jackets)</option>
+                        <option value="Pants">Pants & Bottoms (Jeans, Trousers, Skirts, Shorts, Palazzos)</option>
+                        <option value="Dresses & Gowns">Dresses & Gowns (Evening Gowns, Maxi Dresses, Jumpsuits)</option>
+                        <option value="Accessories">Accessories (Sunglasses, Belts, Watches, Scarves, Hair Accessories)</option>
                         <option value="Others">Others</option>
                       </select>
                     </div>
@@ -1578,11 +1865,14 @@ const handleCreateThriftListing = async () => {
           <div className="category-tabs">
             {[
               "All",
+              "Indian & Ethnic Wear",
+              "Jewelry",
+              "Footwear",
+              "Hats & Headwear",
+              "Bags & Purses",
               "Tops",
               "Pants",
-              "Dresses",
-              "Shoes",
-              "Bags",
+              "Dresses & Gowns",
               "Accessories",
               "Others",
             ].map((category) => (
@@ -1658,7 +1948,9 @@ const handleCreateThriftListing = async () => {
                       <div className="clothes-card-info">
                         <h3>{item.item_name}</h3>
                         <p className="clothes-card-category">
-                          {item.category}
+                          {item.sub_category && item.sub_category.toLowerCase() !== (item.category || "").toLowerCase()
+                            ? `${item.category} • ${item.sub_category}`
+                            : item.category}
                         </p>
                         <p className="clothes-card-tag">
                           {item.color} • {item.occasion} • {item.season}
@@ -1763,16 +2055,15 @@ const handleCreateThriftListing = async () => {
                     })
                   }
                 >
-                  <option value="Shirt">Shirt</option>
-                  <option value="T-Shirt">T-Shirt</option>
-                  <option value="Jeans">Jeans</option>
-                  <option value="Trousers">Trousers</option>
-                  <option value="Skirt">Skirt</option>
-                  <option value="Dress">Dress</option>
-                  <option value="Saree">Saree</option>
-                  <option value="Shoes">Shoes</option>
-                  <option value="Bags">Bags</option>
-                  <option value="Accessories">Accessories</option>
+                  <option value="Indian & Ethnic Wear">Indian & Ethnic Wear (Saree, Lehenga, Kurta, Sherwani, Anarkali, Dhoti)</option>
+                  <option value="Jewelry">Jewelry & Jewels (Necklaces, Jhumkas, Bangles, Rings, Maang Tikka, Payal, Nath)</option>
+                  <option value="Footwear">Footwear (Heels, Boots, Sneakers, Juttis, Mojaris, Loafers, Sandals)</option>
+                  <option value="Hats & Headwear">Hats & Headwear (Fedoras, Caps, Beanies, Turbans, Berets)</option>
+                  <option value="Bags & Purses">Bags & Purses (Handbags, Totes, Clutches, Potlis, Backpacks)</option>
+                  <option value="Tops">Tops (Shirts, T-Shirts, Blouses, Crop Tops, Sweaters, Blazers, Jackets)</option>
+                  <option value="Pants">Pants & Bottoms (Jeans, Trousers, Skirts, Shorts, Palazzos)</option>
+                  <option value="Dresses & Gowns">Dresses & Gowns (Evening Gowns, Maxi Dresses, Jumpsuits)</option>
+                  <option value="Accessories">Accessories (Sunglasses, Belts, Watches, Scarves, Hair Accessories)</option>
                   <option value="Others">Others</option>
                 </select>
               </div>
@@ -1946,56 +2237,8 @@ const handleCreateThriftListing = async () => {
                 type="button"
                 className="primary-pill-button"
                 style={{ marginTop: "18px" }}
-                disabled={isGeneratingOutfit}
-                onClick={async () => {
-                  if (!selectedOccasion) {
-                    setAiRecommendation("Please select an occasion first.");
-                    return;
-                  }
-
-                  const userId = localStorage.getItem("userId");
-                  if (!userId) {
-                    setAiRecommendation("Please log in again before generating an outfit.");
-                    return;
-                  }
-
-                  try {
-                    setIsGeneratingOutfit(true);
-                    const params = new URLSearchParams({
-                      user_id: userId,
-                      occasion: selectedOccasion
-                    });
-                    if (selectedStyle) {
-                      params.append("style", selectedStyle);
-                    }
-
-                    const response = await fetch(`${API}/recommend-outfit?${params.toString()}`);
-                    const data = await response.json();
-
-                    if (!response.ok) {
-                      throw new Error(data.detail || "Failed to generate outfit.");
-                    }
-
-                    setRecommendedOutfit(data.outfit || []);
-                    setRecommendationOccasion(data.occasion || selectedOccasion);
-                    setRecommendationStyle(data.style || selectedStyle || "Curated Chic");
-                    setAiRecommendation(
-                      data.message || `Curated Look for ${selectedOccasion} ♡`
-                    );
-                    setRecommendationAnalysis(data.analysis || null);
-                    setRecommendationColorPalette(data.color_palette || []);
-                  } catch (error) {
-                    console.error("Outfit recommendation error:", error);
-                    setAiRecommendation(
-                      error.message || "Something went wrong while generating your outfit."
-                    );
-                    setRecommendedOutfit([]);
-                    setRecommendationAnalysis(null);
-                    setRecommendationColorPalette([]);
-                  } finally {
-                    setIsGeneratingOutfit(false);
-                  }
-                }}
+                disabled={isGeneratingOutfit || isReGenerating}
+                onClick={() => handleGenerateOutfit(false)}
               >
                 {isGeneratingOutfit ? "✨ Curating Outfit Set..." : "✨ Generate Outfit Set"}
               </button>
@@ -2007,6 +2250,23 @@ const handleCreateThriftListing = async () => {
 
               {recommendedOutfit.length > 0 ? (
                 <>
+                  {/* RE-GENERATE & ALTERNATIVE VARIATION ACTION BAR */}
+                  <div className="lookbook-actions-panel">
+                    <div className="outfit-variation-badge">
+                      <span>✨</span> Look #{outfitVariation + 1} {totalVariations > 1 ? `of ${totalVariations}` : ""}
+                    </div>
+                    <button
+                      type="button"
+                      className={`regenerate-outfit-btn ${isReGenerating ? "loading" : ""}`}
+                      disabled={isReGenerating || isGeneratingOutfit}
+                      onClick={() => handleGenerateOutfit(true)}
+                      title="Curate an alternative outfit combination for this occasion"
+                    >
+                      <span className="spin-icon">🔄</span>
+                      {isReGenerating ? "Curating New Look..." : "Re-generate Outfit"}
+                    </button>
+                  </div>
+
                   <div className="outfit-pieces-summary-bar">
                     {recommendedOutfit.map((item) => (
                       <span key={item._id}>
@@ -2148,6 +2408,117 @@ const handleCreateThriftListing = async () => {
                 </p>
               </div>
             </div>
+          </div>
+
+          {/* =================================================
+              STYLIST LOOKBOOK ARCHIVE (PREVIOUS RECOMMENDATIONS)
+          ================================================= */}
+          <div className="stylist-history-section">
+            <div className="stylist-history-header">
+              <div>
+                <h2>✦ Stylist Lookbook Archive</h2>
+                <p style={{ fontSize: "14px", color: "var(--text-muted)", marginTop: "4px" }}>
+                  Your personal history of previous AI-curated outfits and styling breakdowns.
+                </p>
+              </div>
+              {recommendationHistory.length > 0 && (
+                <span className="stylist-pill-badge" style={{ margin: 0 }}>
+                  {recommendationHistory.length} Saved Look{recommendationHistory.length > 1 ? "s" : ""}
+                </span>
+              )}
+            </div>
+
+            {isLoadingHistory ? (
+              <div className="history-empty-box">
+                <span>✨ Loading your curated lookbook archive...</span>
+              </div>
+            ) : recommendationHistory.length > 0 ? (
+              <div className="stylist-history-grid">
+                {recommendationHistory.map((item) => (
+                  <div className="stylist-history-card" key={item._id}>
+                    <div className="stylist-history-card-top">
+                      <span className="history-occ-tag">
+                        {item.occasion?.toLowerCase() === "wedding"
+                          ? "💍 "
+                          : item.occasion?.toLowerCase() === "college"
+                          ? "🎓 "
+                          : item.occasion?.toLowerCase() === "formal"
+                          ? "💼 "
+                          : item.occasion?.toLowerCase() === "party"
+                          ? "🍸 "
+                          : "✨ "}
+                        {item.occasion}
+                      </span>
+                      <span className="history-time-tag">
+                        {item.created_at
+                          ? new Date(item.created_at).toLocaleDateString(undefined, {
+                              month: "short",
+                              day: "numeric",
+                              hour: "2-digit",
+                              minute: "2-digit"
+                            })
+                          : "Recent"}
+                      </span>
+                    </div>
+
+                    <div className="stylist-history-thumbnails">
+                      {(item.outfit || []).map((piece, pIdx) => (
+                        <div className="stylist-history-thumb" key={pIdx}>
+                          {piece.image ? (
+                            <img src={`${API}${piece.image}`} alt={piece.item_name} />
+                          ) : (
+                            <span>👗</span>
+                          )}
+                          {piece.outfit_role && (
+                            <span className="stylist-history-thumb-role">
+                              {piece.outfit_role}
+                            </span>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="stylist-history-card-headline">
+                      {item.headline || `Curated Look for ${item.occasion} ♡`}
+                    </div>
+
+                    <div className="stylist-history-card-snippet">
+                      {item.analysis?.occasion_fit ? (
+                        item.analysis.occasion_fit.length > 115
+                          ? item.analysis.occasion_fit.substring(0, 115) + "..."
+                          : item.analysis.occasion_fit
+                      ) : (
+                        `Coordinated ${item.occasion} outfit set curated with harmonious color palette and balanced silhouette.`
+                      )}
+                    </div>
+
+                    <div className="stylist-history-card-actions">
+                      <button
+                        type="button"
+                        className="restore-look-btn"
+                        onClick={() => handleRestoreLook(item)}
+                      >
+                        ✦ View & Wear Look
+                      </button>
+                      <button
+                        type="button"
+                        className="delete-look-btn"
+                        title="Remove from history"
+                        onClick={() => handleDeleteStylistHistory(item._id)}
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="history-empty-box">
+                <p style={{ margin: 0, fontStyle: "italic" }}>
+                  No previous recommendations yet. Generate an outfit above to start your personal fashion lookbook archive! ♡
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

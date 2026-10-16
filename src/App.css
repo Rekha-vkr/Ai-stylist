@@ -1263,28 +1263,31 @@ h1, h2, h3 {
 
 .clothes-card-image {
   width: 100%;
-  height: 220px;
+  height: 250px;
   border-radius: 14px;
-  background: var(--bg-cream);
+  background: #fbf9f6;
   overflow: hidden;
   margin-bottom: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 10px;
+  border: 1px solid rgba(115, 45, 74, 0.08);
+  box-sizing: border-box;
 }
 
 .clothes-card-image img {
   width: 100% !important;
   height: 100% !important;
   max-width: 100% !important;
-  max-height: 220px !important;
-  object-fit: cover !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
   display: block !important;
   transition: transform 0.4s ease;
 }
 
 .clothes-card:hover .clothes-card-image img {
-  transform: scale(1.05);
+  transform: scale(1.04);
 }
 
 .clothes-card-info h3 {
@@ -1437,10 +1440,14 @@ h1, h2, h3 {
 
 .thrift-card img {
   width: 100%;
-  height: 200px;
-  object-fit: cover;
+  height: 220px;
+  object-fit: contain;
+  background: #fbf9f6;
+  padding: 10px;
+  border: 1px solid rgba(115, 45, 74, 0.08);
   border-radius: 14px;
   margin-bottom: 12px;
+  box-sizing: border-box;
 }
 
 .thrift-card h3 {
@@ -2333,8 +2340,8 @@ h1, h2, h3 {
 
 .ai-upload-image-preview {
   position: relative;
-  width: 190px;
-  height: 220px;
+  width: 220px;
+  height: 260px;
   border-radius: 18px;
   overflow: hidden;
   box-shadow: 0 10px 26px rgba(115, 45, 74, 0.16);
@@ -2344,7 +2351,10 @@ h1, h2, h3 {
 .ai-upload-image-preview img {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  background: #fbf9f6;
+  padding: 6px;
+  box-sizing: border-box;
 }
 
 .ai-upload-remove-img-btn {
@@ -2563,9 +2573,11 @@ h1, h2, h3 {
 
 .lookbook-item img {
   width: 100%;
-  height: 140px;
-  object-fit: cover;
-  background: var(--bg-cream);
+  height: 200px;
+  object-fit: contain;
+  background: #fbf9f6;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .lookbook-item h4 {
@@ -2616,24 +2628,30 @@ h1, h2, h3 {
 .lookbook-item-image-wrap {
   position: relative;
   width: 100%;
-  height: 160px;
+  height: 260px;
   overflow: hidden;
-  background: var(--bg-cream);
+  background: #fbf9f6;
+  border-radius: 12px;
+  border: 1px solid rgba(115, 45, 74, 0.08);
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 8px;
+  box-sizing: border-box;
 }
 
 .lookbook-item-image-wrap img {
   width: 100% !important;
   height: 100% !important;
-  object-fit: cover !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
   display: block;
   transition: transform 0.35s ease;
 }
 
 .lookbook-item:hover .lookbook-item-image-wrap img {
-  transform: scale(1.06);
+  transform: scale(1.04);
 }
 
 .outfit-role-pill {
@@ -2767,6 +2785,277 @@ h1, h2, h3 {
   font-size: 12px;
   color: #856404;
   text-align: center;
+}
+
+/* --------------------------------------------------------------------------
+   RE-GENERATE OUTFIT & STYLIST LOOKBOOK ARCHIVE
+   -------------------------------------------------------------------------- */
+.lookbook-actions-panel {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  background: linear-gradient(135deg, #fffafd 0%, #fff6f8 100%);
+  border: 1px solid rgba(217, 140, 168, 0.35);
+  border-radius: 16px;
+  padding: 12px 18px;
+  margin-bottom: 18px;
+  box-shadow: 0 4px 14px rgba(115, 45, 74, 0.05);
+}
+
+.outfit-variation-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #ffffff;
+  color: var(--wine);
+  border: 1px solid rgba(115, 45, 74, 0.2);
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  box-shadow: 0 2px 6px rgba(115, 45, 74, 0.04);
+}
+
+.regenerate-outfit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--wine) 0%, #943960 100%);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(115, 45, 74, 0.25);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+  letter-spacing: 0.3px;
+}
+
+.regenerate-outfit-btn:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 8px 22px rgba(115, 45, 74, 0.35);
+  background: linear-gradient(135deg, #872f53 0%, var(--wine) 100%);
+}
+
+.regenerate-outfit-btn:active:not(:disabled) {
+  transform: translateY(1px) scale(0.98);
+}
+
+.regenerate-outfit-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.regenerate-outfit-btn .spin-icon {
+  display: inline-block;
+  font-size: 15px;
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.regenerate-outfit-btn:hover .spin-icon {
+  transform: rotate(180deg);
+}
+
+.regenerate-outfit-btn.loading .spin-icon {
+  animation: spinReGen 0.9s linear infinite;
+}
+
+@keyframes spinReGen {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Stylist History / Archive Section */
+.stylist-history-section {
+  margin-top: 42px;
+  padding-top: 32px;
+  border-top: 1px dashed rgba(115, 45, 74, 0.2);
+}
+
+.stylist-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.stylist-history-header h2 {
+  font-family: var(--font-serif);
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text-plum);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stylist-history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 22px;
+}
+
+.stylist-history-card {
+  background: #ffffff;
+  border: 1px solid var(--border-card);
+  border-radius: 18px;
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+  transition: all 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.stylist-history-card:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--shadow-hover);
+  border-color: var(--rose);
+}
+
+.stylist-history-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.history-occ-tag {
+  background: var(--wine);
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  text-transform: capitalize;
+  letter-spacing: 0.3px;
+}
+
+.history-time-tag {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.stylist-history-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(65px, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.stylist-history-thumb {
+  position: relative;
+  height: 90px;
+  background: #fbf9f6;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(115, 45, 74, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  box-sizing: border-box;
+}
+
+.stylist-history-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.stylist-history-thumb-role {
+  position: absolute;
+  bottom: 2px;
+  left: 2px;
+  right: 2px;
+  background: rgba(115, 45, 74, 0.85);
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 700;
+  text-align: center;
+  border-radius: 4px;
+  padding: 1px 0;
+  text-transform: uppercase;
+}
+
+.stylist-history-card-headline {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-plum);
+  margin-bottom: 6px;
+  line-height: 1.35;
+}
+
+.stylist-history-card-snippet {
+  font-size: 12px;
+  color: var(--text-dark);
+  line-height: 1.5;
+  margin-bottom: 14px;
+  flex: 1;
+}
+
+.stylist-history-card-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(115, 45, 74, 0.08);
+  margin-top: auto;
+}
+
+.restore-look-btn {
+  flex: 1;
+  background: var(--blush);
+  color: var(--wine);
+  border: 1px solid rgba(115, 45, 74, 0.2);
+  border-radius: var(--radius-pill);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  text-align: center;
+}
+
+.restore-look-btn:hover {
+  background: var(--wine);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.delete-look-btn {
+  background: transparent;
+  color: #c95168;
+  border: none;
+  font-size: 14px;
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.delete-look-btn:hover {
+  background: #fee7ec;
+  color: #a8233f;
+}
+
+.history-empty-box {
+  background: #fdfbf7;
+  border: 1px dashed rgba(115, 45, 74, 0.2);
+  border-radius: 16px;
+  padding: 30px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 14px;
 }
 
 /* --------------------------------------------------------------------------

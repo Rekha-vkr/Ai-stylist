@@ -25,6 +25,24 @@ from google import genai
 from google.genai import types
 load_dotenv()
 
+from fashion_classifier import (
+    classify_fashion_image,
+    build_gemini_vision_prompt,
+    normalize_fashion_category,
+    determine_outfit_role,
+    PRIMARY_CATEGORIES,
+    CATEGORY_INDIAN_ETHNIC,
+    CATEGORY_JEWELRY,
+    CATEGORY_FOOTWEAR,
+    CATEGORY_HATS_HEADWEAR,
+    CATEGORY_BAGS,
+    CATEGORY_TOPS,
+    CATEGORY_PANTS,
+    CATEGORY_DRESSES_GOWNS,
+    CATEGORY_ACCESSORIES,
+    CATEGORY_OTHERS,
+)
+
 PICWISH_API_KEY = os.getenv("PICWISH_API_KEY")
 
 if not PICWISH_API_KEY:
@@ -175,113 +193,48 @@ gemini_client = genai.Client(
 )
 
 
+def clean_item_title(color: str, pattern: str, raw_type: str, category: str = "") -> str:
+    """
+    Builds a clean, non-repetitive, elegant item title.
+    Prevents duplicates like 'blue denim pant denim denim'.
+    """
+    color_s = str(color or "").strip()
+    pattern_s = str(pattern or "").strip()
+    type_s = str(raw_type or "").strip()
+    cat_s = str(category or "").strip()
+
+    if not type_s or type_s.lower() in ["unknown", "clothing", "item", "none", ""]:
+        type_s = cat_s or "Garment"
+
+    seen_words = set()
+    cleaned_tokens = []
+
+    def add_token(word):
+        w = word.strip()
+        if not w:
+            return
+        wl = w.lower()
+        if wl in ["solid", "plain", "unknown", "none"]:
+            return
+        if wl in seen_words:
+            return
+        seen_words.add(wl)
+        cleaned_tokens.append(w.capitalize())
+
+    for part in [color_s, pattern_s, type_s]:
+        for token in part.split():
+            add_token(token)
+
+    result = " ".join(cleaned_tokens).strip()
+    return result if result else (type_s.title() if type_s else "Fashion Piece")
+
+
 def fallback_clothing_analysis(image_bytes: bytes) -> dict:
     """
-    Intelligent fallback analyzer that extracts dominant colors and
-    aspect ratio from image bytes if Gemini vision is unreachable.
+    Intelligent local analyzer that uses Marqo FashionCLIP zero-shot vision
+    model across all master categories and subcategories when Gemini vision is unreachable.
     """
-    try:
-        from PIL import Image
-        import io
-        img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        w, h = img.size
-        aspect = h / max(w, 1)
-
-        # Sample colors from central region (avoid edges and white background)
-        crop_box = (int(w * 0.2), int(h * 0.2), int(w * 0.8), int(h * 0.8))
-        cropped = img.crop(crop_box).resize((32, 32))
-        pixels = list(cropped.getdata())
-
-        colored_pixels = [
-            (r, g, b) for (r, g, b) in pixels
-            if not (r > 235 and g > 235 and b > 235) and not (r < 20 and g < 20 and b < 20)
-        ]
-        if not colored_pixels:
-            colored_pixels = pixels
-
-        avg_r = sum(p[0] for p in colored_pixels) / len(colored_pixels)
-        avg_g = sum(p[1] for p in colored_pixels) / len(colored_pixels)
-        avg_b = sum(p[2] for p in colored_pixels) / len(colored_pixels)
-
-        # Color name classification
-        if avg_r > 200 and avg_g > 200 and avg_b > 200:
-            color = "White"
-        elif avg_r < 55 and avg_g < 55 and avg_b < 55:
-            color = "Black"
-        elif avg_r > 150 and avg_g < 80 and avg_b < 80:
-            color = "Crimson Red"
-        elif avg_r < 80 and avg_g < 80 and avg_b > 130:
-            color = "Navy Blue"
-        elif avg_r < 85 and avg_g > 120 and avg_b < 85:
-            color = "Emerald Green"
-        elif avg_r > 175 and avg_g > 150 and avg_b < 90:
-            color = "Mustard Yellow"
-        elif avg_r > 180 and avg_g > 115 and avg_b > 140:
-            color = "Pastel Pink"
-        elif avg_r > 110 and avg_g < 65 and avg_b > 110:
-            color = "Burgundy"
-        elif avg_r > 165 and avg_g > 145 and avg_b > 115:
-            color = "Beige"
-        elif abs(avg_r - avg_g) < 22 and abs(avg_g - avg_b) < 22:
-            color = "Slate Gray"
-        elif avg_r > avg_g and avg_r > avg_b:
-            color = "Coral"
-        elif avg_b > avg_r and avg_b > avg_g:
-            color = "Blue"
-        elif avg_g > avg_r and avg_g > avg_b:
-            color = "Olive Green"
-        else:
-            color = "Classic"
-
-        # Aspect ratio estimation for category
-        if aspect > 1.35:
-            item_type = "trousers"
-            category = "bottom"
-            occasion = ["casual", "college"]
-            season = ["all-season", "summer"]
-        elif aspect < 0.75:
-            item_type = "shoes"
-            category = "footwear"
-            occasion = ["casual", "college", "travel"]
-            season = ["all-season"]
-        else:
-            item_type = "shirt"
-            category = "top"
-            occasion = ["casual", "college", "office"]
-            season = ["summer", "all-season"]
-
-        return {
-            "item_type": item_type,
-            "category": category,
-            "color": color,
-            "secondary_colors": [],
-            "pattern": "solid",
-            "style": "casual",
-            "occasion": occasion,
-            "season": season,
-            "material": "cotton",
-            "sleeve": "unknown",
-            "fit": "regular",
-            "length": "regular",
-            "confidence": 0.85
-        }
-    except Exception as e:
-        print("Fallback clothing analysis error:", repr(e))
-        return {
-            "item_type": "shirt",
-            "category": "top",
-            "color": "Classic",
-            "secondary_colors": [],
-            "pattern": "solid",
-            "style": "casual",
-            "occasion": ["casual", "college"],
-            "season": ["all-season"],
-            "material": "cotton",
-            "sleeve": "unknown",
-            "fit": "regular",
-            "length": "regular",
-            "confidence": 0.75
-        }
+    return classify_fashion_image(image_bytes)
 
 
 def analyze_clothing_with_ai(
@@ -291,111 +244,69 @@ def analyze_clothing_with_ai(
     """
     Analyze a clothing image and detect structured wardrobe attributes:
     item_type, category, color, occasion, season, style, etc.
+    Powered by Marqo FashionCLIP zero-shot vision engine + optional Gemini Vision enrichment.
     """
+    # 1. Instant, zero-quota, high-accuracy fashion classification via Marqo FashionCLIP
+    local_pred = classify_fashion_image(image_bytes)
 
-    prompt = """
-Analyze the clothing item in this image.
+    # 2. If Gemini API key is configured, attempt fine-grained attribute enrichment
+    if not GEMINI_API_KEY:
+        return local_pred
 
-Identify ONLY attributes that can be reasonably
-determined from the visible image.
-
-Return ONLY valid JSON.
-
-Use exactly this structure:
-
-{
-    "item_type": "",
-    "category": "",
-    "color": "",
-    "secondary_colors": [],
-    "pattern": "",
-    "style": "",
-    "occasion": [],
-    "season": [],
-    "material": "",
-    "sleeve": "",
-    "fit": "",
-    "length": "",
-    "confidence": 0.0
-}
-
-Rules:
-
-1. item_type must be the specific clothing/accessory
-   type when possible.
-Examples:
-shirt, t-shirt, blouse, top, pants, jeans,
-trousers, skirt, dress, jacket, shoes, sneakers,
-heels, sandals, bag, handbag, backpack, scarf,
-hat, belt, sunglasses, etc.
-
-2. category should be one broad category such as:
-top, bottom, dress, footwear, bag, accessory.
-
-3. Detect the main visible color.
-
-4. secondary_colors should contain other clearly
-   visible important colors.
-
-5. Detect the pattern only when visible.
-Examples:
-solid, striped, checked, floral, printed,
-polka-dot, geometric, textured.
-
-6. style should describe the visible style.
-Examples:
-casual, formal, sporty, elegant, streetwear,
-traditional, minimal, party.
-
-7. occasion may contain multiple suitable occasions.
-Examples:
-casual, college, office, party, formal,
-wedding, festive, travel, everyday.
-
-8. season may contain:
-summer, winter, spring, autumn, all-season.
-
-9. Do not invent material if it cannot be determined.
-Use "unknown" when necessary.
-
-10. For sleeve, fit, and length, use "unknown"
-when they cannot be determined.
-
-11. confidence should be a number between 0 and 1
-representing confidence in the overall identification.
-
-12. Do not describe the background.
-
-13. Do not generate or modify the clothing.
-
-14. Do not recommend an outfit yet.
-
-Return JSON only.
-"""
-
+    prompt = build_gemini_vision_prompt()
     import concurrent.futures
 
+    # Prepare optimized payload (max 420px for rapid upload and sub-second Gemini inference)
+    optimized_bytes = image_bytes
+    try:
+        from PIL import Image
+        import io
+        pil_im = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        pil_im.thumbnail((420, 420), Image.Resampling.LANCZOS)
+        out_buf = io.BytesIO()
+        pil_im.save(out_buf, format="JPEG", quality=75)
+        optimized_bytes = out_buf.getvalue()
+        mime_type = "image/jpeg"
+    except Exception as opt_err:
+        print("Image payload optimization notice:", repr(opt_err))
+
     def _call_gemini():
-        response = gemini_client.models.generate_content(
-            model="gemini-2.5-flash",
-            contents=[
-                types.Part.from_bytes(
-                    data=image_bytes,
-                    mime_type=mime_type
-                ),
-                prompt
-            ]
-        )
-        return response.text.strip()
+        # High-availability verified Gemini models
+        candidate_models = [
+            "gemini-2.5-flash",
+            "gemini-2.0-flash",
+            "gemini-1.5-flash"
+        ]
+        last_err = None
+        for mod in candidate_models:
+            try:
+                response = gemini_client.models.generate_content(
+                    model=mod,
+                    contents=[
+                        types.Part.from_bytes(
+                            data=optimized_bytes,
+                            mime_type=mime_type
+                        ),
+                        prompt
+                    ],
+                    config=types.GenerateContentConfig(temperature=0.1)
+                )
+                if response and response.text:
+                    return response.text.strip()
+            except Exception as e:
+                last_err = e
+                print(f"Gemini model {mod} notice: {repr(e)}")
+                continue
+
+        raise last_err or Exception("All Gemini models failed or quota exhausted")
 
     try:
         with concurrent.futures.ThreadPoolExecutor(max_workers=1) as executor:
             future = executor.submit(_call_gemini)
-            # HARD TIMEOUT: 5.0 SECONDS MAX
-            result_text = future.result(timeout=5.0)
+            # 8.0 seconds timeout for responsive UI
+            result_text = future.result(timeout=8.0)
 
-        # Remove markdown JSON fences if the model adds them.
-        if result_text.startswith("```"):
+        if "```" in result_text:
             result_text = (
                 result_text
                 .replace("```json", "")
@@ -404,22 +315,58 @@ Return JSON only.
             )
 
         import json
+        gemini_result = json.loads(result_text)
 
-        result = json.loads(result_text)
-        return result
-
-    except concurrent.futures.TimeoutError:
-        print(
-            "Gemini clothing analysis timed out (exceeded 5s), using fast local analyzer!"
+        # Standardize and normalize using Master Fashion Taxonomy
+        norm_cat, norm_subcat, norm_type = normalize_fashion_category(
+            raw_category=str(gemini_result.get("category", "")),
+            raw_type=str(gemini_result.get("item_type", "")),
+            item_name=str(gemini_result.get("item_name", "")),
+            raw_description=str(gemini_result.get("details", ""))
         )
-        return fallback_clothing_analysis(image_bytes)
+
+        # Retain local FashionCLIP category if Gemini returned generic or mismatch
+        final_cat = norm_cat if (norm_cat in PRIMARY_CATEGORIES and norm_cat != CATEGORY_OTHERS) else local_pred["category"]
+        final_subcat = norm_subcat or local_pred["sub_category"]
+        final_type = norm_type or local_pred["item_type"]
+
+        merged = dict(local_pred)
+        merged["category"] = final_cat
+        merged["sub_category"] = final_subcat
+        merged["item_type"] = final_type
+
+        # Incorporate Gemini fine details if present
+        if gemini_result.get("color") and gemini_result.get("color").lower() not in ["classic", "unknown", "none"]:
+            merged["color"] = gemini_result["color"].title()
+        if gemini_result.get("secondary_colors"):
+            merged["secondary_colors"] = gemini_result["secondary_colors"]
+        if gemini_result.get("pattern"):
+            merged["pattern"] = gemini_result["pattern"]
+        if gemini_result.get("material"):
+            merged["material"] = gemini_result["material"]
+        if gemini_result.get("sleeve"):
+            merged["sleeve"] = gemini_result["sleeve"]
+        if gemini_result.get("fit"):
+            merged["fit"] = gemini_result["fit"]
+        if gemini_result.get("length"):
+            merged["length"] = gemini_result["length"]
+        if gemini_result.get("gender"):
+            merged["gender"] = gemini_result["gender"]
+        if gemini_result.get("style"):
+            merged["style"] = gemini_result["style"]
+        if gemini_result.get("occasion"):
+            merged["occasion"] = gemini_result["occasion"]
+        if gemini_result.get("season"):
+            merged["season"] = gemini_result["season"]
+
+        merged["item_name"] = clean_item_title(merged["color"], merged["pattern"], merged["item_type"], merged["category"])
+        merged["outfit_role"] = determine_outfit_role(merged["category"], merged["sub_category"], merged["item_type"])
+
+        return merged
 
     except Exception as e:
-        print(
-            "Gemini clothing analysis failed, using fallback analyzer:",
-            repr(e)
-        )
-        return fallback_clothing_analysis(image_bytes)
+        print("Gemini vision unavailable/failed, using Marqo FashionCLIP output:", repr(e))
+        return local_pred
 hf_client = InferenceClient(
     provider="fal-ai",
     api_key=HF_TOKEN
@@ -469,32 +416,16 @@ async def ai_upload_wardrobe(
 
         image_path = f"/uploads/{unique_filename}"
 
-        # Standardize Category
-        raw_cat = str(ai_result.get("category", "")).lower()
-        raw_type = str(ai_result.get("item_type", "")).lower()
-
-        if any(w in raw_type for w in ["t-shirt", "tshirt", "tee"]):
-            std_category = "T-Shirt"
-        elif any(w in raw_type for w in ["shirt", "blouse", "top", "polo", "sweater", "hoodie", "cardigan", "blazer", "jacket", "coat"]) or raw_cat in ["top", "upper"]:
-            std_category = "Shirt"
-        elif any(w in raw_type for w in ["jean", "denim"]):
-            std_category = "Jeans"
-        elif any(w in raw_type for w in ["trouser", "pant", "chinos", "slacks", "legging", "jogger", "shorts"]) or raw_cat in ["bottom", "lower"]:
-            std_category = "Trousers"
-        elif any(w in raw_type for w in ["skirt"]):
-            std_category = "Trousers"
-        elif any(w in raw_type for w in ["dress", "gown", "frock", "one-piece", "jumpsuit", "romper"]) or raw_cat in ["dress", "one_piece"]:
-            std_category = "Dress"
-        elif any(w in raw_type for w in ["saree", "sari", "kurti", "kurta", "lehenga"]):
-            std_category = "Saree"
-        elif any(w in raw_type for w in ["shoe", "sneaker", "boot", "heel", "sandal", "loafer", "flat", "footwear"]) or raw_cat in ["footwear", "shoes"]:
-            std_category = "Shoes"
-        elif any(w in raw_type for w in ["bag", "handbag", "backpack", "tote", "purse", "clutch"]) or raw_cat in ["bag", "bags"]:
-            std_category = "Bags"
-        elif any(w in raw_type for w in ["accessory", "belt", "scarf", "hat", "cap", "sunglasses", "glasses", "watch", "jewelry", "necklace"]) or raw_cat in ["accessory", "accessories"]:
-            std_category = "Accessories"
-        else:
-            std_category = "Others"
+        # Standardize Category & Fine-Grained Sub-types using Master Fashion Taxonomy
+        std_cat, fallback_subcat, fallback_type = normalize_fashion_category(
+            raw_category=str(ai_result.get("category", "")),
+            raw_type=str(ai_result.get("item_type", "")),
+            item_name=str(ai_result.get("item_name", "")),
+            raw_description=str(ai_result.get("details", ""))
+        )
+        std_category = std_cat
+        std_subcategory = str(ai_result.get("sub_category") or fallback_subcat).strip()
+        std_item_type = str(ai_result.get("item_type") or fallback_type).strip()
 
         # Standardize Color
         raw_color = str(ai_result.get("color", "Classic")).strip()
@@ -510,7 +441,7 @@ async def ai_upload_wardrobe(
             std_occasion = "College"
         elif "party" in raw_occ_str or "club" in raw_occ_str or "night" in raw_occ_str:
             std_occasion = "Party"
-        elif "wedding" in raw_occ_str or "festive" in raw_occ_str or "ceremony" in raw_occ_str:
+        elif "wedding" in raw_occ_str or "festive" in raw_occ_str or "ceremony" in raw_occ_str or "traditional" in raw_occ_str:
             std_occasion = "Wedding"
         elif "formal" in raw_occ_str or "office" in raw_occ_str or "work" in raw_occ_str or "business" in raw_occ_str:
             std_occasion = "Formal"
@@ -537,37 +468,42 @@ async def ai_upload_wardrobe(
         # Standardize Style
         raw_style = str(ai_result.get("style", "Casual")).strip()
         std_style = raw_style.title() if raw_style.lower() not in ["unknown", "none", ""] else "Casual"
-        if std_style not in ["Casual", "Elegant", "Traditional", "Trendy", "Minimal"]:
+        if std_style not in ["Casual", "Elegant", "Traditional", "Trendy", "Minimal", "Royal", "Festive", "Boho", "Glam", "Streetwear", "Formal"]:
             std_style = "Casual"
 
-        # Generate descriptive item name
-        type_display = raw_type.title() if raw_type and raw_type.lower() != "unknown" else std_category
+        # Generate clean descriptive item name without duplicate words
         pattern = str(ai_result.get("pattern", "")).strip().title()
-        if pattern and pattern.lower() not in ["unknown", "solid", "plain", ""]:
-            item_name = f"{std_color} {pattern} {type_display}"
+        ai_name = str(ai_result.get("item_name", "")).strip()
+        if ai_name and len(ai_name.split()) >= 2 and not any(w in ai_name.lower() for w in ["unknown", "garment", "piece"]):
+            item_name = clean_item_title("", "", ai_name, "")
         else:
-            item_name = f"{std_color} {type_display}"
+            item_name = clean_item_title(std_color, pattern, std_item_type or std_subcategory, std_category)
+
+        outfit_role = determine_outfit_role(std_category, std_subcategory, std_item_type)
 
         # Save AI analysis + image to MongoDB
         new_clothing = {
             "user_id": user_id,
             "item_name": item_name,
             "category": std_category,
+            "sub_category": std_subcategory,
             "color": std_color,
             "occasion": std_occasion,
             "season": std_season,
             "style": std_style,
             "image": image_path,
-            "item_type": raw_type or std_category.lower(),
+            "item_type": std_item_type,
             "secondary_colors": ai_result.get("secondary_colors", []),
             "pattern": ai_result.get("pattern", "solid"),
             "occasions": raw_occasions,
             "seasons": raw_seasons,
             "material": ai_result.get("material", "unknown"),
+            "gender": ai_result.get("gender", "Unisex"),
             "sleeve": ai_result.get("sleeve", "unknown"),
             "fit": ai_result.get("fit", "unknown"),
             "length": ai_result.get("length", "unknown"),
-            "confidence": ai_result.get("confidence", 0.95),
+            "confidence": ai_result.get("confidence", 0.98),
+            "outfit_role": outfit_role,
             "created_at": datetime.utcnow()
         }
 
@@ -906,15 +842,26 @@ CLOTHING_MODEL = "mattmdjaga/segformer_b2_clothes"
 
 print("Loading AI clothing segmentation model...")
 
-image_processor = AutoImageProcessor.from_pretrained(
-    CLOTHING_MODEL
-)
-
-clothing_model = (
-    AutoModelForSemanticSegmentation.from_pretrained(
+try:
+    image_processor = AutoImageProcessor.from_pretrained(
+        CLOTHING_MODEL,
+        local_files_only=True
+    )
+    clothing_model = (
+        AutoModelForSemanticSegmentation.from_pretrained(
+            CLOTHING_MODEL,
+            local_files_only=True
+        )
+    )
+except Exception:
+    image_processor = AutoImageProcessor.from_pretrained(
         CLOTHING_MODEL
     )
-)
+    clothing_model = (
+        AutoModelForSemanticSegmentation.from_pretrained(
+            CLOTHING_MODEL
+        )
+    )
 
 clothing_model.eval()
 
@@ -1056,15 +1003,25 @@ async def add_clothing(
 
         image_path = f"/uploads/{unique_filename}"
 
+    norm_cat, norm_subcat, norm_type = normalize_fashion_category(
+        raw_category=category,
+        raw_type="",
+        item_name=item_name
+    )
+    role = determine_outfit_role(norm_cat, norm_subcat, norm_type)
+
     new_clothing = {
         "user_id": user_id,
         "item_name": item_name,
-        "category": category,
+        "category": norm_cat,
+        "sub_category": norm_subcat,
         "color": color,
         "occasion": occasion,
         "season": season,
         "style": style,
         "image": image_path,
+        "item_type": norm_type,
+        "outfit_role": role,
         "created_at": datetime.utcnow()
     }
 
@@ -1089,6 +1046,7 @@ def get_wardrobe(user_id: str):
     )
 
     for clothing in clothes:
+        auto_correct_wardrobe_item(clothing)
         clothing["_id"] = str(clothing["_id"])
 
     return clothes
@@ -1188,15 +1146,25 @@ def update_clothing(
             detail="Clothing item not found."
         )
 
+    norm_cat, norm_subcat, norm_type = normalize_fashion_category(
+        raw_category=category,
+        raw_type=existing.get("item_type", ""),
+        item_name=item_name
+    )
+    role = determine_outfit_role(norm_cat, norm_subcat, norm_type)
+
     db["wardrobe"].update_one(
         {"_id": object_id, "user_id": user_id},
         {
             "$set": {
                 "item_name": item_name,
-                "category": category,
+                "category": norm_cat,
+                "sub_category": norm_subcat,
                 "color": color,
                 "occasion": occasion,
-                "season": season
+                "season": season,
+                "item_type": norm_type,
+                "outfit_role": role
             }
         }
     )
@@ -1550,36 +1518,73 @@ COMPLEMENTARY_PAIRS = [
 ]
 
 
+def auto_correct_wardrobe_item(item):
+    """
+    Ensures items in MongoDB have accurate master categories, subcategories,
+    and outfit roles according to the Master Fashion Taxonomy.
+    """
+    cat = str(item.get("category", "")).strip()
+    subcat = str(item.get("sub_category", "")).strip()
+    name = str(item.get("item_name", "")).strip()
+    itype = str(item.get("item_type", "")).strip()
+
+    correct_cat, correct_subcat, correct_type = normalize_fashion_category(
+        raw_category=cat,
+        raw_type=itype,
+        item_name=name
+    )
+
+    updated = False
+    if cat != correct_cat or not subcat or cat not in PRIMARY_CATEGORIES:
+        item["category"] = correct_cat
+        item["sub_category"] = correct_subcat
+        if not item.get("item_type"):
+            item["item_type"] = correct_type
+        item["outfit_role"] = determine_outfit_role(correct_cat, correct_subcat, item.get("item_type", ""))
+        updated = True
+
+    if updated:
+        try:
+            update_data = {
+                "category": item["category"],
+                "sub_category": item.get("sub_category", ""),
+                "item_name": item["item_name"],
+                "item_type": item.get("item_type", item["category"].lower()),
+                "outfit_role": item.get("outfit_role", "top")
+            }
+            if "color" in item:
+                update_data["color"] = item["color"]
+            if "occasion" in item:
+                update_data["occasion"] = item["occasion"]
+            if "style" in item:
+                update_data["style"] = item["style"]
+            if "season" in item:
+                update_data["season"] = item["season"]
+
+            obj_id = item["_id"]
+            if isinstance(obj_id, str):
+                from bson import ObjectId
+                obj_id = ObjectId(obj_id)
+            db["wardrobe"].update_one({"_id": obj_id}, {"$set": update_data})
+        except Exception as db_err:
+            print("Auto-correct wardrobe persistence notice:", repr(db_err))
+
+    return item
+
+
 def classify_wardrobe_item(item):
-    cat = str(item.get("category", "")).lower().strip()
-    name = str(item.get("item_name", "")).lower().strip()
-
-    # 1. Footwear
-    footwear_keys = ["shoe", "footwear", "sneaker", "heel", "sandal", "boot", "loafer", "flats", "flat", "slippers"]
-    if any(k in cat for k in footwear_keys) or any(k in name for k in footwear_keys):
-        return "footwear"
-
-    # 2. Accessories
-    acc_keys = ["bag", "handbag", "backpack", "tote", "clutch", "purse", "jewel", "necklace", "earring", "bracelet", "ring", "sunglass", "glasses", "watch", "belt", "scarf", "accessor"]
-    if any(k in cat for k in acc_keys) or any(k in name for k in acc_keys):
-        return "accessory"
-
-    # 3. One-piece outfits
-    one_piece_keys = ["dress", "saree", "sari", "gown", "jumpsuit", "lehenga", "anarkali", "suit"]
-    if any(k in cat for k in one_piece_keys) or any(k in name for k in one_piece_keys):
+    cat = str(item.get("category", "")).strip()
+    subcat = str(item.get("sub_category", "")).strip()
+    itype = str(item.get("item_type", "")).strip()
+    name = str(item.get("item_name", "")).strip()
+    role = determine_outfit_role(cat, subcat, f"{itype} {name}")
+    # Return one of standard roles expected by recommendation loop
+    if role in ["footwear", "bottom", "top"]:
+        return role
+    if role == "one_piece":
         return "one_piece"
-
-    # 4. Bottoms
-    bottom_keys = ["pant", "trouser", "jean", "skirt", "short", "lower", "legging", "palazzo", "denim", "bottom"]
-    if any(k in cat for k in bottom_keys) or any(k in name for k in bottom_keys):
-        return "bottom"
-
-    # 5. Tops
-    top_keys = ["upper", "shirt", "t-shirt", "tshirt", "top", "blouse", "hoodie", "sweater", "jacket", "blazer", "kurta", "tee", "crop top"]
-    if any(k in cat for k in top_keys) or any(k in name for k in top_keys):
-        return "top"
-
-    return "top"
+    # jewelry, bag, headwear, accessory are all accessory pieces for outfit coordination
+    return "accessory"
 
 
 def evaluate_color_pair(c1_raw, c2_raw):
@@ -1605,7 +1610,12 @@ def score_item_for_occasion(item, occasion_lower):
     item_occ = str(item.get("occasion", "")).lower()
     item_cat = str(item.get("category", "")).lower()
     item_name = str(item.get("item_name", "")).lower()
+    item_type = str(item.get("item_type", "")).lower()
     item_style = str(item.get("style", "")).lower()
+    item_mat = str(item.get("material", "")).lower()
+    item_len = str(item.get("length", "")).lower()
+
+    combined_text = f"{item_name} {item_cat} {item_type} {item_style} {item_mat} {item_len}"
 
     score = 0
     if occasion_lower in item_occ:
@@ -1613,37 +1623,83 @@ def score_item_for_occasion(item, occasion_lower):
     elif "all" in item_occ or not item_occ:
         score += 20
 
-    if occasion_lower == "college":
-        if any(k in item_name or k in item_cat for k in ["t-shirt", "tshirt", "tee", "shirt", "jeans", "denim", "pant", "sneaker", "backpack", "tote"]):
-            score += 35
-        if any(k in item_name or k in item_cat for k in ["saree", "gown", "heavy", "wedding"]):
-            score -= 50
-        if any(k in item_style for k in ["casual", "minimal", "trendy", "streetwear"]):
+    if occasion_lower == "wedding":
+        # 1. Indian Traditional Attire & Grand Wedding Wear
+        if any(k in combined_text for k in ["saree", "sari", "kanchipuram", "banarasi", "silk saree", "half saree", "langa voni", "dhavani", "lehenga", "ghagra", "chaniya", "anarkali", "gown", "evening gown", "ballgown", "grand gown"]):
+            score += 150
+        # 2. Luxury Fabrics & Maxi Length
+        elif any(k in combined_text for k in ["maxi", "floor-length", "floor"]) or (("dress" in combined_text) and any(m in combined_text for m in ["silk", "satin", "velvet", "organza", "chiffon", "brocade", "sequin", "shimmer", "embellish", "embroidered"])):
+            score += 110
+        # 3. Disqualify casual or short dresses
+        elif any(k in combined_text for k in ["short", "mini", "casual", "sundress", "t-shirt dress", "tshirt dress"]):
+            score -= 250
+        elif "dress" in combined_text:
             score += 20
 
-    elif occasion_lower == "wedding":
-        if any(k in item_name or k in item_cat for k in ["saree", "sari", "gown", "dress", "lehenga", "anarkali", "heel", "jewel", "clutch", "traditional"]):
-            score += 45
-        if any(k in item_name or k in item_cat for k in ["t-shirt", "tshirt", "hoodie", "distressed"]):
-            score -= 50
-        if any(k in item_style for k in ["traditional", "elegant", "glam"]):
-            score += 25
+        # Footwear: heels, pumps, stilettos, juttis, mojaris
+        if any(k in combined_text for k in ["heel", "stilettos", "stiletto", "pump", "wedge", "embellished heel", "strappy heel", "aquazzura", "jutti", "mojari", "kolhapuri", "embellished sandal"]):
+            score += 90
+        elif any(k in combined_text for k in ["sneaker", "trainer", "running", "combat boot", "work boot", "flip-flop", "canvas"]):
+            score -= 350  # Strictly reject casual shoes for weddings
 
-    elif occasion_lower == "formal":
-        if any(k in item_name or k in item_cat for k in ["shirt", "blazer", "trouser", "formal", "skirt", "loafer", "pump"]):
-            score += 35
-        if any(k in item_style for k in ["formal", "minimal", "elegant"]):
+        # Accessories: royal jewelry, clutches, potlis
+        if any(k in combined_text for k in ["jewel", "necklace", "choker", "earring", "jhumka", "bangle", "bracelet", "ring", "tikka", "maang tikka", "pendant", "clutch", "potli"]):
+            score += 90
+        elif any(k in combined_text for k in ["backpack", "gym bag", "tote canvas", "hobo", "crossbody"]):
+            score -= 350  # Strictly reject casual bags for weddings
+
+        # Separates: silk blouses, peplum, ethnic
+        if any(k in combined_text for k in ["peplum", "corset", "silk blouse", "sharara", "palazzo", "ethnic"]):
+            score += 50
+        # Casual tops / bottoms penalty
+        if any(k in combined_text for k in ["t-shirt", "tshirt", "tee", "hoodie", "sweatshirt", "tank top"]):
+            score -= 300
+        if any(k in combined_text for k in ["jeans", "denim", "distressed", "shorts", "sweatpants", "jogger", "cargo"]):
+            score -= 300
+
+        if any(k in item_style for k in ["traditional", "elegant", "glam", "royal"]):
+            score += 45
+
+    elif occasion_lower == "college":
+        if any(k in combined_text for k in ["t-shirt", "tshirt", "tee", "polo", "casual shirt", "shirt", "jeans", "denim", "pant", "cargo", "sneaker", "backpack", "tote"]):
+            score += 45
+        if any(k in combined_text for k in ["saree", "gown", "heavy", "wedding", "lehenga", "anarkali", "stilettos", "bridal"]):
+            score -= 90
+        if any(k in item_style for k in ["casual", "minimal", "trendy", "streetwear"]):
             score += 25
 
     elif occasion_lower == "party":
-        if any(k in item_name or k in item_cat for k in ["dress", "skirt", "heel", "party", "chic", "top", "shimmer"]):
+        if any(k in combined_text for k in ["party", "cocktail", "shimmer", "sequin", "satin", "slip dress", "peplum", "corset", "crop top", "skirt", "heel", "stilettos", "chic", "glam"]):
+            score += 65
+        if any(k in combined_text for k in ["gym", "sweatpants", "jogger", "flip-flop", "canvas bag"]):
+            score -= 70
+        if any(k in item_style for k in ["trendy", "elegant", "glam", "party"]):
+            score += 30
+
+    elif occasion_lower == "formal":
+        # Formal garments: button-down shirts, blazers, suits, pleated trousers, formal slacks, pencil skirts
+        if any(k in combined_text for k in ["formal shirt", "button-down", "button down", "dress shirt", "blazer", "suit", "trouser", "slacks", "pleated trouser", "pencil skirt", "formal"]):
+            score += 95
+        elif any(k in combined_text for k in ["shirt", "blouse", "chinos"]):
+            score += 45
+        # Formal footwear: loafers, oxfords, pumps, formal heels, dress shoes, clean flats
+        if any(k in combined_text for k in ["loafer", "oxford", "derby", "pump", "heel", "dress shoe", "clean flat"]):
+            score += 80
+        # Strict penalties for casual clothes in formal settings
+        if any(k in combined_text for k in ["t-shirt", "tshirt", "tee", "crop top", "tank top", "hoodie", "sweatshirt"]):
+            score -= 280
+        if any(k in combined_text for k in ["jeans", "denim", "ripped", "distressed", "shorts", "jogger", "cargo", "sweatpant"]):
+            score -= 280
+        if any(k in combined_text for k in ["sneaker", "trainer", "running", "combat boot", "flip-flop", "canvas", "crocs"]):
+            score -= 300
+        if any(k in item_style for k in ["formal", "minimal", "elegant", "preppy"]):
             score += 35
-        if any(k in item_style for k in ["trendy", "elegant", "party"]):
-            score += 20
 
     elif occasion_lower in ["casual", "travel"]:
-        if any(k in item_name or k in item_cat for k in ["t-shirt", "shirt", "jeans", "sneaker", "flat", "bag", "pant"]):
-            score += 30
+        if any(k in combined_text for k in ["t-shirt", "shirt", "jeans", "sneaker", "flat", "bag", "pant", "jogger", "hoodie", "denim"]):
+            score += 45
+        if any(k in combined_text for k in ["gown", "saree", "lehenga", "stilettos"]):
+            score -= 80
 
     return score
 
@@ -1656,49 +1712,72 @@ def generate_stylist_analysis(outfit, occasion, style_pref=""):
     dress_item = next((i for i in outfit if i.get("outfit_role") == "One-Piece"), None)
 
     color_palette = [i.get("color") for i in outfit if i.get("color")]
+    is_wedding_traditional = (occasion.lower() == "wedding") or ("traditional" in (style_pref or "").lower())
 
-    # 1. Try Gemini AI if client is available
+    # 1. Try Gemini AI with verified models
     if gemini_client and GEMINI_API_KEY:
-        try:
-            items_str = "\n".join([
-                f"- [{i.get('outfit_role', 'Piece')}]: {i.get('item_name', '')} (Color: {i.get('color', 'N/A')}, Category: {i.get('category', 'N/A')})"
-                for i in outfit
-            ])
-            prompt = f"""You are a luxury Vogue celebrity fashion stylist.
+        items_str = "\n".join([
+            f"- [{i.get('outfit_role', 'Piece')}]: {i.get('item_name', '')} (Color: {i.get('color', 'N/A')}, Category: {i.get('category', 'N/A')})"
+            for i in outfit
+        ])
+
+        if is_wedding_traditional:
+            wedding_rules = """CRITICAL TRADITIONAL / INDIAN WEDDING RULES:
+- This is a formal Indian Wedding / Traditional Festive occasion.
+- Celebrate authentic Haute Couture, bridal splendor, Sabyasachi / Manish Malhotra aesthetics, royal silhouettes, silk, zardozi embroidery, and rich festive jewel tones.
+- NEVER justify sneakers, athletic shoes, combat boots, or casual backpacks for weddings. Traditional attire requires heels, royal juttis/mojaris, luxury jewelry, or an embroidered potli/clutch.
+- If footwear or accessories are absent from the set, provide an expert stylist tip recommending champagne/gold heels, embroidered juttis, heritage kundan/polki jewelry, and an embellished potli clutch."""
+        else:
+            wedding_rules = ""
+
+        prompt = f"""You are a luxury Vogue celebrity fashion stylist.
 Client Occasion: {occasion.upper()}
 Style Vibe: {style_pref or 'Effortless Chic'}
 Outfit Pieces:
 {items_str}
 
+{wedding_rules}
+
 Analyze this coordinated set and explain why it is perfect for the occasion, analyzing color harmony and style.
 Return ONLY valid JSON matching this schema:
 {{
-  "headline": "A short, chic lookbook title with an emoji or heart (e.g. 'Effortless Campus Minimalism ♡')",
+  "headline": "A short, chic lookbook title with an emoji or heart (e.g. 'Royal Grandeur & Haute Couture Splendor ✨')",
   "occasion_fit": "A thoughtful 2-3 sentence explanation of why this outfit set works brilliantly for {occasion}.",
   "color_harmony": "A 2-3 sentence analysis of how these specific colors complement each other and balance the look.",
   "style_notes": "A 2-sentence note on the silhouette, fit, and proportions between the pieces.",
-  "styling_tips": "1-2 actionable tips on how to wear it (e.g. tucking, accessories, rolling sleeves, layering)."
+  "styling_tips": "1-2 actionable tips on how to wear it (e.g. jewelry coordination, draping, footwear, clutch, hair/makeup)."
 }}
 """
-            response = gemini_client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt
-            )
-            text = response.text.strip()
-            if text.startswith("```"):
-                text = text.replace("```json", "").replace("```", "").strip()
-            import json
-            parsed = json.loads(text)
-            if "occasion_fit" in parsed and "color_harmony" in parsed:
-                return {
-                    "headline": parsed.get("headline", f"Curated Look for {occasion} ♡"),
-                    "occasion_fit": parsed.get("occasion_fit", ""),
-                    "color_harmony": parsed.get("color_harmony", ""),
-                    "style_notes": parsed.get("style_notes", ""),
-                    "styling_tips": parsed.get("styling_tips", "")
-                }
-        except Exception as gemini_err:
-            print("Gemini stylist analysis fallback:", repr(gemini_err))
+        candidate_models = [
+            "gemini-3.5-flash",
+            "gemini-3.6-flash",
+            "gemini-3.7-flash",
+            "gemini-3.8-flash",
+            "gemini-3.1-pro-preview"
+        ]
+        for model_name in candidate_models:
+            try:
+                response = gemini_client.models.generate_content(
+                    model=model_name,
+                    contents=prompt,
+                    config=types.GenerateContentConfig(temperature=0.2)
+                )
+                text = response.text.strip()
+                if "```" in text:
+                    text = text.replace("```json", "").replace("```", "").strip()
+                import json
+                parsed = json.loads(text)
+                if "occasion_fit" in parsed and "color_harmony" in parsed:
+                    return {
+                        "headline": parsed.get("headline", f"Curated Look for {occasion} ♡"),
+                        "occasion_fit": parsed.get("occasion_fit", ""),
+                        "color_harmony": parsed.get("color_harmony", ""),
+                        "style_notes": parsed.get("style_notes", ""),
+                        "styling_tips": parsed.get("styling_tips", "")
+                    }
+            except Exception as gemini_err:
+                print(f"Gemini stylist analysis notice ({model_name}):", repr(gemini_err))
+                continue
 
     # 2. Expert Algorithmic Stylist Generator
     occ_lower = occasion.lower()
@@ -1708,8 +1787,54 @@ Return ONLY valid JSON matching this schema:
     bottom_color = bottom_item.get("color", "") if bottom_item else ""
     shoes_name = shoes_item.get("item_name", "footwear") if shoes_item else ""
     shoes_color = shoes_item.get("color", "") if shoes_item else ""
+    acc_name = acc_item.get("item_name", "accessory") if acc_item else ""
 
-    if occ_lower == "college":
+    if is_wedding_traditional:
+        is_grand = any(k in top_name.lower() for k in ["gown", "saree", "sari", "lehenga", "anarkali", "grand"])
+        if is_grand:
+            headline = "Regal Heritage & Haute Couture Splendor ✨"
+            occ_fit = (
+                f"For a grand Indian wedding celebration, the magnificent {top_color.title() + ' ' if top_color else ''}{top_name} radiates authentic royal poise and celebratory grandeur. "
+                f"Its sweeping silhouette, opulent craftsmanship, and celebratory presence make it an unforgettable showstopper for the Sangeet, Wedding Ceremony, or Reception."
+            )
+            if shoes_item:
+                occ_fit += f" Complemented by {shoes_color.title() + ' ' if shoes_color else ''}{shoes_name}, it elevates your stance with graceful stateliness."
+            else:
+                occ_fit += " Pair with metallic champagne stilettos or royal embroidered juttis to complete the regal stance."
+
+            color_harm = (
+                f"The luxurious palette of {', '.join(color_palette) if color_palette else 'rich celebratory jewel tones'} creates warm luminescence and royal charm under celebratory chandeliers."
+            )
+            style_notes = "Sweeping floor-length lines and contoured couture tailoring establish a majestic, photo-ready profile that flatters effortlessly."
+            if acc_item:
+                style_tips = f"Pro-Tip: Coordinate with {acc_name}, opt for an elegant updo with fresh jasmine/roses, and add glowing festive makeup."
+            else:
+                style_tips = "Pro-Tip: Crown this look with a statement polki or kundan choker, chandelier jhumkas, and carry an embroidered raw-silk potli clutch."
+        elif dress_item:
+            headline = "Celebratory Wedding Grace ✨"
+            occ_fit = (
+                f"For this wedding celebration, the refined {top_color.title() + ' ' if top_color else ''}{top_name} brings festive poise and celebratory charm. "
+                f"It captures the spirit of the occasion with grace and understated beauty."
+            )
+            if shoes_item:
+                occ_fit += f" Paired with {shoes_color.title() + ' ' if shoes_color else ''}{shoes_name}, it creates a poised ceremonial profile."
+            else:
+                occ_fit += " Style with embellished block heels or golden juttis to anchor the look."
+            color_harm = f"Harmonious festive tones in {', '.join(color_palette) if color_palette else 'classic hues'} balance romantic flair with celebratory glow."
+            style_notes = "Balanced proportions maintain effortless comfort while accentuating graceful movement across ceremonial spaces."
+            style_tips = "Pro-Tip: Add delicate gold jewelry, a structured clutch, and glowing beauty accents to finish the look."
+        else:
+            headline = "Distinguished Wedding Splendor ✨"
+            occ_fit = (
+                f"For a wedding occasion, the refined {top_color.title() + ' ' if top_color else ''}{top_name} paired with {bottom_color.title() + ' ' if bottom_color else ''}{bottom_name} creates a distinguished, celebratory presence."
+            )
+            if shoes_item:
+                occ_fit += f" Finished with {shoes_name}, this set achieves formal harmony."
+            color_harm = "Luminous and harmonious hues reflect celebratory ambient lighting gracefully."
+            style_notes = "Structured tailoring and elevated cut lines deliver a poised silhouette."
+            style_tips = "Pro-Tip: Pair with heritage accessories and polished evening footwear to complete the festive elegance."
+
+    elif occ_lower == "college":
         headline = "Effortless Campus Chic ♡"
         if top_item and bottom_item:
             occ_fit = (
@@ -1724,7 +1849,7 @@ Return ONLY valid JSON matching this schema:
                 f"For an easygoing college day, the {top_color.title() + ' ' if top_color else ''}{top_name} delivers breezy, one-step styling that feels light, comfortable, and effortlessly put-together."
             )
         else:
-            occ_fit = f"Selected for campus ease, this piece provides an approachable, comfortable look suited for daily college routines."
+            occ_fit = "Selected for campus ease, this piece provides an approachable, comfortable look suited for daily college routines."
 
         color_harm = (
             f"The palette combines {top_color or 'neutral'} and {bottom_color or 'complementary'} tones to create a balanced, unfussy aesthetic. "
@@ -1732,29 +1857,6 @@ Return ONLY valid JSON matching this schema:
         )
         style_notes = "A relaxed-proportioned upper paired with clean-lined bottoms establishes a flattering, casual silhouette suited for all-day campus wear."
         style_tips = "Pro-Tip: Try a relaxed half-tuck at the waistband. Carry a canvas tote or backpack, and keep jewellery minimal for a breezy student vibe."
-
-    elif occ_lower == "wedding":
-        headline = "Royal Wedding Elegance ✨"
-        if dress_item:
-            occ_fit = (
-                f"For a wedding celebration, timeless grace and luxurious draping take center stage. "
-                f"The {top_color.title() + ' ' if top_color else ''}{top_name} commands celebratory radiance and opulent poise, ideal for ceremonies and receptions."
-            )
-            if shoes_item:
-                occ_fit += f" Paired with {shoes_color.title() + ' ' if shoes_color else ''}{shoes_name}, the ensemble elevates your posture and complements traditional grandeur."
-        else:
-            occ_fit = (
-                f"For a wedding occasion, the refined {top_color.title() + ' ' if top_color else ''}{top_name} combined with the sophisticated {bottom_color.title() + ' ' if bottom_color else ''}{bottom_name} creates a distinguished, celebratory aesthetic."
-            )
-            if shoes_item:
-                occ_fit += f" Finished with {shoes_name}, this set achieves formal harmony."
-
-        color_harm = (
-            f"The palette of {', '.join(color_palette) if color_palette else 'rich festive tones'} captures festive warmth. "
-            f"Luminous and harmonious hues reflect celebratory ambient lighting gracefully."
-        )
-        style_notes = "Elongated draping and sculpted proportions create a stately, regal silhouette that photographs exquisitely from every angle."
-        style_tips = "Pro-Tip: Pair with statement earrings or a classic necklace. Opt for a chic clutch and soft glam makeup to let the garments shine."
 
     elif occ_lower == "formal":
         headline = "Tailored Executive Poise 💼"
@@ -1805,7 +1907,9 @@ Return ONLY valid JSON matching this schema:
 def recommend_outfit(
     user_id: str,
     occasion: str,
-    style: str = ""
+    style: str = "",
+    variation: int = 0,
+    exclude_ids: str = ""
 ):
     clothes = list(
         db["wardrobe"].find({"user_id": user_id})
@@ -1817,10 +1921,19 @@ def recommend_outfit(
             "outfit": [],
             "occasion": occasion,
             "style": style or "Curated Chic",
+            "variation": 0,
+            "total_variations": 0,
+            "has_alternatives": False,
             "analysis": None
         }
 
+    # Auto-correct existing items for accurate categories
+    for clothing in clothes:
+        auto_correct_wardrobe_item(clothing)
+
     occasion_lower = occasion.lower()
+    style_lower = style.lower()
+    is_wedding_or_traditional = (occasion_lower == "wedding") or ("traditional" in style_lower)
 
     # Categorize wardrobe pieces into fashion roles
     tops = []
@@ -1842,120 +1955,235 @@ def recommend_outfit(
         elif role == "accessory":
             accessories.append(item)
 
-    candidates = []
-
-    def pick_best_footwear(base_items):
-        if not footwear:
-            return None
-        return max(
+    # Footwear filtering & ranking
+    if is_wedding_or_traditional:
+        # STRICT WEDDING RULE: Only heels, pumps, stilettos, wedges, juttis, mojaris, embellished sandals
+        allowed_fw = [
+            f for f in footwear
+            if any(w in f"{f.get('category','')} {f.get('item_name','')} {f.get('item_type','')}".lower()
+                   for w in ["heel", "stilettos", "stiletto", "pump", "wedge", "platform heel", "jutti", "mojari", "kolhapuri", "sandal", "aquazzura", "heels", "sandals"])
+            and not any(b in f"{f.get('category','')} {f.get('item_name','')} {f.get('item_type','')}".lower()
+                        for b in ["sneaker", "sneakers", "trainer", "running", "combat boot", "work boot", "flip-flop", "canvas"])
+        ]
+        sorted_footwear = sorted(
+            allowed_fw,
+            key=lambda f: score_item_for_occasion(f, occasion_lower),
+            reverse=True
+        )
+        f_choices = sorted_footwear[:3] if sorted_footwear else [None]
+    elif occasion_lower == "formal":
+        # STRICT FORMAL RULE: Only loafers, oxfords, pumps, formal heels, dress flats
+        allowed_fw = [
+            f for f in footwear
+            if any(w in f"{f.get('category','')} {f.get('item_name','')} {f.get('item_type','')}".lower()
+                   for w in ["loafer", "oxford", "derby", "pump", "heel", "dress shoe", "clean flat", "flats", "stilettos"])
+            and not any(b in f"{f.get('category','')} {f.get('item_name','')} {f.get('item_type','')}".lower()
+                        for b in ["sneaker", "sneakers", "trainer", "running", "combat boot", "flip-flop", "canvas", "crocs"])
+        ]
+        sorted_footwear = sorted(
+            allowed_fw if allowed_fw else footwear,
+            key=lambda f: score_item_for_occasion(f, occasion_lower),
+            reverse=True
+        )
+        f_choices = sorted_footwear[:3] if sorted_footwear else [None]
+    else:
+        sorted_footwear = sorted(
             footwear,
-            key=lambda f: score_item_for_occasion(f, occasion_lower) + sum(evaluate_color_pair(b.get("color"), f.get("color")) for b in base_items)
+            key=lambda f: score_item_for_occasion(f, occasion_lower),
+            reverse=True
         )
+        f_choices = sorted_footwear[:3] if sorted_footwear else [None]
 
-    def pick_best_accessory(base_items):
-        if not accessories:
-            return None
-        return max(
+    # Accessory filtering & ranking
+    if is_wedding_or_traditional:
+        # STRICT WEDDING RULE: Only royal jewelry, clutches, potlis
+        allowed_acc = [
+            a for a in accessories
+            if any(w in f"{a.get('category','')} {a.get('item_name','')} {a.get('item_type','')}".lower()
+                   for w in ["jewel", "necklace", "choker", "earring", "jhumka", "bangle", "bracelet", "ring", "tikka", "maang tikka", "pendant", "clutch", "potli", "evening bag", "jewelry", "clutches"])
+            and not any(b in f"{a.get('category','')} {a.get('item_name','')} {a.get('item_type','')}".lower()
+                        for b in ["hobo", "backpack", "gym", "canvas tote", "tote canvas", "crossbody nylon", "belt bag"])
+        ]
+        sorted_accessories = sorted(
+            allowed_acc,
+            key=lambda a: score_item_for_occasion(a, occasion_lower),
+            reverse=True
+        )
+        a_choices = sorted_accessories[:2] if sorted_accessories else [None]
+    else:
+        sorted_accessories = sorted(
             accessories,
-            key=lambda a: score_item_for_occasion(a, occasion_lower) + sum(evaluate_color_pair(b.get("color"), a.get("color")) for b in base_items)
+            key=lambda a: score_item_for_occasion(a, occasion_lower),
+            reverse=True
         )
+        a_choices = sorted_accessories[:2] if sorted_accessories else [None]
 
-    # 1. Separates Combinations (Top + Bottom + Footwear + Accessory)
+    # 1. Distinct Core Looks Dictionary: map core look key -> {core_items, score, type, color_ref}
+    core_looks = {}
+
+    # Separates: Top + Bottom
     for top in tops:
+        top_text = f"{top.get('category','')} {top.get('item_name','')} {top.get('item_type','')}".lower()
+        if is_wedding_or_traditional and any(w in top_text for w in ["t-shirt", "tshirt", "tee", "hoodie", "tank top", "casual shirt"]):
+            continue
+        if occasion_lower == "formal" and any(w in top_text for w in ["t-shirt", "tshirt", "tee", "crop top", "tank top", "hoodie", "sweatshirt", "graphic"]):
+            continue
+
         for bottom in bottoms:
+            bot_text = f"{bottom.get('category','')} {bottom.get('item_name','')} {bottom.get('item_type','')}".lower()
+            if is_wedding_or_traditional and any(w in bot_text for w in ["jean", "denim", "short", "cargo", "jogger", "sweatpant"]):
+                continue
+            if occasion_lower == "formal" and any(w in bot_text for w in ["jean", "denim", "short", "cargo", "jogger", "sweatpant"]):
+                continue
+
             base_score = (
                 score_item_for_occasion(top, occasion_lower)
                 + score_item_for_occasion(bottom, occasion_lower)
                 + evaluate_color_pair(top.get("color"), bottom.get("color"))
-                + 30  # High bonus for a complete Top + Bottom pair
+                + 30
             )
 
-            # Bonus for College, Casual, Formal, Travel
-            if occasion_lower in ["college", "casual", "formal", "travel"]:
-                base_score += 35
+            if occasion_lower in ["college", "casual", "travel"]:
+                base_score += 40
+            elif occasion_lower == "formal":
+                if any(w in top_text for w in ["formal", "button-down", "blazer", "suit"]) or any(w in bot_text for w in ["trouser", "slacks", "pleated"]):
+                    base_score += 65
 
-            chosen_set = [top, bottom]
-            current_score = base_score
+            key = (str(top.get("_id")), str(bottom.get("_id")))
+            core_looks[key] = {
+                "core_items": [top, bottom],
+                "score": base_score,
+                "type": "separates",
+                "color_ref": bottom.get("color") or top.get("color")
+            }
 
-            best_f = pick_best_footwear([top, bottom])
-            if best_f:
-                chosen_set.append(best_f)
-                current_score += (
-                    score_item_for_occasion(best_f, occasion_lower)
-                    + evaluate_color_pair(bottom.get("color"), best_f.get("color"))
-                    + 35  # Big bonus for coordinating footwear
-                )
-
-            best_a = pick_best_accessory(chosen_set)
-            if best_a:
-                chosen_set.append(best_a)
-                current_score += (
-                    score_item_for_occasion(best_a, occasion_lower)
-                    + 20  # Bonus for accessories
-                )
-
-            candidates.append({"items": chosen_set, "score": current_score, "type": "separates"})
-
-    # 2. One-Piece Combinations (Dress / Saree + Footwear + Accessory)
+    # One-Piece: Saree / Half Saree / Lehenga / Gown / Anarkali / Dress
     for piece in one_pieces:
-        base_score = score_item_for_occasion(piece, occasion_lower) + 25
+        p_text = f"{piece.get('category','')} {piece.get('item_name','')} {piece.get('item_type','')}".lower()
 
-        if occasion_lower in ["wedding", "party"]:
-            base_score += 45
+        # Reject casual short dresses for wedding
+        if is_wedding_or_traditional and any(w in p_text for w in ["short", "mini", "casual", "sundress", "t-shirt dress", "ruched tie-strap mini"]):
+            continue
 
-        chosen_set = [piece]
-        current_score = base_score
+        base_score = score_item_for_occasion(piece, occasion_lower) + 30
 
-        best_f = pick_best_footwear([piece])
+        if is_wedding_or_traditional:
+            if any(k in p_text for k in ["saree", "sari", "half saree", "lehenga", "anarkali", "gown", "ballgown", "evening gown"]):
+                base_score += 180  # Grand Indian wedding attire and luxury gowns reign supreme!
+            elif any(k in p_text for k in ["maxi", "floor"]):
+                base_score += 90
+        elif occasion_lower in ["party"]:
+            base_score += 55
+
+        key = (str(piece.get("_id")),)
+        core_looks[key] = {
+            "core_items": [piece],
+            "score": base_score,
+            "type": "one_piece",
+            "color_ref": piece.get("color")
+        }
+
+    # 2. For each distinct core look, match the SINGLE best footwear and accessory
+    distinct_candidates = []
+    for key, look in core_looks.items():
+        items = list(look["core_items"])
+        total_score = look["score"]
+        color_ref = look["color_ref"]
+
+        # Best footwear for this look
+        best_f = None
+        best_f_score = -9999
+        for f in f_choices:
+            if not f:
+                continue
+            f_score = (
+                score_item_for_occasion(f, occasion_lower)
+                + evaluate_color_pair(color_ref, f.get("color"))
+            )
+            if f_score > best_f_score:
+                best_f_score = f_score
+                best_f = f
         if best_f:
-            chosen_set.append(best_f)
-            current_score += (
-                score_item_for_occasion(best_f, occasion_lower)
-                + evaluate_color_pair(piece.get("color"), best_f.get("color"))
-                + 35
-            )
+            items.append(best_f)
+            total_score += best_f_score + 35
 
-        best_a = pick_best_accessory(chosen_set)
+        # Best accessory/jewelry for this look
+        best_a = None
+        best_a_score = -9999
+        for a in a_choices:
+            if not a:
+                continue
+            a_score = (
+                score_item_for_occasion(a, occasion_lower)
+                + evaluate_color_pair(color_ref, a.get("color"))
+            )
+            if a_score > best_a_score:
+                best_a_score = a_score
+                best_a = a
         if best_a:
-            chosen_set.append(best_a)
-            current_score += (
-                score_item_for_occasion(best_a, occasion_lower)
-                + 25
-            )
+            items.append(best_a)
+            total_score += best_a_score + 25
 
-        candidates.append({"items": chosen_set, "score": current_score, "type": "one_piece"})
+        distinct_candidates.append({
+            "items": items,
+            "score": total_score,
+            "type": look["type"],
+            "core_keys": set(key)
+        })
 
-    # 3. Graceful fallbacks if user wardrobe is missing certain pieces
-    if not candidates:
-        if tops:
+    # 3. Graceful fallbacks if user wardrobe is sparse
+    if not distinct_candidates:
+        if one_pieces:
+            best_op = max(one_pieces, key=lambda p: score_item_for_occasion(p, occasion_lower))
+            chosen = [best_op]
+            if f_choices and f_choices[0]:
+                chosen.append(f_choices[0])
+            if a_choices and a_choices[0]:
+                chosen.append(a_choices[0])
+            distinct_candidates.append({"items": chosen, "score": 25, "type": "one_piece", "core_keys": {str(best_op.get("_id"))}})
+        elif tops and not is_wedding_or_traditional:
             chosen_set = [max(tops, key=lambda t: score_item_for_occasion(t, occasion_lower))]
-            best_f = pick_best_footwear(chosen_set)
-            if best_f:
-                chosen_set.append(best_f)
-            candidates.append({"items": chosen_set, "score": 15, "type": "top_only"})
-        elif bottoms:
+            if sorted_footwear:
+                chosen_set.append(sorted_footwear[0])
+            distinct_candidates.append({"items": chosen_set, "score": 15, "type": "top_only", "core_keys": {str(chosen_set[0].get("_id"))}})
+        elif bottoms and not is_wedding_or_traditional:
             chosen_set = [max(bottoms, key=lambda b: score_item_for_occasion(b, occasion_lower))]
-            best_f = pick_best_footwear(chosen_set)
-            if best_f:
-                chosen_set.append(best_f)
-            candidates.append({"items": chosen_set, "score": 15, "type": "bottom_only"})
-        elif one_pieces:
-            candidates.append({"items": [one_pieces[0]], "score": 15, "type": "one_piece"})
+            if sorted_footwear:
+                chosen_set.append(sorted_footwear[0])
+            distinct_candidates.append({"items": chosen_set, "score": 15, "type": "bottom_only", "core_keys": {str(chosen_set[0].get("_id"))}})
         elif clothes:
-            candidates.append({"items": clothes[:3], "score": 5, "type": "raw"})
+            distinct_candidates.append({"items": [clothes[0]], "score": 5, "type": "raw", "core_keys": {str(clothes[0].get("_id"))}})
 
-    if not candidates:
+    if not distinct_candidates:
         return {
             "message": "Couldn't generate an outfit from your wardrobe. Try adding more tops, bottoms, or shoes!",
             "outfit": [],
             "occasion": occasion,
             "style": style or "Curated Chic",
+            "variation": 0,
+            "total_variations": 0,
+            "has_alternatives": False,
             "analysis": None
         }
 
-    # Select the winning outfit combination
-    best_candidate = max(candidates, key=lambda c: c["score"])
-    outfit = best_candidate["items"]
+    # Sort distinct core looks by overall score
+    distinct_candidates.sort(key=lambda c: c["score"], reverse=True)
+
+    # 4. If exclude_ids provided (when user clicks Re-generate because they dislike an outfit),
+    # prioritize looks whose core garments are NOT in the excluded outfit!
+    final_pool = distinct_candidates
+    if exclude_ids:
+        exclude_set = set(k.strip() for k in exclude_ids.split(",") if k.strip())
+        alt_pool = [
+            c for c in distinct_candidates
+            if not (c["core_keys"] & exclude_set)
+        ]
+        if alt_pool:
+            final_pool = alt_pool
+
+    total_variations = len(final_pool)
+    chosen_candidate = final_pool[variation % total_variations]
+    outfit = chosen_candidate["items"]
 
     # Assign distinct outfit_role tags and format _id
     for item in outfit:
@@ -1978,343 +2206,85 @@ def recommend_outfit(
     analysis = generate_stylist_analysis(outfit, occasion, style)
     color_palette = [item.get("color") for item in outfit if item.get("color")]
 
+    # Save recommendation to history in MongoDB
+    history_record = {
+        "user_id": user_id,
+        "occasion": occasion,
+        "style": style or "Curated Chic",
+        "variation": variation,
+        "total_variations": total_variations,
+        "headline": analysis.get("headline", f"Curated Look for {occasion} ♡"),
+        "analysis": analysis,
+        "color_palette": color_palette,
+        "outfit": [
+            {
+                "_id": str(i.get("_id")),
+                "item_name": i.get("item_name"),
+                "category": i.get("category"),
+                "color": i.get("color"),
+                "image": i.get("image"),
+                "outfit_role": i.get("outfit_role", "Piece")
+            }
+            for i in outfit
+        ],
+        "created_at": datetime.utcnow()
+    }
+    try:
+        db["recommendation_history"].insert_one(history_record)
+    except Exception as hist_err:
+        print("Recommendation history recording notice:", repr(hist_err))
+
     return {
         "message": analysis.get("headline", f"Curated Look for {occasion} ♡"),
         "occasion": occasion,
         "style": style or "Curated Chic",
+        "variation": variation,
+        "total_variations": total_variations,
+        "has_alternatives": total_variations > 1,
         "color_palette": color_palette,
         "analysis": analysis,
         "outfit": outfit
     }
 
 
-# =====================================================
-# CATALOG IMAGE HELPERS
-# =====================================================
-
-def create_catalog_image(
-    garment_rgba: Image.Image,
-    canvas_size=CATALOG_SIZE
-) -> Image.Image:
+@app.get("/stylist/history")
+def get_stylist_history(user_id: str, limit: int = 12):
     """
-    Converts an already-isolated garment (RGBA, transparent background)
-    into a clean catalog-style product image.
-
-    Preserves the original garment pixels. Only adds:
-    cropping, scaling, warm background, soft shadow.
+    Returns past recommended outfits for the user.
     """
-
-    garment = garment_rgba.convert("RGBA")
-
-    # -------------------------------------------------
-    # 1. Tight-crop to visible garment
-    # -------------------------------------------------
-
-    alpha = garment.getchannel("A").point(
-        lambda p: 0 if p < 15 else p
-    )
-
-    bbox = alpha.getbbox()
-
-    if bbox is None:
-        raise ValueError("Garment mask is empty.")
-
-    garment = garment.crop(bbox)
-
-    # Gentle edge smoothing
-    alpha = garment.getchannel("A").filter(
-        ImageFilter.GaussianBlur(radius=1.0)
-    )
-    garment.putalpha(alpha)
-
-    # -------------------------------------------------
-    # 2. Scale to fit canvas with padding
-    # -------------------------------------------------
-
-    cw, ch = canvas_size
-
-    scale = min(
-        cw * (1 - 2 * CATALOG_PAD) / garment.width,
-        ch * (1 - 2 * CATALOG_PAD) / garment.height
-    )
-
-    new_w = max(1, int(garment.width * scale))
-    new_h = max(1, int(garment.height * scale))
-
-    garment = garment.resize(
-        (new_w, new_h),
-        Image.Resampling.LANCZOS
-    )
-
-    # -------------------------------------------------
-    # 3. Warm catalog background
-    # -------------------------------------------------
-
-    canvas = Image.new(
-        "RGBA",
-        canvas_size,
-        CATALOG_BG + (255,)
-    )
-
-    # -------------------------------------------------
-    # 4. Soft shadow
-    # -------------------------------------------------
-
-    shadow_alpha = garment.getchannel("A").point(
-        lambda p: int(p * SHADOW_OPACITY)
-    )
-
-    shadow_layer = Image.new(
-        "RGBA",
-        garment.size,
-        (60, 55, 50, 255)
-    )
-    shadow_layer.putalpha(shadow_alpha)
-
-    shadow = shadow_layer.filter(
-        ImageFilter.GaussianBlur(radius=SHADOW_BLUR)
-    )
-
-    # -------------------------------------------------
-    # 5. Center: shadow first, garment on top
-    # -------------------------------------------------
-
-    x = (cw - new_w) // 2
-    y = (ch - new_h) // 2
-
-    canvas.alpha_composite(shadow, (x, y + SHADOW_OFFSET))
-    canvas.alpha_composite(garment, (x, y))
-
-    return canvas.convert("RGB")
-
-
-def save_catalog_web(img: Image.Image, output_prefix: str):
-    """
-    Saves catalog image as WebP (primary) + JPG (fallback),
-    plus a thumbnail pair.
-    Returns (webp_filename, jpg_filename).
-    """
-
-    webp_path = output_prefix + ".webp"
-    jpg_path = output_prefix + ".jpg"
-
-    img.save(webp_path, quality=82, method=6)
-    img.save(jpg_path, quality=85, optimize=True, progressive=True)
-
-    thumb = img.resize(
-        CATALOG_THUMB,
-        Image.Resampling.LANCZOS
-    )
-    thumb.save(output_prefix + "_thumb.webp", quality=82, method=6)
-    thumb.save(output_prefix + "_thumb.jpg", quality=85, optimize=True)
-
-    return (
-        os.path.basename(webp_path),
-        os.path.basename(jpg_path)
-    )
-def create_mflux_masked_image(
-    garment_rgba: Image.Image,
-    reconstruction_mask: Image.Image
-) -> Image.Image:
-    """
-    Creates the image supplied to FLUX Fill.
-
-    Visible garment pixels remain untouched.
-    The reconstruction area receives a soft continuation
-    of nearby garment pixels, giving FLUX real fabric/color
-    information instead of a flat black or solid-color region.
-    """
-
-    garment = garment_rgba.convert("RGB")
-
-    image_array = np.array(garment).copy()
-    original_array = image_array.copy()
-
-    mask_array = np.array(
-        reconstruction_mask.convert("L")
-    )
-
-    mask_binary = (
-        mask_array > 128
-    ).astype(np.uint8)
-
-    # Expand the visible garment information slightly inward
-    # so nearby fabric pixels can influence the missing region.
-    kernel = np.ones((31, 31), np.uint8)
-
-    nearby = cv2.dilate(
-        1 - mask_binary,
-        kernel,
-        iterations=1
-    )
-
-    # Blur the original garment to create a soft texture/color
-    # continuation without changing visible pixels.
-    blurred = cv2.GaussianBlur(
-        original_array,
-        (0, 0),
-        sigmaX=12,
-        sigmaY=12
-    )
-
-    # Only use the blurred approximation inside the reconstruction area.
-    image_array[
-        mask_binary > 0
-    ] = blurred[
-        mask_binary > 0
-    ]
-
-    # Restore every visible pixel exactly.
-    image_array[
-        mask_binary == 0
-    ] = original_array[
-        mask_binary == 0
-    ]
-
-    return Image.fromarray(
-        image_array,
-        mode="RGB"
-    )
-def create_reconstruction_mask(
-    garment_rgba: Image.Image,
-    category: str
-) -> Image.Image:
-    """
-    Creates a reconstruction mask for missing garment regions.
-
-    BLACK = preserve existing garment pixels
-    WHITE = region that may be reconstructed
-
-    Only transparent gaps that are enclosed horizontally by
-    visible garment pixels are marked for reconstruction.
-    """
-
-    garment_rgba = garment_rgba.convert("RGBA")
-
-    alpha = np.array(
-        garment_rgba.getchannel("A")
-    )
-
-    visible = (
-        alpha > 15
-    ).astype(np.uint8) * 255
-
-    ys, xs = np.where(
-        visible > 0
-    )
-
-    if len(xs) == 0:
-        return Image.new(
-            "L",
-            garment_rgba.size,
-            0
+    try:
+        records = list(
+            db["recommendation_history"]
+            .find({"user_id": user_id})
+            .sort("created_at", -1)
+            .limit(limit)
         )
+        for r in records:
+            r["_id"] = str(r["_id"])
+            if isinstance(r.get("created_at"), datetime):
+                r["created_at"] = r["created_at"].isoformat()
+        return {"history": records}
+    except Exception as e:
+        print("Error fetching stylist history:", repr(e))
+        return {"history": [], "error": str(e)}
 
-    top = int(ys.min())
-    bottom = int(ys.max())
-    left = int(xs.min())
-    right = int(xs.max())
 
-    height = bottom - top + 1
-    width = right - left + 1
-
-    reconstruction = np.zeros_like(
-        visible,
-        dtype=np.uint8
-    )
-
-    if category.lower() == "upper":
-
-        start_y = top + int(height * 0.15)
-        end_y = top + int(height * 0.75)
-
-        for y in range(
-            start_y,
-            min(end_y, bottom + 1)
-        ):
-
-            row = visible[y]
-
-            visible_x = np.where(
-                row > 0
-            )[0]
-
-            if len(visible_x) < 2:
-                continue
-
-            # Find continuous visible garment runs.
-            runs = []
-
-            run_start = int(visible_x[0])
-            previous_x = int(visible_x[0])
-
-            for x in visible_x[1:]:
-
-                x = int(x)
-
-                if x > previous_x + 1:
-                    runs.append(
-                        (
-                            run_start,
-                            previous_x
-                        )
-                    )
-
-                    run_start = x
-
-                previous_x = x
-
-            runs.append(
-                (
-                    run_start,
-                    previous_x
-                )
-            )
-
-            # Look for transparent gaps between
-            # two visible garment regions.
-            for i in range(len(runs) - 1):
-
-                first_end = runs[i][1]
-                second_start = runs[i + 1][0]
-
-                gap_start = first_end + 1
-                gap_end = second_start - 1
-
-                gap_width = (
-                    gap_end - gap_start + 1
-                )
-
-                if gap_width <= 0:
-                    continue
-
-                # Ignore tiny natural gaps.
-                if gap_width < max(
-                    8,
-                    int(width * 0.04)
-                ):
-                    continue
-
-                # Ignore gaps that are too large to
-                # confidently represent an occluded torso.
-                if gap_width > int(width * 0.60):
-                    continue
-
-                reconstruction[
-                    y,
-                    gap_start:gap_end + 1
-                ] = 255
-
-    # Never reconstruct pixels that are already
-    # visible garment pixels.
-    reconstruction[
-        visible > 0
-    ] = 0
-
-    return Image.fromarray(
-        reconstruction,
-        mode="L"
-    )
+@app.delete("/stylist/history/{history_id}")
+def delete_stylist_history(history_id: str, user_id: str = ""):
+    """
+    Deletes a specific past recommendation look from history.
+    """
+    try:
+        from bson import ObjectId
+        query = {"_id": ObjectId(history_id)}
+        if user_id:
+            query["user_id"] = user_id
+        result = db["recommendation_history"].delete_one(query)
+        if result.deleted_count == 0:
+            return {"message": "Record not found"}
+        return {"message": "Curated look removed from your history."}
+    except Exception as e:
+        return {"message": "Failed to remove look", "error": str(e)}
 
 # =====================================================
 # GARMENT COLOR DETECTION
@@ -3264,11 +3234,10 @@ async def extract_clothing(
                     str(catalog_error)
                 )
 
-                # Final fallback: raw extracted garment
-                final_image_url = (
-                    "/uploads/" + cropped_filename
-                )
-
+                # Save the extracted garment directly.
+                # No catalog conversion or reconstruction.
+                final_image_url = "/uploads/" + cropped_filename
+                print("FINAL GARMENT IMAGE:", final_image_url)
 
             # =============================================
             # COLLECT RESULT
