@@ -4,6 +4,27 @@ import "./App.css";
 import fashionImage from "./assets/fashion-ai.png";
 import homeIllustration from "./assets/home-illustration.png";
 
+import {
+  DoodleSparkles,
+  DoodleHanger,
+  DoodleBow,
+  DoodleHeart,
+  DoodleSunglasses,
+  DoodleRibbon,
+  DoodleFloral,
+  DoodlePerfume,
+  DoodleHeels,
+  DoodleDenim,
+  DoodleHandbag,
+  DoodleMirror,
+  DoodleLeaf,
+  DoodleSwatches,
+  DoodleQuoteSticker,
+  CategoryDoodleIcon,
+  FullSideDoodles,
+} from "./FashionDoodles";
+import { FASHION_WEB_IMAGES } from "./FashionImages";
+
 const API = "http://127.0.0.1:8000";
 
 function App() {
@@ -1124,10 +1145,16 @@ const handleCreateThriftListing = async () => {
   if (!isLoggedIn) {
     return (
       <div className="app-container">
-        <div className="page">
+        <div className="page auth-page">
 
-          {/* LEFT FASHION IMAGE WITH DOODLE QUOTE */}
+          {/* LEFT FASHION IMAGE WITH DOODLE QUOTE & STICKERS */}
           <section className="fashion-side">
+            {/* SUBTLE AMBIENT VECTOR ACCENTS */}
+            <div className="auth-doodle-decorations">
+              <DoodleSparkles className="auth-doodle-sparkle-top" size={32} color="#f4d38c" />
+              <DoodleFloral className="auth-doodle-floral-corner" size={42} />
+            </div>
+
             <div className="fashion-image-wrapper">
               <img
                 src={fashionImage}
@@ -1135,15 +1162,31 @@ const handleCreateThriftListing = async () => {
                 className="fashion-image"
               />
               
+              <div className="auth-doodle-quote-badge">
+                <DoodleQuoteSticker text="Style is personal power ♡" />
+              </div>
+
+              <div className="auth-doodle-script-caption">
+                Couture Curation • Personal AI Atelier ♡
+              </div>
             </div>
           </section>
 
           {/* RIGHT LOGIN SIDE */}
           <section className="login-side">
+            {/* AMBIENT FLOATING VECTOR ACCENTS */}
+            <div className="auth-login-side-decor">
+              <DoodleSparkles className="auth-amb-sparkle" size={28} color="#d4af37" />
+            </div>
+
             <div className="login-card">
               <div className="card-brand-header">
-                <div className="profile-icon" style={{ fontSize: "32px", marginBottom: "4px" }}>👒</div>
+                <div className="card-brand-emblem">
+                  <DoodleHanger size={28} stroke="var(--wine)" />
+                  <DoodleSparkles className="emblem-sparkle-icon" size={16} color="#d4af37" />
+                </div>
                 <div className="card-brand-title">AI Stylist</div>
+                <p className="card-brand-subtitle">Private Dressing Room & Atelier</p>
               </div>
 
               {!isRegistering ? (
@@ -1520,11 +1563,24 @@ const handleCreateThriftListing = async () => {
       
 {(activePage === "wardrobe" || activePage === "clothes") && (
         <div className="wardrobe-page">
-          {/* EDITORIAL HEADER (MATCHING FIGMA SCREEN 5) */}
-          <div className="section-editorial-header">
+          {/* FLOATING WARDROBE VECTOR DOODLE STICKERS (SIDE GUTTERS - DENSE SCROLL) */}
+          <div className="wardrobe-page-decorations page-side-doodles-container">
+            <FullSideDoodles page="wardrobe" />
+          </div>
+
+          <div className="wardrobe-content-container page-content-container">
+            {/* EDITORIAL HEADER (MATCHING FIGMA SCREEN 5) */}
+            <div className="section-editorial-header">
             <div>
-              <h1>My Wardrobe</h1>
-              <p>Your style collection, organized beautifully.</p>
+              <div className="header-badge-row">
+                <span className="curated-badge-pill">✨ CLOSET ATELIER</span>
+                <span className="wardrobe-count-pill">{wardrobeItems.length} Pieces</span>
+              </div>
+              <h1>My Wardrobe <span>♡</span></h1>
+              <p>Your style collection, organized beautifully for effortless curation.</p>
+              <div className="doodle-script-quote header-script-quote">
+                "Curate • Coordinate • Cherish ♡"
+              </div>
             </div>
             <button
               className="add-item-pill-btn"
@@ -1534,7 +1590,7 @@ const handleCreateThriftListing = async () => {
                 setWardrobeMessage("");
               }}
             >
-              {showWardrobeForm ? "✕ Close Form" : "+ Add Item"}
+              {showWardrobeForm ? "✕ Close Form" : "+ Add Garment"}
             </button>
           </div>
 
@@ -1580,7 +1636,10 @@ const handleCreateThriftListing = async () => {
                   </div>
                 ) : (
                   <div className="ai-upload-placeholder">
-                    <div className="ai-upload-icon-circle">👗</div>
+                    <div className="ai-upload-icon-circle-decorated">
+                      <DoodleHanger size={46} />
+                      <DoodleSparkles className="ai-dropzone-sparkle-img" size={24} color="#d4af37" />
+                    </div>
                     <h3>Select or Snap a Garment Photo</h3>
                     <p>Supported: JPG, PNG, WEBP from your closet or live camera</p>
 
@@ -1861,7 +1920,7 @@ const handleCreateThriftListing = async () => {
             </button>
           </div>
 
-          {/* CATEGORY TABS */}
+          {/* CATEGORY TABS WITH VECTOR DOODLE ICONS */}
           <div className="category-tabs">
             {[
               "All",
@@ -1886,7 +1945,8 @@ const handleCreateThriftListing = async () => {
                 }
                 onClick={() => setSelectedCategory(category)}
               >
-                {category}
+                <CategoryDoodleIcon category={category} size={18} />
+                <span>{category}</span>
               </button>
             ))}
           </div>
@@ -1995,12 +2055,36 @@ const handleCreateThriftListing = async () => {
               {wardrobeItems.filter((item) =>
                 categoryMatches(item, selectedCategory)
               ).length === 0 && (
-                <p className="clothes-message">
-                  No clothes in this category yet. Click "+ Add Item" above to add your first piece!
-                </p>
+                <div className="wardrobe-empty-state-card">
+                  <div className="empty-state-art-composition">
+                    <img
+                      src={FASHION_WEB_IMAGES.wardrobeEmpty}
+                      alt="Curated Wardrobe Collection"
+                      className="empty-art-photo"
+                    />
+                    <DoodleHanger className="empty-art-hanger-svg" size={54} />
+                    <DoodleSparkles className="empty-art-sparkles-svg" size={34} color="#d4af37" />
+                    <DoodleBow className="empty-art-bow-svg" size={42} />
+                  </div>
+                  <h3>Your {selectedCategory === "All" ? "Wardrobe" : selectedCategory} is Ready for Style! ♡</h3>
+                  <div className="doodle-script-quote empty-art-quote">
+                    "A curated wardrobe is a love letter to yourself"
+                  </div>
+                  <p className="empty-state-guide">
+                    Upload or snap garment photos — our Vision AI recognizes categories, shades, occasion and season automatically!
+                  </p>
+                  <button
+                    type="button"
+                    className="primary-pill-button empty-add-btn"
+                    onClick={() => setShowWardrobeForm(true)}
+                  >
+                    ✨ + Add Garment with AI
+                  </button>
+                </div>
               )}
             </>
           )}
+          </div>
         </div>
       )}
 
@@ -2009,7 +2093,13 @@ const handleCreateThriftListing = async () => {
       ================================================= */}
       {activePage === "edit" && editingItem && (
         <div className="edit-page">
-          <div className="edit-page-header">
+          {/* EDIT PAGE VECTOR DOODLES (SIDE GUTTERS - DENSE SCROLL) */}
+          <div className="edit-page-decorations page-side-doodles-container">
+            <FullSideDoodles page="edit" />
+          </div>
+
+          <div className="edit-content-container page-content-container">
+            <div className="edit-page-header">
             <button
               className="edit-back-button"
               type="button"
@@ -2023,11 +2113,42 @@ const handleCreateThriftListing = async () => {
           </div>
 
           <div className="edit-page-content">
-            <h1>Edit Clothing</h1>
+            <h1>Edit Clothing <span>♡</span></h1>
 
             <p className="edit-page-subtitle">
               Update the details of your clothing item
             </p>
+
+            <div className="edit-atelier-preview-card">
+              <div className="edit-preview-polaroid">
+                {editingItem.image ? (
+                  <img
+                    src={`${API}${editingItem.image}`}
+                    alt={editingItem.item_name}
+                    className="edit-polaroid-img"
+                  />
+                ) : (
+                  <div className="edit-polaroid-placeholder">
+                    <img
+                      src={FASHION_WEB_IMAGES.editAtelier}
+                      alt="Atelier Moodboard"
+                      className="edit-polaroid-img"
+                    />
+                  </div>
+                )}
+                <DoodleHeart className="edit-polaroid-pin" size={24} color="#d4af37" />
+              </div>
+              <div className="edit-atelier-note">
+                <span className="curated-badge-pill">✂️ ATELIER CUSTOMIZATION</span>
+                <h3>{editingItem.item_name || "Garment Details"}</h3>
+                <div className="doodle-script-quote" style={{ fontSize: "1.3rem", margin: "4px 0" }}>
+                  Refining your signature style silhouette ♡
+                </div>
+                <p style={{ fontSize: "13px", color: "var(--text-muted)" }}>
+                  {editingItem.category} • {editingItem.color} • {editingItem.occasion}
+                </p>
+              </div>
+            </div>
 
             <div className="edit-form">
               <div className="edit-form-group">
@@ -2178,6 +2299,7 @@ const handleCreateThriftListing = async () => {
               </div>
             </div>
           </div>
+          </div>
         </div>
       )}
 
@@ -2187,9 +2309,18 @@ const handleCreateThriftListing = async () => {
       ================================================= */}
       {activePage === "recommendation" && (
         <div className="recommendation-page">
-          <div className="section-editorial-header">
+          {/* FLOATING AMBIENT VECTOR DOODLES (SIDE GUTTERS - DENSE SCROLL) */}
+          <div className="recommendation-page-decorations page-side-doodles-container">
+            <FullSideDoodles page="recommendation" />
+          </div>
+
+          <div className="recommendation-content-container page-content-container">
+            <div className="section-editorial-header">
             <div>
-              <h1>AI Stylist Recommendations</h1>
+              <div className="header-badge-row">
+                <span className="curated-badge-pill">✨ COUTURE ALCHEMY</span>
+              </div>
+              <h1>AI Stylist Recommendations <span>♡</span></h1>
               <p>Effortlessly curated outfits directly from your wardrobe.</p>
             </div>
             <div className="doodle-script-quote" style={{ fontSize: "1.35rem" }}>
@@ -2267,6 +2398,10 @@ const handleCreateThriftListing = async () => {
                     </button>
                   </div>
 
+                  <div style={{ textAlign: "center", margin: "6px 0 12px" }}>
+                    <DoodleSwatches className="lookbook-swatches-decor" size={54} />
+                  </div>
+
                   <div className="outfit-pieces-summary-bar">
                     {recommendedOutfit.map((item) => (
                       <span key={item._id}>
@@ -2320,10 +2455,22 @@ const handleCreateThriftListing = async () => {
                   </div>
                 </>
               ) : (
-                <div className="lookbook-empty-state">
-                  <img src="/fashion-assets/dress.png" alt="Fashion Inspiration" />
-                  <p>
-                    Select an occasion (e.g. College, Wedding, Party) on the left to see your coordinated Top, Bottom & Footwear look!
+                <div className="lookbook-empty-moodboard">
+                  <div className="lookbook-moodboard-art">
+                    <img
+                      src={FASHION_WEB_IMAGES.recommendationMoodboard}
+                      alt="Stylist Lookbook Inspiration"
+                      className="lookbook-muse-photo"
+                    />
+                    <DoodleSparkles className="lookbook-sparkles-doodle" size={36} color="#d4af37" />
+                    <DoodleBow className="lookbook-bow-doodle" size={44} />
+                  </div>
+                  <h3>Your Daily Runway Awaits ♡</h3>
+                  <div className="doodle-script-quote" style={{ fontSize: "1.35rem", margin: "6px 0 10px" }}>
+                    "Curated specifically from pieces in your wardrobe"
+                  </div>
+                  <p className="lookbook-empty-sub">
+                    Select your occasion (e.g. College, Party, Wedding, Formal) and style vibe on the left, then click <strong>Generate Outfit Set</strong> to reveal your head-to-toe coordinated look!
                   </p>
                 </div>
               )}
@@ -2513,12 +2660,21 @@ const handleCreateThriftListing = async () => {
                 ))}
               </div>
             ) : (
-              <div className="history-empty-box">
-                <p style={{ margin: 0, fontStyle: "italic" }}>
-                  No previous recommendations yet. Generate an outfit above to start your personal fashion lookbook archive! ♡
-                </p>
+              <div className="history-empty-showcase">
+                <div className="history-empty-art">
+                  <img
+                    src={FASHION_WEB_IMAGES.archiveJournal}
+                    alt="Styling Journals"
+                    className="history-books-photo"
+                  />
+                  <DoodleHeart className="history-heart-img" size={32} color="#d98ca8" />
+                  <DoodleSparkles className="history-sparkle-img" size={28} color="#d4af37" />
+                </div>
+                <h4>Your Digital Style Archive is Ready ♡</h4>
+                <p>Generate looks above to start building your personalized fashion lookbook collection!</p>
               </div>
             )}
+          </div>
           </div>
         </div>
       )}
@@ -2529,13 +2685,47 @@ const handleCreateThriftListing = async () => {
       ================================================= */}
       {activePage === "thrift" && (
         <div className="thrift-page">
-          <div className="section-editorial-header">
+          {/* THRIFT VECTOR DOODLES (SIDE GUTTERS - DENSE SCROLL) */}
+          <div className="thrift-page-decorations page-side-doodles-container">
+            <FullSideDoodles page="thrift" />
+          </div>
+
+          <div className="thrift-content-container page-content-container">
+            <div className="section-editorial-header">
             <div>
-              <h1>Thrift Store</h1>
+              <div className="header-badge-row">
+                <span className="curated-badge-pill">🌿 CIRCULAR ATELIER</span>
+              </div>
+              <h1>Thrift Store <span>♡</span></h1>
               <p>Give pre-loved pieces a second story through circular fashion.</p>
             </div>
             <div className="doodle-script-quote" style={{ fontSize: "1.35rem" }}>
               Reduce • Reuse • Reimagine ♡
+            </div>
+          </div>
+
+          {/* CIRCULAR FASHION HERO ATELIER BANNER */}
+          <div className="thrift-atelier-banner">
+            <div className="thrift-banner-text">
+              <span className="curated-badge-pill">🌿 100% CIRCULAR FASHION ATELIER</span>
+              <h2>Give Loved Clothes a Second Story</h2>
+              <p>
+                Discover curated pre-loved garments and give your own closet gems a second journey. Circular fashion honors quality, reduces waste, and protects our planet.
+              </p>
+              <div className="thrift-banner-quote doodle-script-quote">
+                "Reduce • Re-wear • Reimagine ♡"
+              </div>
+            </div>
+            <div className="thrift-banner-art">
+              <img
+                src={FASHION_WEB_IMAGES.thriftBanner}
+                alt="Circular Sustainable Fashion"
+                className="thrift-banner-photo"
+              />
+              <DoodleHandbag className="thrift-banner-handbag" size={52} />
+              <DoodleDenim className="thrift-banner-jeans" size={48} />
+              <DoodleLeaf className="thrift-banner-leaf" size={40} />
+              <DoodleSparkles className="thrift-banner-sparkle" size={32} color="#d4af37" />
             </div>
           </div>
 
@@ -2636,15 +2826,30 @@ const handleCreateThriftListing = async () => {
               {thriftLoading ? (
                 <p className="clothes-message">Curating thrift pieces...</p>
               ) : thriftListings.length === 0 ? (
-                <div className="lookbook-empty-state">
-                  <p>No listings found matching your search. Be the first to list one!</p>
+                <div className="thrift-empty-state-showcase">
+                  <div className="thrift-empty-art">
+                    <img
+                      src={FASHION_WEB_IMAGES.thriftEmpty}
+                      alt="Vintage Thrift Boutique"
+                      className="thrift-empty-photo"
+                    />
+                    <DoodleSparkles className="thrift-empty-flowers" size={32} color="#d4af37" />
+                    <DoodleHeart className="thrift-empty-quote" size={34} color="#d98ca8" />
+                  </div>
+                  <h3>No Listings Found in this Category</h3>
+                  <div className="doodle-script-quote" style={{ fontSize: "1.3rem", margin: "6px 0 10px" }}>
+                    "Every timeless piece deserves another adventure ♡"
+                  </div>
+                  <p style={{ color: "var(--text-muted)", fontSize: "14px", maxWidth: "440px", margin: "0 auto" }}>
+                    Be the first to list a piece in this category for circular fashion lovers!
+                  </p>
                   <button
                     type="button"
-                    className="add-item-pill-btn"
-                    style={{ margin: "16px auto" }}
+                    className="primary-pill-button"
+                    style={{ width: "auto", margin: "18px auto 0", padding: "12px 28px" }}
                     onClick={() => setThriftPage("list")}
                   >
-                    + List an Item
+                    ✨ + Sell or Exchange an Item
                   </button>
                 </div>
               ) : (
@@ -2792,15 +2997,20 @@ const handleCreateThriftListing = async () => {
           {thriftPage === "saved" && (
             <div>
               {savedThriftListings.length === 0 ? (
-                <div className="lookbook-empty-state">
-                  <p>You haven't saved any thrift pieces yet. Tap "♡ Save Item" on any piece you love!</p>
+                <div className="thrift-saved-empty-showcase">
+                  <DoodleSunglasses className="thrift-saved-glasses" size={64} />
+                  <DoodleHeart className="thrift-saved-hearts" size={44} color="#d98ca8" />
+                  <h3>Your Pre-Loved Wishlist is Empty ♡</h3>
+                  <p style={{ color: "var(--text-muted)", fontSize: "14px", maxWidth: "440px", margin: "0 auto" }}>
+                    Browse listings and tap "♡ Save Item" on pieces you love to build your dream thrift wishlist!
+                  </p>
                   <button
                     type="button"
-                    className="add-item-pill-btn"
-                    style={{ margin: "16px auto" }}
+                    className="primary-pill-button"
+                    style={{ width: "auto", margin: "18px auto 0", padding: "12px 28px" }}
                     onClick={() => setThriftPage("browse")}
                   >
-                    ← Browse Listings
+                    ← Browse Thrift Collection
                   </button>
                 </div>
               ) : (
@@ -2838,6 +3048,7 @@ const handleCreateThriftListing = async () => {
               )}
             </div>
           )}
+          </div>
         </div>
       )}
 
@@ -2846,17 +3057,37 @@ const handleCreateThriftListing = async () => {
       ================================================= */}
       {activePage === "about" && (
         <div className="about-page">
-          {/* ATELIER EDITORIAL HERO */}
-          <div className="about-atelier-hero">
-            <span className="curated-badge-pill">✨ HAUTE INTELLIGENCE & CIRCULAR ATELIER</span>
-            <h1 className="about-hero-title">The Future of Personal Styling is Already in Your Closet</h1>
-            <p className="about-hero-subtitle">
-              Where multimodal computer vision meets high-fashion alchemy, mindful curation, and sustainable living.
-            </p>
+          {/* ABOUT US VECTOR DOODLES (SIDE GUTTERS - DENSE SCROLL) */}
+          <div className="about-page-decorations page-side-doodles-container">
+            <FullSideDoodles page="about" />
+          </div>
+
+          <div className="about-content-container page-content-container">
+            {/* ATELIER EDITORIAL HERO */}
+            <div className="about-atelier-hero">
+            <div>
+              <span className="curated-badge-pill">✨ HAUTE INTELLIGENCE & CIRCULAR ATELIER</span>
+              <h1 className="about-hero-title">The Future of Personal Styling is Already in Your Closet</h1>
+              <p className="about-hero-subtitle">
+                Where multimodal computer vision meets high-fashion alchemy, mindful curation, and sustainable living.
+              </p>
+            </div>
+            <div className="about-hero-art-showcase">
+              <img
+                src="/fashion-assets/girl.png"
+                alt="Anime Haute Couture Muse"
+                className="about-muse-photo"
+              />
+              <DoodleSparkles className="about-decor-sparkles" size={30} color="#d4af37" />
+              <div className="about-art-quote doodle-script-quote">
+                Where Vision AI meets Haute Couture ♡
+              </div>
+            </div>
           </div>
 
           {/* EDITORIAL MANIFESTO QUOTE PLAQUE */}
           <div className="about-manifesto-quote-plaque">
+            <DoodleFloral className="about-manifesto-corner-floral" size={60} />
             <span className="quote-mark-watermark">“</span>
             <blockquote>
               True elegance is not about acquiring endless garments. It is about understanding the geometry of silhouette, the harmony of shade, and breathing eternal runway life into the treasures you already possess.
@@ -2890,7 +3121,10 @@ const handleCreateThriftListing = async () => {
           {/* 3 CORE ATELIER PILLARS */}
           <div className="about-cards-strip">
             <div className="about-info-card">
-              <div className="action-icon-circle">💎</div>
+              <div className="about-pillar-icon-box">
+                <DoodleSwatches size={38} />
+                <DoodleSparkles className="about-pillar-sparkle" size={22} color="#d4af37" />
+              </div>
               <h2>Visionary Neural Wardrobe</h2>
               <p>
                 Advanced Gemini multimodal vision deciphers garment cuts, chromatic palettes, textile drapes, and seasonal weights instantly from photos.
@@ -2899,7 +3133,10 @@ const handleCreateThriftListing = async () => {
             </div>
 
             <div className="about-info-card">
-              <div className="action-icon-circle">🌿</div>
+              <div className="about-pillar-icon-box">
+                <DoodleDenim size={36} />
+                <DoodleLeaf className="about-pillar-leaf" size={24} />
+              </div>
               <h2>Circular Fashion Collective</h2>
               <p>
                 Breathe renewed life into pre-loved treasures. Our circular thrift community lets you sell and exchange timeless pieces without contributing to textile landfills.
@@ -2908,7 +3145,10 @@ const handleCreateThriftListing = async () => {
             </div>
 
             <div className="about-info-card">
-              <div className="action-icon-circle">🪞</div>
+              <div className="about-pillar-icon-box">
+                <DoodleMirror size={36} />
+                <DoodlePerfume className="about-pillar-perfume" size={26} />
+              </div>
               <h2>Private Dressing Atelier</h2>
               <p>
                 Personalized algorithmic pairing matrix cross-references your tops, bottoms, shoes, and jewelry for weddings, college, work, and evening galas.
@@ -2927,6 +3167,7 @@ const handleCreateThriftListing = async () => {
 
             <div className="steps-container">
               <div className="step-card">
+                <DoodleHanger size={36} className="about-step-asset-img" />
                 <span className="step-number">01</span>
                 <h3>Digital Archival</h3>
                 <p>
@@ -2935,6 +3176,7 @@ const handleCreateThriftListing = async () => {
               </div>
 
               <div className="step-card">
+                <DoodleSwatches size={36} className="about-step-asset-img" />
                 <span className="step-number">02</span>
                 <h3>Occasion & Vibe Prompting</h3>
                 <p>
@@ -2943,6 +3185,7 @@ const handleCreateThriftListing = async () => {
               </div>
 
               <div className="step-card">
+                <DoodleBow size={36} className="about-step-asset-img" />
                 <span className="step-number">03</span>
                 <h3>Algorithmic Runway Curations</h3>
                 <p>
@@ -2954,6 +3197,8 @@ const handleCreateThriftListing = async () => {
 
           {/* INTERACTIVE CTA BANNER */}
           <div className="about-cta-banner">
+            <DoodleSparkles className="about-cta-sparkle-decor" size={44} color="#d4af37" />
+            <DoodleBow className="about-cta-bow-decor" size={54} />
             <h2>Ready to Elevate Your Everyday Style?</h2>
             <p>Your wardrobe has dozens of hidden looks waiting to be discovered.</p>
             <div className="about-cta-buttons">
@@ -2977,6 +3222,7 @@ const handleCreateThriftListing = async () => {
               Crafted with passion for conscious style lovers worldwide ✦
             </span>
           </div>
+          </div>
         </div>
       )}
 
@@ -2986,6 +3232,8 @@ const handleCreateThriftListing = async () => {
       {cameraOpen && (
         <div className="camera-modal-overlay">
           <div className="camera-modal-box">
+            <DoodleFloral className="camera-modal-floral-corner" size={54} />
+            <DoodleSparkles className="camera-modal-sparkles" size={32} color="#d4af37" />
             <h2>Live Camera Booth 📷</h2>
             <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "16px" }}>
               Frame your outfit or clothing piece in good lighting
