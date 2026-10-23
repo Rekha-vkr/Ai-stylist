@@ -1,0 +1,39 @@
+# ==============================================================================
+# AI Stylist - Backend Python Dependencies
+# Compatible with Python 3.10, 3.11, 3.12, 3.13
+# Install using: pip install -r requirements.txt
+# ==============================================================================
+
+# Web Framework & API Server
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+python-multipart>=0.0.9
+pydantic>=2.7.0
+email-validator>=2.0.0
+
+# Database & Environment
+pymongo>=4.6.0
+certifi>=2024.2.2
+python-dotenv>=1.0.0
+
+# Machine Learning, Computer Vision & Clothing Segmentation
+torch>=2.2.0
+torchvision>=0.17.0
+transformers>=4.38.0
+open-clip-torch>=2.24.0
+huggingface-hub>=0.21.0
+opencv-python>=4.8.0
+pillow>=10.2.0
+pillow-heif>=0.15.0
+numpy>=1.24.0
+timm>=0.9.12
+accelerate>=0.27.0
+
+# Multimodal AI & Cloud APIs
+google-genai>=0.1.0
+requests>=2.31.0
+replicate>=0.25.0
+
+# Security & Authentication
+pwdlib[argon2]>=0.2.0
+argon2-cffi>=23.1.0
