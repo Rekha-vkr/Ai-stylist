@@ -1,19 +1,9 @@
-import React from "react";
-
 // ==========================================================================
 // CRYSTAL-CLEAR VECTOR FASHION DOODLES & ICONS (ZERO BLURRINESS)
 // ==========================================================================
 
 export const DoodleSparkles = ({ className = "", style = {}, size = 32, color = "#d4af37" }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 40 40"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size} viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Large 4-point sparkle star */}
     <path
       d="M20 2C20 12 28 20 38 20C28 20 20 28 20 38C20 28 12 20 2 20C12 20 20 12 20 2Z"
@@ -32,15 +22,7 @@ export const DoodleSparkles = ({ className = "", style = {}, size = 32, color = 
 );
 
 export const DoodleHanger = ({ className = "", style = {}, size = 50, stroke = "var(--wine, #732d4a)" }) => (
-  <svg
-    width={size}
-    height={size * 0.7}
-    viewBox="0 0 60 42"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.7} viewBox="0 0 60 42" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Hanger Hook */}
     <path
       d="M30 18C30 14 30 6 36 6C40 6 42 9 42 12C42 16 38 18 31 20"
@@ -65,15 +47,7 @@ export const DoodleHanger = ({ className = "", style = {}, size = 50, stroke = "
 );
 
 export const DoodleBow = ({ className = "", style = {}, size = 44, color = "#d98ca8" }) => (
-  <svg
-    width={size}
-    height={size * 0.75}
-    viewBox="0 0 50 38"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.75} viewBox="0 0 50 38" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Left loop */}
     <path
       d="M25 18C20 10 7 8 8 18C9 26 21 24 25 18Z"
@@ -107,15 +81,7 @@ export const DoodleBow = ({ className = "", style = {}, size = 44, color = "#d98
 );
 
 export const DoodleHeart = ({ className = "", style = {}, size = 32, color = "#d98ca8" }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 36 36"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path
       d="M18 31C18 31 5 22.5 5 13C5 7.5 9.5 4 14 4C16.8 4 18 6 18 6C18 6 19.2 4 22 4C26.5 4 31 7.5 31 13C31 22.5 18 31 18 31Z"
       stroke="var(--wine, #732d4a)"
@@ -136,15 +102,7 @@ export const DoodleHeart = ({ className = "", style = {}, size = 32, color = "#d
 );
 
 export const DoodleSunglasses = ({ className = "", style = {}, size = 50, stroke = "var(--wine, #732d4a)" }) => (
-  <svg
-    width={size}
-    height={size * 0.45}
-    viewBox="0 0 60 28"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.45} viewBox="0 0 60 28" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Bridge */}
     <path d="M26 12C28 10 32 10 34 12" stroke={stroke} strokeWidth="2.2" strokeLinecap="round" />
     {/* Left Frame (Cat-eye) */}
@@ -170,15 +128,7 @@ export const DoodleSunglasses = ({ className = "", style = {}, size = 50, stroke
 );
 
 export const DoodleRibbon = ({ className = "", style = {}, size = 55 }) => (
-  <svg
-    width={size}
-    height={size * 0.8}
-    viewBox="0 0 60 48"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.8} viewBox="0 0 60 48" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path
       d="M6 38C16 42 28 32 24 20C20 8 36 6 42 16C46 22 52 26 56 22"
       stroke="var(--wine, #732d4a)"
@@ -198,15 +148,7 @@ export const DoodleRibbon = ({ className = "", style = {}, size = 55 }) => (
 );
 
 export const DoodleFloral = ({ className = "", style = {}, size = 46 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 50 50"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size} viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Petals */}
     <ellipse cx="25" cy="15" rx="7" ry="11" fill="rgba(217, 140, 168, 0.35)" stroke="var(--wine, #732d4a)" strokeWidth="1.6" />
     <ellipse cx="25" cy="35" rx="7" ry="11" fill="rgba(217, 140, 168, 0.35)" stroke="var(--wine, #732d4a)" strokeWidth="1.6" />
@@ -219,15 +161,7 @@ export const DoodleFloral = ({ className = "", style = {}, size = 46 }) => (
 );
 
 export const DoodlePerfume = ({ className = "", style = {}, size = 42 }) => (
-  <svg
-    width={size}
-    height={size * 1.25}
-    viewBox="0 0 40 50"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.25} viewBox="0 0 40 50" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Spray nozzle */}
     <rect x="17" y="4" width="6" height="5" rx="1.5" fill="#d4af37" stroke="var(--wine, #732d4a)" strokeWidth="1.5" />
     <rect x="14" y="9" width="12" height="4" rx="1" fill="#f4d38c" stroke="var(--wine, #732d4a)" strokeWidth="1.5" />
@@ -254,15 +188,7 @@ export const DoodlePerfume = ({ className = "", style = {}, size = 42 }) => (
 );
 
 export const DoodleHeels = ({ className = "", style = {}, size = 44 }) => (
-  <svg
-    width={size}
-    height={size * 0.85}
-    viewBox="0 0 50 42"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.85} viewBox="0 0 50 42" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Stiletto heel */}
     <path d="M12 24L8 40H11L14 26" fill="var(--wine, #732d4a)" />
     {/* Sole curve and arch */}
@@ -280,15 +206,7 @@ export const DoodleHeels = ({ className = "", style = {}, size = 44 }) => (
 );
 
 export const DoodleDenim = ({ className = "", style = {}, size = 38 }) => (
-  <svg
-    width={size}
-    height={size * 1.1}
-    viewBox="0 0 40 44"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.1} viewBox="0 0 40 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Waistband */}
     <path d="M8 8H32V12H8V8Z" fill="#3b5998" stroke="var(--wine, #732d4a)" strokeWidth="1.6" />
     {/* Legs */}
@@ -307,15 +225,7 @@ export const DoodleDenim = ({ className = "", style = {}, size = 38 }) => (
 );
 
 export const DoodleHandbag = ({ className = "", style = {}, size = 42 }) => (
-  <svg
-    width={size}
-    height={size * 0.9}
-    viewBox="0 0 46 40"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.9} viewBox="0 0 46 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Handle arch */}
     <path
       d="M17 16C17 9 20 5 23 5C26 5 29 9 29 16"
@@ -345,15 +255,7 @@ export const DoodleHandbag = ({ className = "", style = {}, size = 42 }) => (
 );
 
 export const DoodleMirror = ({ className = "", style = {}, size = 42 }) => (
-  <svg
-    width={size}
-    height={size * 1.3}
-    viewBox="0 0 40 52"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.3} viewBox="0 0 40 52" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Oval Mirror */}
     <ellipse cx="20" cy="20" rx="15" ry="18" fill="rgba(235, 245, 255, 0.7)" stroke="#d4af37" strokeWidth="2.5" />
     <ellipse cx="20" cy="20" rx="12" ry="15" fill="none" stroke="rgba(217, 140, 168, 0.4)" strokeWidth="1" />
@@ -366,15 +268,7 @@ export const DoodleMirror = ({ className = "", style = {}, size = 42 }) => (
 );
 
 export const DoodleLeaf = ({ className = "", style = {}, size = 36 }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 36 36"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size} viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path
       d="M6 30C6 30 9 18 20 10C27 4 32 4 32 4C32 4 32 9 26 16C18 27 6 30 6 30Z"
       fill="rgba(120, 160, 120, 0.35)"
@@ -389,15 +283,7 @@ export const DoodleLeaf = ({ className = "", style = {}, size = 36 }) => (
 );
 
 export const DoodleSwatches = ({ className = "", style = {}, size = 48 }) => (
-  <svg
-    width={size}
-    height={size * 0.7}
-    viewBox="0 0 54 38"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.7} viewBox="0 0 54 38" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* 4 Fan Swatches */}
     <rect x="4" y="6" width="14" height="26" rx="2" fill="#732d4a" stroke="#ffffff" strokeWidth="1.5" transform="rotate(-15 4 6)" />
     <rect x="14" y="4" width="14" height="26" rx="2" fill="#d98ca8" stroke="#ffffff" strokeWidth="1.5" transform="rotate(-5 14 4)" />
@@ -467,15 +353,7 @@ export const CategoryDoodleIcon = ({ category, size = 18 }) => {
 // ==========================================================================
 
 export const DoodleDress = ({ className = "", style = {}, size = 52, color = "#d98ca8" }) => (
-  <svg
-    width={size}
-    height={size * 1.25}
-    viewBox="0 0 44 54"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.25} viewBox="0 0 44 54" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Straps & Bodice */}
     <path d="M16 4L17 14M28 4L27 14" stroke="var(--wine, #732d4a)" strokeWidth="1.8" strokeLinecap="round" />
     <path d="M15 14C19 16 25 16 29 14L30 24C27 25 17 25 14 24L15 14Z" fill={color} stroke="var(--wine, #732d4a)" strokeWidth="1.8" />
@@ -495,15 +373,7 @@ export const DoodleDress = ({ className = "", style = {}, size = 52, color = "#d
 );
 
 export const DoodleHat = ({ className = "", style = {}, size = 50, stroke = "var(--wine, #732d4a)" }) => (
-  <svg
-    width={size}
-    height={size * 0.55}
-    viewBox="0 0 54 30"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.55} viewBox="0 0 54 30" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Crown */}
     <path d="M17 18C17 9 20 5 27 5C34 5 37 9 37 18" fill="rgba(217, 140, 168, 0.3)" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
     {/* Hat Ribbon */}
@@ -515,15 +385,7 @@ export const DoodleHat = ({ className = "", style = {}, size = 50, stroke = "var
 );
 
 export const DoodleLipstick = ({ className = "", style = {}, size = 42 }) => (
-  <svg
-    width={size}
-    height={size * 1.3}
-    viewBox="0 0 32 42"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.3} viewBox="0 0 32 42" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Slanted bullet */}
     <path d="M11 16V8C11 8 13 4 19 6L21 16H11Z" fill="#c4335c" stroke="var(--wine, #732d4a)" strokeWidth="1.6" />
     <line x1="13" y1="10" x2="15" y2="15" stroke="#ffffff" strokeWidth="1.2" strokeLinecap="round" opacity="0.75" />
@@ -536,15 +398,7 @@ export const DoodleLipstick = ({ className = "", style = {}, size = 42 }) => (
 );
 
 export const DoodleJewelry = ({ className = "", style = {}, size = 46 }) => (
-  <svg
-    width={size}
-    height={size * 0.9}
-    viewBox="0 0 46 40"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.9} viewBox="0 0 46 40" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Chain */}
     <path d="M8 8C14 26 32 26 38 8" stroke="var(--wine, #732d4a)" strokeWidth="1.8" strokeLinecap="round" strokeDasharray="2 3" />
     {/* Diamond Pendant */}
@@ -555,15 +409,7 @@ export const DoodleJewelry = ({ className = "", style = {}, size = 46 }) => (
 );
 
 export const DoodleStar = ({ className = "", style = {}, size = 30, color = "#d4af37" }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path
       d="M16 2L19.5 11.5L29 12.5L22 19L24 29L16 23.5L8 29L10 19L3 12.5L12.5 11.5L16 2Z"
       fill={color}
@@ -575,15 +421,7 @@ export const DoodleStar = ({ className = "", style = {}, size = 30, color = "#d4
 );
 
 export const DoodleCoffee = ({ className = "", style = {}, size = 42 }) => (
-  <svg
-    width={size}
-    height={size * 1.2}
-    viewBox="0 0 36 44"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 1.2} viewBox="0 0 36 44" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Cup */}
     <path d="M8 12L10 38C10 40 12 41 14 41H22C24 41 26 40 26 38L28 12H8Z" fill="#ffffff" stroke="var(--wine, #732d4a)" strokeWidth="1.8" />
     {/* Sleeve */}
@@ -596,15 +434,7 @@ export const DoodleCoffee = ({ className = "", style = {}, size = 42 }) => (
 );
 
 export const DoodleCamera = ({ className = "", style = {}, size = 46 }) => (
-  <svg
-    width={size}
-    height={size * 0.8}
-    viewBox="0 0 46 36"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.8} viewBox="0 0 46 36" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     {/* Body */}
     <rect x="4" y="9" width="38" height="23" rx="5" fill="#fbf0f4" stroke="var(--wine, #732d4a)" strokeWidth="2" />
     {/* Top Prism */}
@@ -619,15 +449,7 @@ export const DoodleCamera = ({ className = "", style = {}, size = 46 }) => (
 );
 
 export const DoodleCrown = ({ className = "", style = {}, size = 44 }) => (
-  <svg
-    width={size}
-    height={size * 0.7}
-    viewBox="0 0 44 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.7} viewBox="0 0 44 32" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path
       d="M5 26L8 10L16 19L22 6L28 19L36 10L39 26H5Z"
       fill="rgba(244, 211, 140, 0.35)"
@@ -645,15 +467,7 @@ export const DoodleCrown = ({ className = "", style = {}, size = 44 }) => (
 );
 
 export const DoodleTape = ({ className = "", style = {}, size = 52, color = "#faecef" }) => (
-  <svg
-    width={size}
-    height={size * 0.35}
-    viewBox="0 0 60 22"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.35} viewBox="0 0 60 22" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path d="M3 3L6 19L57 19L54 3L3 3Z" fill={color} stroke="var(--border-light, #dcc3cd)" strokeWidth="1.4" strokeDasharray="3 2" />
     <line x1="12" y1="8" x2="20" y2="8" stroke="var(--rose, #d98ca8)" strokeWidth="1.2" strokeLinecap="round" />
     <line x1="26" y1="14" x2="36" y2="14" stroke="var(--rose, #d98ca8)" strokeWidth="1.2" strokeLinecap="round" />
@@ -662,15 +476,7 @@ export const DoodleTape = ({ className = "", style = {}, size = 52, color = "#fa
 );
 
 export const DoodlePin = ({ className = "", style = {}, size = 38 }) => (
-  <svg
-    width={size}
-    height={size * 0.5}
-    viewBox="0 0 44 22"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={`fashion-svg-doodle ${className}`}
-    style={style}
-  >
+  <svg width={size} height={size * 0.5} viewBox="0 0 44 22" fill="none" xmlns="http://www.w3.org/2000/svg" className={`fashion-svg-doodle ${className}`} style={style} >
     <path d="M4 14C4 8 10 4 16 4H36C40 4 42 7 42 10C42 13 40 16 36 16H8C5 16 4 15 4 14Z" stroke="#d4af37" strokeWidth="2" fill="none" strokeLinecap="round" />
     <rect x="2" y="10" width="8" height="8" rx="2" fill="var(--wine, #732d4a)" />
   </svg>
@@ -723,66 +529,90 @@ export const SideStickerCard = ({
 );
 
 // ==========================================================================
-// CURATED DESIGNER EDITORIAL VIGNETTES (SOPHISTICATED LUXURY FRONTEND)
+// DENSE FULL-PAGE SIDE-GUTTER TAPESTRY (ANIME GIRLS + ANIMATION CARDS + DOODLES)
 // ==========================================================================
 
 export const FullSideDoodles = ({ page = "wardrobe" }) => {
   if (page === "wardrobe") {
     return (
       <>
-        {/* LEFT SIDE: 2 CURATED EDITORIAL VIGNETTES */}
-        <div style={{ position: "absolute", top: "140px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-1.png"
-            alt="Street Chic Anime Muse"
-            tag="Street Chic ✦"
-            size={102}
-            animation="anim-anime-float"
-          />
-          <DoodleSparkles
-            className="page-side-doodle anim-pulse"
-            style={{ position: "absolute", top: "-15px", right: "-12px" }}
-            size={22}
-            color="#d4af37"
-          />
-        </div>
+        {/* LEFT SIDE GUTTER: ANIME GIRLS + ANIMATION STICKERS + DOODLES */}
+        <DoodleHanger className="page-side-doodle anim-float" style={{ top: "40px", left: "1.5%", transform: "rotate(8deg)" }} size={68} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "90px", left: "4.8%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Street Chic Anime Girl" tag="Street Chic ✦" size={106} animation="anim-anime-float" style={{ top: "140px", left: "1.2%" }} />
 
-        <div style={{ position: "absolute", top: "900px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-4.png"
-            alt="Atelier Knit Anime Muse"
-            tag="Atelier Knit ♡"
-            size={104}
-            animation="anim-anime-sway"
-          />
-        </div>
+        <DoodleCrown className="page-side-doodle anim-pulse" style={{ top: "350px", left: "4.8%", transform: "rotate(-10deg)" }} size={42} />
+        <DoodleDress className="page-side-doodle anim-drift" style={{ top: "405px", left: "1.4%", transform: "rotate(-5deg)" }} size={60} />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Magazine Cover" caption="Vogue Mood ♡" size={110} rotation={-6} animation="anim-anime-sway" style={{ top: "485px", left: "1.4%" }} />
 
-        {/* RIGHT SIDE: 2 CURATED EDITORIAL VIGNETTES */}
-        <div style={{ position: "absolute", top: "140px", right: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/magazine-cover.png"
-            alt="Vogue Magazine Polaroid"
-            caption="Vogue Mood ♡"
-            size={108}
-            rotation={5}
-            animation="anim-anime-sway"
-          />
-          <DoodleBow
-            className="page-side-doodle anim-drift"
-            style={{ position: "absolute", bottom: "-14px", left: "-10px" }}
-            size={36}
-          />
-        </div>
+        <DoodleSwatches className="page-side-doodle anim-float" style={{ top: "700px", left: "1.8%", transform: "rotate(-12deg)" }} size={54} />
+        <DoodleStar className="page-side-doodle anim-drift" style={{ top: "765px", left: "4.8%", transform: "rotate(14deg)" }} size={30} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-3.png" alt="Parisian Anime Girl" tag="Latte Chic ☕" size={105} animation="anim-anime-bob" style={{ top: "830px", left: "1.2%" }} />
 
-        <div style={{ position: "absolute", top: "900px", right: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/girl2.png"
-            alt="Summer Muse Anime Girl"
-            tag="Summer Muse ✨"
-            size={94}
-            animation="anim-anime-float"
-          />
-        </div>
+        <DoodleFloral className="page-side-doodle anim-float" style={{ top: "1050px", left: "1.5%", transform: "rotate(15deg)" }} size={56} />
+        <DoodleRibbon className="page-side-doodle anim-drift" style={{ top: "1115px", left: "4.2%", transform: "rotate(-10deg)" }} size={64} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Cozy Atelier Anime Girl" tag="Atelier Knit ♡" size={110} animation="anim-anime-float" style={{ top: "1190px", left: "1.4%" }} />
+
+        <DoodleHat className="page-side-doodle anim-drift" style={{ top: "1420px", left: "1.5%", transform: "rotate(-14deg)" }} size={52} />
+        <DoodleTape className="page-side-doodle anim-pulse" style={{ top: "1485px", left: "4.2%", transform: "rotate(8deg)" }} size={48} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Good Vibes Sticker Collage" caption="Aesthetic ♡" size={115} rotation={5} animation="anim-anime-sway" style={{ top: "1560px", left: "1.2%" }} />
+
+        <DoodleMirror className="page-side-doodle anim-float" style={{ top: "1780px", left: "1.8%", transform: "rotate(6deg)" }} size={58} />
+        <DoodlePin className="page-side-doodle anim-pulse" style={{ top: "1850px", left: "4.2%", transform: "rotate(10deg)" }} size={40} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-5.png" alt="Blossom Anime Girl" tag="Peony Muse 🌸" size={100} animation="anim-anime-bob" style={{ top: "1920px", left: "1.4%" }} />
+
+        <DoodleDress className="page-side-doodle anim-drift" style={{ top: "2140px", left: "1.4%", transform: "rotate(-8deg)" }} size={56} />
+        <DoodleFloral className="page-side-doodle anim-float" style={{ top: "2205px", left: "4.2%", transform: "rotate(12deg)" }} size={50} />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Palazzo Belle Anime Girl" tag="Sunhat Belle ✨" size={95} animation="anim-anime-sway" style={{ top: "2280px", left: "1.5%" }} />
+
+        <DoodleHanger className="page-side-doodle anim-drift" style={{ top: "2490px", left: "1.8%", transform: "rotate(6deg)" }} size={65} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "2560px", left: "4.5%" }} size={32} color="#f4d38c" />
+
+        {/* RIGHT SIDE GUTTER: ANIME GIRLS + ANIMATION STICKERS + DOODLES */}
+        <DoodleBow className="page-side-doodle anim-float" style={{ top: "40px", right: "1.8%", transform: "rotate(10deg)" }} size={52} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "90px", right: "4.5%" }} size={30} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Summer Elegance Anime Girl" tag="Summer Chic ✨" size={95} animation="anim-anime-sway" style={{ top: "140px", right: "1.5%" }} />
+
+        <DoodleLipstick className="page-side-doodle anim-drift" style={{ top: "350px", right: "4.8%", transform: "rotate(-8deg)" }} size={42} />
+        <DoodleHeels className="page-side-doodle anim-float" style={{ top: "405px", right: "1.5%", transform: "rotate(-8deg)" }} size={60} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-2.png" alt="Rose Couture Anime Girl" tag="Rose Couture ♡" size={105} animation="anim-anime-float" style={{ top: "485px", right: "1.2%" }} />
+
+        <DoodleSunglasses className="page-side-doodle anim-drift" style={{ top: "700px", right: "2%", transform: "rotate(12deg)" }} size={56} />
+        <DoodleJewelry className="page-side-doodle anim-pulse" style={{ top: "765px", right: "4.5%", transform: "rotate(12deg)" }} size={44} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Aesthetic Fashion Sticker" caption="Good Vibes ♡" size={115} rotation={-6} animation="anim-anime-sway" style={{ top: "830px", right: "1.4%" }} />
+
+        <DoodlePerfume className="page-side-doodle anim-drift" style={{ top: "1050px", right: "1.6%", transform: "rotate(-6deg)" }} size={50} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "1115px", right: "4.8%" }} size={36} color="#d98ca8" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Runway Icon Anime Girl" tag="Runway Star ✦" size={105} flip={true} animation="anim-anime-bob" style={{ top: "1190px", right: "1.2%" }} />
+
+        <DoodleCamera className="page-side-doodle anim-float" style={{ top: "1420px", right: "4.4%", transform: "rotate(8deg)" }} size={46} />
+        <DoodleHandbag className="page-side-doodle anim-drift" style={{ top: "1485px", right: "1.8%", transform: "rotate(-10deg)" }} size={54} />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Magazine Polaroid" caption="Vogue Cover ♡" size={110} rotation={6} animation="anim-anime-float" style={{ top: "1560px", right: "1.5%" }} />
+
+        <DoodleDenim className="page-side-doodle anim-float" style={{ top: "1780px", right: "1.5%", transform: "rotate(8deg)" }} size={54} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1850px", right: "4.6%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-3.png" alt="Trench Aura Anime Girl" tag="Trench Aura ✨" size={105} flip={true} animation="anim-anime-sway" style={{ top: "1920px", right: "1.2%" }} />
+
+        <DoodleLipstick className="page-side-doodle anim-float" style={{ top: "2140px", right: "4.6%", transform: "rotate(-12deg)" }} size={40} />
+        <DoodleHeels className="page-side-doodle anim-drift" style={{ top: "2205px", right: "1.5%", transform: "rotate(-8deg)" }} size={58} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Chic Sunday Anime Girl" tag="Chic Sunday ♡" size={110} animation="anim-anime-float" style={{ top: "2280px", right: "1.4%" }} />
+
+        <DoodlePerfume className="page-side-doodle anim-float" style={{ top: "2490px", right: "1.8%", transform: "rotate(6deg)" }} size={50} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "2560px", right: "4.5%" }} size={32} color="#f4d38c" />
       </>
     );
   }
@@ -790,61 +620,63 @@ export const FullSideDoodles = ({ page = "wardrobe" }) => {
   if (page === "recommendation") {
     return (
       <>
-        {/* LEFT SIDE: 2 CURATED STYLIST VIGNETTES */}
-        <div style={{ position: "absolute", top: "150px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-3.png"
-            alt="Parisian Chic Muse"
-            tag="Parisian Chic ☕"
-            size={104}
-            animation="anim-anime-float"
-          />
-          <DoodleSparkles
-            className="page-side-doodle anim-pulse"
-            style={{ position: "absolute", top: "-12px", right: "-10px" }}
-            size={22}
-            color="#d4af37"
-          />
-        </div>
+        {/* LEFT SIDE GUTTER: AI STYLIST ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodleMirror className="page-side-doodle anim-float" style={{ top: "45px", left: "1.8%", transform: "rotate(6deg)" }} size={64} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "95px", left: "4.8%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-3.png" alt="Parisian Chic Anime Girl" tag="Parisian Chic ☕" size={106} animation="anim-anime-float" style={{ top: "145px", left: "1.3%" }} />
 
-        <div style={{ position: "absolute", top: "880px", left: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/fashion-sticker.png"
-            alt="Couture Sticker"
-            caption="Couture Glow ♡"
-            size={108}
-            rotation={-5}
-            animation="anim-anime-sway"
-          />
-        </div>
+        <DoodleCrown className="page-side-doodle anim-pulse" style={{ top: "355px", left: "4.6%", transform: "rotate(-8deg)" }} size={40} />
+        <DoodleRibbon className="page-side-doodle anim-drift" style={{ top: "410px", left: "1.5%", transform: "rotate(-12deg)" }} size={66} />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Magazine" caption="Stylist Edit ♡" size={110} rotation={-7} animation="anim-anime-sway" style={{ top: "490px", left: "1.4%" }} />
 
-        {/* RIGHT SIDE: 2 CURATED STYLIST VIGNETTES */}
-        <div style={{ position: "absolute", top: "150px", right: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/magazine-cover.png"
-            alt="Vogue Style Magazine"
-            caption="Stylist Edit ♡"
-            size={108}
-            rotation={6}
-            animation="anim-anime-sway"
-          />
-        </div>
+        <DoodleDress className="page-side-doodle anim-float" style={{ top: "710px", left: "1.6%", transform: "rotate(-6deg)" }} size={58} />
+        <DoodleFloral className="page-side-doodle anim-drift" style={{ top: "770px", left: "4.5%", transform: "rotate(14deg)" }} size={54} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Stylist Muse Anime Girl" tag="Stylist Muse ♡" size={110} animation="anim-anime-bob" style={{ top: "840px", left: "1.3%" }} />
 
-        <div style={{ position: "absolute", top: "880px", right: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-2.png"
-            alt="Evening Gala Anime Muse"
-            tag="Evening Gala ♡"
-            size={102}
-            animation="anim-anime-float"
-          />
-          <DoodleHeart
-            className="page-side-doodle anim-heart"
-            style={{ position: "absolute", top: "-10px", left: "-8px" }}
-            size={24}
-            color="#d98ca8"
-          />
-        </div>
+        <DoodleSwatches className="page-side-doodle anim-float" style={{ top: "1060px", left: "1.8%", transform: "rotate(-8deg)" }} size={52} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1125px", left: "4.6%" }} size={30} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-5.png" alt="Floral Dream Anime Girl" tag="Floral Dream 🌸" size={100} animation="anim-anime-sway" style={{ top: "1190px", left: "1.4%" }} />
+
+        <DoodleHat className="page-side-doodle anim-drift" style={{ top: "1410px", left: "1.5%", transform: "rotate(-12deg)" }} size={50} />
+        <DoodleTape className="page-side-doodle anim-pulse" style={{ top: "1475px", left: "4.4%", transform: "rotate(8deg)" }} size={48} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Couture Sticker" caption="Couture Glow ♡" size={115} rotation={5} animation="anim-anime-float" style={{ top: "1540px", left: "1.2%" }} />
+
+        <DoodleCoffee className="page-side-doodle anim-float" style={{ top: "1720px", left: "1.8%", transform: "rotate(-5deg)" }} size={44} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "1780px", left: "4.5%" }} size={32} color="#f4d38c" />
+
+        {/* RIGHT SIDE GUTTER: AI STYLIST ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodlePerfume className="page-side-doodle anim-drift" style={{ top: "45px", right: "1.8%", transform: "rotate(-8deg)" }} size={54} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "95px", right: "4.8%" }} size={36} color="#d98ca8" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Runway Ready Anime Girl" tag="Runway Ready ✦" size={105} animation="anim-anime-bob" style={{ top: "145px", right: "1.3%" }} />
+
+        <DoodleJewelry className="page-side-doodle anim-pulse" style={{ top: "355px", right: "4.6%", transform: "rotate(10deg)" }} size={44} />
+        <DoodleSunglasses className="page-side-doodle anim-float" style={{ top: "410px", right: "1.5%", transform: "rotate(10deg)" }} size={58} />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Summer Muse Anime Girl" tag="Summer Muse ✨" size={95} animation="anim-anime-sway" style={{ top: "490px", right: "1.4%" }} />
+
+        <DoodleBow className="page-side-doodle anim-drift" style={{ top: "710px", right: "1.8%", transform: "rotate(-10deg)" }} size={50} />
+        <DoodleLipstick className="page-side-doodle anim-float" style={{ top: "770px", right: "4.5%", transform: "rotate(-8deg)" }} size={42} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Good Vibes Sticker" caption="Good Vibes ♡" size={115} rotation={6} animation="anim-anime-float" style={{ top: "840px", right: "1.4%" }} />
+
+        <DoodleHeels className="page-side-doodle anim-drift" style={{ top: "1060px", right: "1.5%", transform: "rotate(-6deg)" }} size={58} />
+        <DoodleHandbag className="page-side-doodle anim-float" style={{ top: "1125px", right: "4.6%", transform: "rotate(10deg)" }} size={52} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-2.png" alt="Evening Gala Anime Girl" tag="Evening Gala ♡" size={105} animation="anim-anime-float" style={{ top: "1190px", right: "1.3%" }} />
+
+        <DoodleCamera className="page-side-doodle anim-drift" style={{ top: "1410px", right: "1.8%", transform: "rotate(-8deg)" }} size={46} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "1475px", right: "4.4%" }} size={32} color="#d4af37" />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Style Magazine" caption="Vogue Style ♡" size={110} rotation={-6} animation="anim-anime-sway" style={{ top: "1540px", right: "1.4%" }} />
+
+        <DoodleDenim className="page-side-doodle anim-float" style={{ top: "1720px", right: "1.6%", transform: "rotate(8deg)" }} size={52} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "1780px", right: "4.2%" }} size={34} color="#d98ca8" />
       </>
     );
   }
@@ -852,59 +684,67 @@ export const FullSideDoodles = ({ page = "wardrobe" }) => {
   if (page === "thrift") {
     return (
       <>
-        {/* LEFT SIDE: 2 CURATED THRIFT VIGNETTES */}
-        <div style={{ position: "absolute", top: "150px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-4.png"
-            alt="Vintage Lover Muse"
-            tag="Vintage Lover ♡"
-            size={104}
-            animation="anim-anime-float"
-          />
-          <DoodleLeaf
-            className="page-side-doodle anim-drift"
-            style={{ position: "absolute", top: "-14px", right: "-8px" }}
-            size={32}
-          />
-        </div>
+        {/* LEFT SIDE GUTTER: THRIFT ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodleLeaf className="page-side-doodle anim-drift" style={{ top: "45px", left: "2.2%", transform: "rotate(-15deg)" }} size={56} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "95px", left: "4.8%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Vintage Lover Anime Girl" tag="Vintage Lover ♡" size={110} animation="anim-anime-float" style={{ top: "145px", left: "1.3%" }} />
 
-        <div style={{ position: "absolute", top: "900px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/girl2.png"
-            alt="Circular Belle Muse"
-            tag="Circular Belle 🌿"
-            size={94}
-            animation="anim-anime-sway"
-          />
-        </div>
+        <DoodleCrown className="page-side-doodle anim-pulse" style={{ top: "355px", left: "4.6%", transform: "rotate(8deg)" }} size={40} />
+        <DoodleDenim className="page-side-doodle anim-float" style={{ top: "410px", left: "1.8%", transform: "rotate(10deg)" }} size={58} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Thrift Treasures Sticker" caption="Pre-Loved Gem ♡" size={115} rotation={-6} animation="anim-anime-sway" style={{ top: "490px", left: "1.3%" }} />
 
-        {/* RIGHT SIDE: 2 CURATED THRIFT VIGNETTES */}
-        <div style={{ position: "absolute", top: "150px", right: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/magazine-cover.png"
-            alt="Vogue Circular"
-            caption="Pre-Loved Gem ♡"
-            size={108}
-            rotation={5}
-            animation="anim-anime-sway"
-          />
-          <DoodleSparkles
-            className="page-side-doodle anim-pulse"
-            style={{ position: "absolute", bottom: "-10px", left: "-8px" }}
-            size={22}
-            color="#d4af37"
-          />
-        </div>
+        <DoodleFloral className="page-side-doodle anim-drift" style={{ top: "710px", left: "2%", transform: "rotate(15deg)" }} size={52} />
+        <DoodleTape className="page-side-doodle anim-pulse" style={{ top: "770px", left: "4.5%", transform: "rotate(-6deg)" }} size={48} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Retro Chic Anime Girl" tag="Retro Chic ✦" size={105} animation="anim-anime-bob" style={{ top: "840px", left: "1.3%" }} />
 
-        <div style={{ position: "absolute", top: "900px", right: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-5.png"
-            alt="Eco Aesthetic Muse"
-            tag="Eco Aesthetic 🌸"
-            size={98}
-            animation="anim-anime-float"
-          />
-        </div>
+        <DoodleDress className="page-side-doodle anim-float" style={{ top: "1060px", left: "1.6%", transform: "rotate(-8deg)" }} size={56} />
+        <DoodleHat className="page-side-doodle anim-drift" style={{ top: "1125px", left: "4.5%", transform: "rotate(12deg)" }} size={50} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-3.png" alt="Slow Fashion Anime Girl" tag="Slow Fashion ☕" size={105} animation="anim-anime-sway" style={{ top: "1190px", left: "1.3%" }} />
+
+        <DoodleRibbon className="page-side-doodle anim-float" style={{ top: "1410px", left: "1.8%", transform: "rotate(-10deg)" }} size={62} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1475px", left: "4.6%" }} size={30} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Circular Belle Anime Girl" tag="Circular Belle 🌿" size={95} animation="anim-anime-float" style={{ top: "1540px", left: "1.4%" }} />
+
+        <DoodleCoffee className="page-side-doodle anim-drift" style={{ top: "1730px", left: "1.6%", transform: "rotate(6deg)" }} size={42} />
+        <DoodleSwatches className="page-side-doodle anim-float" style={{ top: "1800px", left: "4.4%", transform: "rotate(-10deg)" }} size={50} />
+        <DoodlePin className="page-side-doodle anim-pulse" style={{ top: "1890px", left: "2%", transform: "rotate(12deg)" }} size={38} />
+        <DoodleLeaf className="page-side-doodle anim-drift" style={{ top: "1980px", left: "4.2%", transform: "rotate(-18deg)" }} size={52} />
+
+        {/* RIGHT SIDE GUTTER: THRIFT ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodleHandbag className="page-side-doodle anim-drift" style={{ top: "45px", right: "2%", transform: "rotate(12deg)" }} size={56} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "95px", right: "4.8%" }} size={34} color="#d98ca8" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-5.png" alt="Eco Aesthetic Anime Girl" tag="Eco Aesthetic 🌸" size={100} animation="anim-anime-sway" style={{ top: "145px", right: "1.4%" }} />
+
+        <DoodleJewelry className="page-side-doodle anim-pulse" style={{ top: "355px", right: "4.5%", transform: "rotate(-10deg)" }} size={44} />
+        <DoodleHeels className="page-side-doodle anim-float" style={{ top: "410px", right: "1.8%", transform: "rotate(-10deg)" }} size={58} />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Circular" caption="Vogue Circular ♡" size={110} rotation={6} animation="anim-anime-float" style={{ top: "490px", right: "1.4%" }} />
+
+        <DoodleSunglasses className="page-side-doodle anim-drift" style={{ top: "710px", right: "2.2%", transform: "rotate(12deg)" }} size={54} />
+        <DoodleLipstick className="page-side-doodle anim-float" style={{ top: "770px", right: "4.6%", transform: "rotate(-8deg)" }} size={40} />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Vintage Muse Anime Girl" tag="Vintage Muse ✨" size={95} animation="anim-anime-bob" style={{ top: "840px", right: "1.4%" }} />
+
+        <DoodleCamera className="page-side-doodle anim-drift" style={{ top: "1060px", right: "1.8%", transform: "rotate(8deg)" }} size={46} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1125px", right: "4.6%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-2.png" alt="Pre-Loved Glam Anime Girl" tag="Pre-Loved Glam ♡" size={105} animation="anim-anime-float" style={{ top: "1190px", right: "1.3%" }} />
+
+        <DoodleBow className="page-side-doodle anim-float" style={{ top: "1410px", right: "2%", transform: "rotate(-10deg)" }} size={48} />
+        <DoodlePerfume className="page-side-doodle anim-drift" style={{ top: "1475px", right: "4.5%", transform: "rotate(8deg)" }} size={46} />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Good Vibes Sticker" caption="Good Vibes ♡" size={115} rotation={-5} animation="anim-anime-sway" style={{ top: "1540px", right: "1.4%" }} />
+
+        <DoodleHandbag className="page-side-doodle anim-float" style={{ top: "1730px", right: "4.4%", transform: "rotate(-10deg)" }} size={50} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "1800px", right: "2%" }} size={34} color="#d98ca8" />
+        <DoodleSunglasses className="page-side-doodle anim-drift" style={{ top: "1890px", right: "4.2%", transform: "rotate(14deg)" }} size={50} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "1980px", right: "1.8%" }} size={30} color="#d4af37" />
       </>
     );
   }
@@ -912,82 +752,91 @@ export const FullSideDoodles = ({ page = "wardrobe" }) => {
   if (page === "about") {
     return (
       <>
-        {/* LEFT SIDE: 2 RESTRAINED ATELIER VIGNETTES (COMPLEMENTS HERO ROSE MUSE) */}
-        <div style={{ position: "absolute", top: "220px", left: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/magazine-cover.png"
-            alt="Vogue Magazine Cover"
-            caption="Atelier Vision ♡"
-            size={105}
-            rotation={-5}
-            animation="anim-anime-sway"
-          />
-        </div>
+        {/* LEFT SIDE GUTTER: ABOUT US ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodleRibbon className="page-side-doodle anim-drift" style={{ top: "45px", left: "2%", transform: "rotate(-12deg)" }} size={68} />
+        <DoodleCrown className="page-side-doodle anim-pulse" style={{ top: "95px", left: "4.8%", transform: "rotate(8deg)" }} size={40} />
+        
+        <SideAnimeGirl src="/fashion-assets/girl.png" alt="Atelier Belle Anime Girl" tag="Atelier Muse ✨" size={95} animation="anim-anime-sway" style={{ top: "150px", left: "1.4%" }} />
 
-        <div style={{ position: "absolute", top: "1050px", left: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/girl2.png"
-            alt="Runway Muse Anime Character"
-            tag="Runway Muse ✨"
-            size={94}
-            animation="anim-anime-float"
-          />
-        </div>
+        <DoodleSwatches className="page-side-doodle anim-float" style={{ top: "365px", left: "1.8%", transform: "rotate(8deg)" }} size={54} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "420px", left: "4.5%" }} size={34} color="#d4af37" />
+        
+        <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Vogue Magazine Cover" caption="Haute Vision ♡" size={110} rotation={-6} animation="anim-anime-float" style={{ top: "500px", left: "1.4%" }} />
 
-        {/* RIGHT SIDE: 2 RESTRAINED ATELIER VIGNETTES */}
-        <div style={{ position: "absolute", top: "220px", right: "1.8%" }}>
-          <SideAnimeGirl
-            src="/fashion-assets/fashion-girl-1.png"
-            alt="Future Fashion Anime Muse"
-            tag="Future Fashion ✦"
-            size={100}
-            animation="anim-anime-float"
-          />
-          <DoodleSparkles
-            className="page-side-doodle anim-pulse"
-            style={{ position: "absolute", top: "-12px", right: "-8px" }}
-            size={22}
-            color="#d4af37"
-          />
-        </div>
+        <DoodleDress className="page-side-doodle anim-drift" style={{ top: "720px", left: "1.5%", transform: "rotate(-6deg)" }} size={58} />
+        <DoodleFloral className="page-side-doodle anim-float" style={{ top: "780px", left: "4.6%", transform: "rotate(15deg)" }} size={56} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-3.png" alt="Couture Vision Anime Girl" tag="Couture Vision ☕" size={105} animation="anim-anime-bob" style={{ top: "850px", left: "1.3%" }} />
 
-        <div style={{ position: "absolute", top: "1050px", right: "1.8%" }}>
-          <SideStickerCard
-            src="/fashion-assets/fashion-sticker.png"
-            alt="Good Vibes Sticker"
-            caption="Good Vibes ♡"
-            size={108}
-            rotation={5}
-            animation="anim-anime-sway"
-          />
-        </div>
+        <DoodleHat className="page-side-doodle anim-drift" style={{ top: "1070px", left: "1.8%", transform: "rotate(-14deg)" }} size={50} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1135px", left: "4.6%" }} size={32} color="#d4af37" />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-5.png" alt="Sustainable Art Anime Girl" tag="Sustainable Art 🌸" size={100} animation="anim-anime-float" style={{ top: "1200px", left: "1.4%" }} />
+
+        <DoodleMirror className="page-side-doodle anim-float" style={{ top: "1420px", left: "1.6%", transform: "rotate(6deg)" }} size={56} />
+        <DoodleTape className="page-side-doodle anim-pulse" style={{ top: "1485px", left: "4.4%", transform: "rotate(-8deg)" }} size={48} />
+        <DoodleCoffee className="page-side-doodle anim-drift" style={{ top: "1590px", left: "1.8%", transform: "rotate(6deg)" }} size={42} />
+        <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "1670px", left: "4.5%" }} size={32} color="#f4d38c" />
+
+        {/* RIGHT SIDE GUTTER: ABOUT US ANIME CHARACTERS + STICKERS + DOODLES */}
+        <DoodleBow className="page-side-doodle anim-float" style={{ top: "45px", right: "2.2%", transform: "rotate(10deg)" }} size={52} />
+        <DoodleLipstick className="page-side-doodle anim-drift" style={{ top: "95px", right: "4.8%", transform: "rotate(-10deg)" }} size={40} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Fashion Future Anime Girl" tag="Fashion Future ✦" size={105} animation="anim-anime-bob" style={{ top: "150px", right: "1.4%" }} />
+
+        <DoodlePerfume className="page-side-doodle anim-drift" style={{ top: "365px", right: "1.8%", transform: "rotate(-8deg)" }} size={54} />
+        <DoodleJewelry className="page-side-doodle anim-pulse" style={{ top: "420px", right: "4.6%", transform: "rotate(12deg)" }} size={42} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Creative Muse Anime Girl" tag="Creative Muse ♡" size={110} animation="anim-anime-sway" style={{ top: "500px", right: "1.4%" }} />
+
+        <DoodleSunglasses className="page-side-doodle anim-float" style={{ top: "720px", right: "2.2%", transform: "rotate(12deg)" }} size={56} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "780px", right: "4.8%" }} size={36} color="#d98ca8" />
+        
+        <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Good Vibes Sticker" caption="Good Vibes ♡" size={115} rotation={5} animation="anim-anime-float" style={{ top: "850px", right: "1.3%" }} />
+
+        <DoodleHeels className="page-side-doodle anim-drift" style={{ top: "1070px", right: "1.8%", transform: "rotate(-8deg)" }} size={58} />
+        <DoodleCamera className="page-side-doodle anim-float" style={{ top: "1135px", right: "4.5%", transform: "rotate(8deg)" }} size={44} />
+        
+        <SideAnimeGirl src="/fashion-assets/fashion-girl-2.png" alt="Runway Icon Anime Girl" tag="Runway Icon ✨" size={105} animation="anim-anime-float" style={{ top: "1200px", right: "1.3%" }} />
+
+        <DoodleHandbag className="page-side-doodle anim-drift" style={{ top: "1420px", right: "2%", transform: "rotate(-10deg)" }} size={52} />
+        <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "1485px", right: "4.6%" }} size={32} color="#d4af37" />
+        <DoodleBow className="page-side-doodle anim-float" style={{ top: "1590px", right: "1.8%", transform: "rotate(8deg)" }} size={48} />
+        <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "1670px", right: "4.2%" }} size={34} color="#d98ca8" />
       </>
     );
   }
 
-  // Edit Clothing Page: Minimal & Focused
+  // Edit Clothing Page
   return (
     <>
-      <div style={{ position: "absolute", top: "180px", left: "2%" }}>
-        <SideAnimeGirl
-          src="/fashion-assets/fashion-girl-4.png"
-          alt="Design Atelier Anime Muse"
-          tag="Design Atelier ♡"
-          size={100}
-          animation="anim-anime-float"
-        />
-      </div>
+      {/* LEFT SIDE GUTTER: EDIT CLOTHING */}
+      <DoodleSwatches className="page-side-doodle anim-drift" style={{ top: "50px", left: "2.2%", transform: "rotate(-10deg)" }} size={58} />
+      <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "100px", left: "4.8%" }} size={32} color="#d4af37" />
+      
+      <SideAnimeGirl src="/fashion-assets/fashion-girl-4.png" alt="Design Atelier Anime Girl" tag="Design Atelier ♡" size={106} animation="anim-anime-float" style={{ top: "150px", left: "1.6%" }} />
 
-      <div style={{ position: "absolute", top: "180px", right: "2%" }}>
-        <SideStickerCard
-          src="/fashion-assets/magazine-cover.png"
-          alt="Curated Magazine Cover"
-          caption="Curated Details ♡"
-          size={105}
-          rotation={5}
-          animation="anim-anime-sway"
-        />
-      </div>
+      <DoodleFloral className="page-side-doodle anim-float" style={{ top: "370px", left: "2%", transform: "rotate(14deg)" }} size={52} />
+      <DoodleDress className="page-side-doodle anim-drift" style={{ top: "430px", left: "4%", transform: "rotate(-6deg)" }} size={54} />
+      
+      <SideStickerCard src="/fashion-assets/fashion-sticker.png" alt="Atelier Details Sticker" caption="Details ♡" size={110} rotation={-5} animation="anim-anime-sway" style={{ top: "510px", left: "1.5%" }} />
+
+      <DoodleRibbon className="page-side-doodle anim-float" style={{ top: "720px", left: "2%", transform: "rotate(10deg)" }} size={58} />
+      <DoodleStar className="page-side-doodle anim-pulse" style={{ top: "780px", left: "4.2%" }} size={30} color="#d4af37" />
+
+      {/* RIGHT SIDE GUTTER: EDIT CLOTHING */}
+      <DoodleMirror className="page-side-doodle anim-float" style={{ top: "50px", right: "2.2%", transform: "rotate(8deg)" }} size={56} />
+      <DoodleHeart className="page-side-doodle anim-heart" style={{ top: "100px", right: "4.8%" }} size={34} color="#d98ca8" />
+      
+      <SideAnimeGirl src="/fashion-assets/fashion-girl-1.png" alt="Silhouette Fit Anime Girl" tag="Silhouette Fit ✦" size={105} animation="anim-anime-bob" style={{ top: "150px", right: "1.6%" }} />
+
+      <DoodleBow className="page-side-doodle anim-drift" style={{ top: "370px", right: "2.2%", transform: "rotate(-10deg)" }} size={46} />
+      <DoodleLipstick className="page-side-doodle anim-float" style={{ top: "430px", right: "4.5%", transform: "rotate(8deg)" }} size={38} />
+      
+      <SideStickerCard src="/fashion-assets/magazine-cover.png" alt="Curated Magazine Cover" caption="Curated ♡" size={110} rotation={6} animation="anim-anime-float" style={{ top: "510px", right: "1.5%" }} />
+
+      <DoodlePerfume className="page-side-doodle anim-drift" style={{ top: "720px", right: "2.2%", transform: "rotate(-8deg)" }} size={48} />
+      <DoodleSparkles className="page-side-doodle anim-pulse" style={{ top: "780px", right: "4.5%" }} size={30} color="#d4af37" />
     </>
   );
 };

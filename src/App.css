@@ -3,7 +3,7 @@
    Reference: Figma / High-End Fashion Stylist Mockup
    ========================================================================== */
 
-@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600;1,700&family=Sacramento&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400;1,600&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Dancing+Script:wght@600;700&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&family=Sacramento&display=swap");
 
 /* --------------------------------------------------------------------------
    1. DESIGN TOKENS & COLOR PALETTE
@@ -162,42 +162,6 @@ h1, h2, h3 {
   animation: gentleFloat 7s ease-in-out infinite;
 }
 
-.doodle-heart {
-  color: var(--rose);
-  display: inline-block;
-  font-size: 1.25rem;
-  animation: heartBeatPop 3s ease-in-out infinite;
-}
-
-.doodle-sparkle {
-  color: #d4af7a;
-  display: inline-block;
-  animation: sparklePulse 3s ease-in-out infinite;
-}
-
-/* Brushstroke underline for title */
-.script-title {
-  font-family: var(--font-serif);
-  font-style: italic;
-  font-weight: 600;
-  color: var(--wine);
-  position: relative;
-  display: inline-block;
-}
-
-.script-title::after {
-  content: "";
-  position: absolute;
-  left: -4%;
-  bottom: 2px;
-  width: 108%;
-  height: 12px;
-  background: rgba(244, 215, 225, 0.55);
-  border-radius: 6px;
-  z-index: -1;
-  transform: rotate(-1deg);
-}
-
 /* --------------------------------------------------------------------------
    5. NAVIGATION BAR
    -------------------------------------------------------------------------- */
@@ -210,13 +174,14 @@ h1, h2, h3 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 5%;
+  padding: 0 clamp(24px, 4vw, 56px);
   background: rgba(255, 250, 248, 0.92);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-bottom: 1px solid var(--border-light);
   box-shadow: 0 4px 20px rgba(115, 45, 74, 0.03);
   transition: all 0.3s ease;
+  box-sizing: border-box;
 }
 
 .nav-logo {
@@ -234,13 +199,6 @@ h1, h2, h3 {
 
 .nav-logo:hover {
   transform: scale(1.03);
-}
-
-.hanger-logo-icon {
-  width: 28px;
-  height: 28px;
-  color: var(--wine);
-  vertical-align: middle;
 }
 
 .nav-links {
@@ -281,28 +239,6 @@ h1, h2, h3 {
   font-size: 12px;
 }
 
-.nav-user-avatar {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  border: 2px solid var(--rose);
-  overflow: hidden;
-  background: var(--blush);
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(115, 45, 74, 0.1);
-  transition: transform 0.25s ease;
-}
-
-.nav-user-avatar:hover {
-  transform: scale(1.08);
-}
-
-.nav-user-avatar img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
 .logout-button {
   background: transparent;
   color: var(--wine);
@@ -332,393 +268,359 @@ h1, h2, h3 {
   user-select: none;
 }
 
-.page,
+/* ==========================================================================
+   6. HAUTE COUTURE ATELIER AUTH & LOGIN SYSTEM
+   Reference: Deep Burgundy Atelier with Glowing AI Interface & Glassmorphism
+   ========================================================================== */
+
+/* Auth Page Root */
+.auth-wrapper {
+  background-color: #170206;
+  min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
+}
+
 .auth-page {
   min-height: 100vh;
-  display: grid;
-  grid-template-columns: 1.15fr 0.85fr;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(248, 222, 230, 0.95) 0%, transparent 48%),
-    radial-gradient(circle at 85% 80%, rgba(254, 233, 240, 0.9) 0%, transparent 48%),
-    radial-gradient(circle at 50% 50%, #fff9f6 0%, #fbf0f4 65%, #f5e1ea 100%);
-  position: relative;
-  overflow: hidden;
-  animation: pageFadeIn 0.5s ease-out;
-}
-
-.fashion-side {
-  min-height: 100vh;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 5%;
-  background: radial-gradient(circle at 50% 50%, rgba(217, 140, 168, 0.14) 0%, transparent 70%);
-}
-
-/* Floating doodle stickers around fashion illustration */
-.auth-doodle-decorations {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-}
-
-.auth-doodle-sticker {
-  position: absolute;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 6px 14px rgba(115, 45, 74, 0.15));
-}
-
-.auth-doodle-sparkle-top {
-  top: 8%;
-  left: 10%;
-  width: 44px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.auth-doodle-bow {
-  top: 12%;
-  right: 12%;
-  width: 60px;
-  transform: rotate(12deg);
-  animation: gentleFloat 7s ease-in-out infinite;
-}
-
-.auth-doodle-floral-corner {
-  top: 0;
-  left: 0;
-  width: 140px;
-  opacity: 0.85;
-}
-
-.auth-doodle-ribbon {
-  bottom: 10%;
-  left: 6%;
-  width: 85px;
-  transform: rotate(-10deg);
-  animation: gentleFloat 9s ease-in-out infinite reverse;
-}
-
-.auth-doodle-floral-bottom {
-  bottom: 4%;
-  right: 8%;
-  width: 80px;
-  opacity: 0.8;
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.fashion-image-wrapper {
-  position: relative;
-  max-width: 480px;
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  z-index: 2;
-}
-
-.fashion-image {
-  max-height: 74vh;
-  width: auto;
-  max-width: 100%;
-  object-fit: contain;
-  border-radius: 28px;
-  filter: drop-shadow(0 20px 45px rgba(115, 45, 74, 0.22));
-  animation: gentleFloat 8s ease-in-out infinite;
-}
-
-.auth-doodle-quote-badge {
-  position: absolute;
-  top: -14px;
-  right: -16px;
-  z-index: 4;
-  animation: floatDrift 10s ease-in-out infinite;
-}
-
-/* Chic Doodle Sticker Badge */
-.doodle-sticker-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  padding: 8px 18px 8px 14px;
-  border-radius: 999px;
-  border: 1.5px solid var(--border-light);
-  box-shadow: 0 10px 25px rgba(115, 45, 74, 0.16);
-  transform: rotate(-3deg);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  user-select: none;
-}
-
-.doodle-sticker-badge:hover {
-  transform: rotate(0deg) scale(1.05);
-  box-shadow: 0 14px 32px rgba(115, 45, 74, 0.22);
-}
-
-.doodle-sticker-badge .sticker-pin {
-  font-size: 15px;
-}
-
-.doodle-sticker-badge .sticker-text {
-  font-family: var(--font-script);
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--wine);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.auth-quote-img {
-  width: 125px;
-  height: auto;
-  filter: drop-shadow(0 10px 20px rgba(115, 45, 74, 0.15));
-  transform: rotate(7deg);
-}
-
-.auth-doodle-script-caption {
-  margin-top: 18px;
-  font-family: var(--font-script);
-  font-size: 1.65rem;
-  font-weight: 700;
-  color: var(--wine);
-  text-align: center;
-  text-shadow: 0 1px 3px rgba(255, 255, 255, 0.85);
-  letter-spacing: 0.5px;
-}
-
-/* Right Login Side & Atmosphere */
-.login-side {
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 6%;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(340px, 440px);
+  background-color: #180307;
+  background-image:
+    radial-gradient(ellipse at 12% 18%, rgba(135, 25, 48, 0.45) 0%, transparent 45%),
+    radial-gradient(circle at 45% 55%, rgba(185, 30, 65, 0.22) 0%, transparent 52%),
+    radial-gradient(circle at 85% 25%, rgba(110, 15, 35, 0.45) 0%, transparent 55%),
+    linear-gradient(135deg, #22050c 0%, #170206 50%, #0d0103 100%);
   position: relative;
-  background: radial-gradient(circle at 60% 50%, rgba(217, 140, 168, 0.16) 0%, transparent 70%);
-}
-
-.auth-login-side-decor {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
   overflow: hidden;
+  align-items: center;
 }
 
-.auth-ambient-decor {
-  position: absolute;
-  pointer-events: none;
+/* --------------------------------------------------------------------------
+   LEFT COLUMN: FASHION HERO VISUAL & BRANDING
+   -------------------------------------------------------------------------- */
+.fashion-side {
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px 8px 20px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.fashion-hero-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  max-height: 98vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.fashion-hero-artwork {
+  width: 100%;
+  height: 100%;
+  max-height: 98vh;
+  object-fit: contain;
+  object-position: center;
+  filter: drop-shadow(0 20px 50px rgba(0, 0, 0, 0.8));
   user-select: none;
-  opacity: 0.5;
-  filter: drop-shadow(0 6px 14px rgba(115, 45, 74, 0.12));
+  pointer-events: none;
+  animation: gentleFadeIn 0.8s ease-out;
 }
 
-.auth-amb-sparkle {
-  top: 12%;
-  left: 8%;
-  width: 38px;
-  animation: sparklePulse 4s ease-in-out infinite;
+@keyframes gentleFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.auth-amb-perfume {
-  bottom: 8%;
-  left: 6%;
-  width: 95px;
-  transform: rotate(-8deg);
-  animation: floatDrift 12s ease-in-out infinite;
-}
-
-.auth-amb-heart {
-  top: 16%;
-  right: 10%;
-  width: 44px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.auth-amb-glasses {
-  bottom: 14%;
-  right: 8%;
-  width: 75px;
-  transform: rotate(12deg);
-  animation: gentleFloat 9s ease-in-out infinite;
+/* --------------------------------------------------------------------------
+   RIGHT COLUMN: ATELIER LOGIN CARD & CONTROLS
+   -------------------------------------------------------------------------- */
+.login-side {
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 48px 30px 16px;
+  position: relative;
+  z-index: 2;
 }
 
 .login-card {
   width: min(440px, 100%);
-  background: rgba(255, 255, 255, 0.94);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1.5px solid rgba(225, 185, 200, 0.55);
-  border-radius: 30px;
-  padding: 42px 36px;
-  box-shadow: 0 24px 60px rgba(115, 45, 74, 0.12), 0 0 0 1px rgba(255, 255, 255, 0.8) inset;
+  background: rgba(38, 8, 16, 0.65);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid rgba(255, 120, 155, 0.22);
+  border-radius: 26px;
+  padding: 44px 38px 36px;
+  box-shadow:
+    0 25px 60px rgba(0, 0, 0, 0.68),
+    0 0 35px rgba(180, 20, 60, 0.12),
+    inset 0 1px 1px rgba(255, 200, 220, 0.15);
   position: relative;
-  z-index: 1;
+  color: #ffffff;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  animation: cardSlideIn 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.login-card-bow-sticker {
+@keyframes cardSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Glowing Top-Right Bow Sticker */
+.login-card-bow-container {
   position: absolute;
-  top: -18px;
-  right: 28px;
-  width: 52px;
-  height: auto;
+  top: 16px;
+  right: 18px;
+  width: 44px;
+  height: 38px;
   pointer-events: none;
-  filter: drop-shadow(0 6px 12px rgba(115, 45, 74, 0.18));
-  transform: rotate(8deg);
+  z-index: 4;
 }
 
-.card-brand-header {
+.login-card-glow-bow {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 0 12px rgba(255, 120, 160, 0.75));
+  animation: glowPulse 4s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 10px rgba(255, 120, 160, 0.65));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 140, 180, 0.9));
+    transform: scale(1.03);
+  }
+}
+
+/* Card Brand Header */
+.atelier-card-header {
   text-align: center;
-  margin-bottom: 22px;
-}
-
-.card-brand-emblem {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #faecef 0%, #f7dbe3 100%);
-  border: 1px solid rgba(217, 140, 168, 0.4);
-  border-radius: 50%;
-  margin-bottom: 8px;
-  box-shadow: 0 6px 16px rgba(115, 45, 74, 0.12);
-}
-
-.emblem-sparkle-icon {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 20px;
-  height: 20px;
-  animation: sparklePulse 3s ease-in-out infinite;
-}
-
-.card-brand-title {
-  font-family: var(--font-logo);
-  font-size: 42px;
-  color: var(--wine);
-  font-weight: 700;
-  line-height: 1.05;
-}
-
-.card-brand-subtitle {
-  font-family: var(--font-sans);
-  font-size: 11.5px;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-top: 3px;
-}
-
-.login-card h1 {
-  font-size: 32px;
-  text-align: center;
-  margin-bottom: 6px;
-  font-style: italic;
-  font-weight: 600;
-}
-
-.login-card .subtitle {
-  text-align: center;
-  color: var(--text-muted);
-  font-size: 14px;
   margin-bottom: 26px;
 }
 
-/* Input Fields */
-.input-group {
+.atelier-hanger-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+  filter: drop-shadow(0 0 10px rgba(242, 141, 165, 0.6));
+}
+
+.atelier-card-title {
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif !important;
+  font-size: 34px !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.5px !important;
+  color: #faecef !important; /* Ivory Pink */
+  margin: 0 0 8px 0 !important;
+  line-height: 1.15 !important;
+  text-shadow: 0 0 24px rgba(250, 236, 239, 0.55), 0 2px 10px rgba(0, 0, 0, 0.5) !important;
+}
+
+.atelier-heart-glyph {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
+  font-weight: 300 !important;
+  font-size: 26px !important;
+  color: #f8cbd6 !important; /* Matching soft ivory pink */
+  vertical-align: middle !important;
+  margin-left: 5px !important;
+  text-shadow: 0 0 16px rgba(248, 203, 214, 0.7) !important;
+}
+
+.atelier-pill-tag {
+  font-family: "Cinzel", "DM Sans", -apple-system, sans-serif !important;
+  font-size: 11px !important;
+  font-weight: 600 !important;
+  letter-spacing: 2.4px !important;
+  text-transform: uppercase !important;
+  color: #d896a6 !important;
+  margin: 0 0 8px 0 !important;
+}
+
+.atelier-card-subtitle {
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif !important;
+  font-size: 13px !important;
+  color: #c9b1b8 !important;
+  margin: 0 !important;
+  font-weight: 400 !important;
+  line-height: 1.4 !important;
+}
+
+/* Form & Input Groups */
+.atelier-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.atelier-input-group {
   position: relative;
-  margin-bottom: 16px;
+  margin-bottom: 15px;
   display: flex;
   align-items: center;
-  background: #ffffff;
-  border: 1.5px solid var(--border-light);
+  background: rgba(26, 5, 11, 0.65);
+  border: 1px solid rgba(255, 120, 155, 0.22);
   border-radius: 14px;
-  padding: 4px 14px;
+  padding: 0 16px;
+  height: 48px;
   transition: all 0.25s ease;
 }
 
-.input-group:focus-within {
-  border-color: var(--wine);
-  box-shadow: 0 0 0 3px var(--blush-tint);
+.atelier-input-group:focus-within {
+  border-color: rgba(255, 145, 175, 0.65);
+  background: rgba(36, 7, 15, 0.85);
+  box-shadow: 0 0 18px rgba(220, 50, 95, 0.25), 0 0 0 1px rgba(255, 145, 175, 0.4);
 }
 
-.input-icon {
-  font-size: 16px;
-  color: var(--text-muted);
-  margin-right: 10px;
+.atelier-input-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #b58390;
+  margin-right: 12px;
+  flex-shrink: 0;
 }
 
-.input-group input {
-  width: 100%;
+.atelier-input-group input {
+  flex: 1;
   border: none;
   background: transparent;
-  padding: 10px 0;
+  padding: 12px 0;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 14px;
-  color: var(--text-dark);
+  color: #ffffff;
   outline: none;
 }
 
-.input-group input::placeholder {
-  color: var(--text-light);
+.atelier-input-group input::placeholder {
+  color: rgba(225, 185, 198, 0.45);
 }
 
-.password-toggle {
+.atelier-password-toggle {
   background: transparent;
-  color: var(--text-muted);
-  font-size: 16px;
-  padding: 4px 8px;
+  border: none;
+  color: #b58390;
+  cursor: pointer;
+  padding: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s ease;
 }
 
-.options {
+.atelier-password-toggle:hover {
+  color: #f7a2b7;
+}
+
+/* Options (Remember Me & Forgot Password) */
+.atelier-options-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 14px 0 22px;
+  margin: 4px 0 22px;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
-  color: var(--text-muted);
 }
 
-.options .remember {
-  display: flex;
+.atelier-remember-me {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 9px;
+  color: #c9b1b8;
   cursor: pointer;
+  user-select: none;
+  font-size: 13px;
 }
 
-.options .remember input[type="checkbox"] {
-  accent-color: var(--wine);
+.atelier-remember-me input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+  height: 0;
+  width: 0;
 }
 
-.options .forgot {
+.atelier-checkbox-custom {
+  width: 17px;
+  height: 17px;
+  background: rgba(28, 5, 11, 0.8);
+  border: 1px solid rgba(255, 120, 155, 0.35);
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.atelier-remember-me input[type="checkbox"]:checked ~ .atelier-checkbox-custom {
+  background: #a82448;
+  border-color: #f7a2b7;
+}
+
+.atelier-remember-me input[type="checkbox"]:checked ~ .atelier-checkbox-custom::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid #ffffff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.atelier-forgot-btn {
   background: transparent;
-  color: var(--wine);
+  border: none;
+  color: #e58ba0;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
   font-size: 13px;
   font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
 }
 
-.options .forgot:hover {
+.atelier-forgot-btn:hover {
+  color: #ffb5c6;
   text-decoration: underline;
 }
 
-/* Burgundy Pill Buttons */
-.login-button,
-.primary-pill-button {
+/* Primary Gradient Pill Button */
+.atelier-login-btn {
   width: 100%;
-  background: var(--wine);
+  height: 48px;
+  border-radius: 999px;
+  border: none;
+  background: linear-gradient(90deg, #a32244 0%, #c83257 50%, #871533 100%);
   color: #ffffff;
-  font-size: 15px;
-  font-weight: 600;
-  padding: 13px 24px;
-  border-radius: var(--radius-pill);
-  box-shadow: 0 8px 20px rgba(115, 45, 74, 0.22);
+  font-family: "Cormorant Garamond", "Playfair Display", Georgia, serif;
+  font-size: 17px;
+  font-style: italic;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(186, 37, 67, 0.4), 0 0 18px rgba(220, 50, 95, 0.2);
   transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
   display: flex;
   align-items: center;
@@ -726,76 +628,128 @@ h1, h2, h3 {
   gap: 8px;
 }
 
-.login-button:hover,
-.primary-pill-button:hover {
-  background: var(--wine-dark);
+.atelier-login-btn:hover {
+  background: linear-gradient(90deg, #b82a50 0%, #dc3e66 50%, #991a3b 100%);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(115, 45, 74, 0.3);
+  box-shadow: 0 12px 28px rgba(200, 45, 80, 0.5), 0 0 25px rgba(240, 70, 115, 0.35);
 }
 
-.login-button:active,
-.primary-pill-button:active {
+.atelier-login-btn:active {
   transform: scale(0.98);
 }
 
-/* Divider & Social */
-.divider {
+/* Divider & Social Sign-In */
+.atelier-divider {
   display: flex;
   align-items: center;
-  margin: 20px 0;
-  color: var(--text-light);
-  font-size: 13px;
+  margin: 22px 0 18px;
 }
 
-.divider span {
+.atelier-divider-line {
   flex: 1;
   height: 1px;
-  background: var(--border-light);
+  background: rgba(255, 120, 155, 0.16);
 }
 
-.divider p {
+.atelier-divider-text {
   padding: 0 14px;
+  font-size: 12px;
+  color: #a87e8a;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0;
 }
 
-.google-login-btn {
+.atelier-google-btn {
   width: 100%;
-  background: #ffffff;
-  color: var(--text-dark);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 11px 20px;
-  border-radius: var(--radius-pill);
-  border: 1.5px solid var(--border-light);
+  height: 46px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: rgba(28, 5, 11, 0.45);
+  border: 1px solid rgba(255, 120, 155, 0.22);
+  color: #ffffff;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 13.5px;
+  font-weight: 500;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 10px;
+  cursor: pointer;
   transition: all 0.25s ease;
 }
 
-.google-login-btn:hover {
-  border-color: var(--rose);
-  background: var(--bg-cream);
+.atelier-google-btn:hover {
+  background: rgba(45, 10, 20, 0.65);
+  border-color: rgba(255, 140, 180, 0.4);
   transform: translateY(-1px);
 }
 
-.signup-text {
+.atelier-footer-text {
   text-align: center;
-  margin-top: 22px;
+  margin-top: 24px;
   font-size: 13px;
-  color: var(--text-muted);
+  color: #b08d97;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-.signup-text button {
+.atelier-link-btn {
   background: transparent;
-  color: var(--wine);
-  font-weight: 700;
+  border: none;
+  color: #f28da5;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
   margin-left: 6px;
+  transition: color 0.2s ease;
+}
+
+.atelier-link-btn:hover {
+  color: #ffb3c5;
+  text-decoration: underline;
+}
+
+.atelier-message-badge {
+  text-align: center;
+  margin-top: 14px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  background: rgba(220, 50, 95, 0.18);
+  border: 1px solid rgba(255, 120, 155, 0.35);
+  color: #ffc4d2;
   font-size: 13px;
 }
 
-.signup-text button:hover {
-  text-decoration: underline;
+/* --------------------------------------------------------------------------
+   RESPONSIVE DESIGN (TABLET & MOBILE)
+   -------------------------------------------------------------------------- */
+@media (max-width: 680px) {
+  .auth-page {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    padding: 24px 16px;
+    gap: 20px;
+  }
+
+  .fashion-side {
+    height: auto;
+    padding: 16px 10px 0;
+  }
+
+  .fashion-hero-frame {
+    height: auto;
+    max-height: 42vh;
+  }
+
+  .fashion-hero-artwork {
+    max-height: 40vh;
+    object-position: center;
+  }
+
+  .login-side {
+    height: auto;
+    padding: 10px 10px 30px;
+  }
 }
 
 /* --------------------------------------------------------------------------
@@ -804,17 +758,19 @@ h1, h2, h3 {
 .dashboard-page {
   width: 100%;
   min-height: calc(100vh - 72px);
-  padding: 30px 5% 60px;
+  padding: 36px clamp(24px, 4vw, 56px) 60px;
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
   animation: pageFadeIn 0.5s ease-out;
+  box-sizing: border-box;
 }
 
 .dashboard-content {
   position: relative;
   z-index: 2;
-  max-width: 1100px;
+  max-width: 1540px;
+  width: 100%;
   margin: 0 auto;
 }
 
@@ -838,57 +794,39 @@ h1, h2, h3 {
 
 .fashion-dress {
   width: 400px;
-  max-width: 400px;
-  left: 0%;
+  max-width: 4000px;
+  left: -7%;
   top: 18%;
   opacity: 0.8;
   transform: rotate(-6deg);
   animation-delay: 0s;
 }
 .fashion-decoration {
-  width: 400px;
-  max-width: 400px;
-  left: 35%;
-  top: 55%;
+  width: 300px;
+  max-width: 2000px;
+  left: 40%;
+  top: 44%;
   opacity: 0.8;
   transform: rotate(-6deg);
   animation-delay: 0s;
 }
 
 .fashion-handbag {
-  width: 150px;
-  max-width: 200px;
-  right: 3%;
+  width: 15000px;
+  max-width: 20000px;
+  right: -1%;
   top: 24%;
   opacity: 0.82;
   transform: rotate(5deg);
   animation-delay: -2s;
 }
 .fashion-perfume {
-  width: 400px;
-  max-width: 400px;
-  right: 0%;
+  width: 500px;
+  max-width: 600px;
+  right: -10%;
   bottom: 0%;
   opacity: 0.8;
   animation-delay: -8s;
-}
-
-.fashion-jewellery {
-  width: 150px;
-  max-width: 200px;
-  left: 400px;
-  top: 0%;
-  opacity: 0.78;
-  animation-delay: -10s;
-}
-
-.fashion-hanger {
-  width: 150px;
-  max-width: 200px;
-  left: 80%;
-  top: 8%;
-  opacity: 0.75;
-  animation-delay: -3s;
 }
 
 .fashion-sparkle {
@@ -901,196 +839,25 @@ h1, h2, h3 {
 }
 
 @media (max-width: 900px) {
-  .fashion-dress, .fashion-handbag, .fashion-heels {
+  .fashion-dress, .fashion-handbag {
     width: 70px;
     opacity: 0.5;
   }
-  .fashion-sunglasses, .fashion-perfume, .fashion-jewellery, .fashion-hanger, .fashion-sparkle {
+  .fashion-perfume, .fashion-sparkle {
     display: none;
   }
-}
-
-
-/* Top Hero Grid */
-.hero-editorial-section {
-  max-width: 1220px;
-  margin: 0 auto 50px;
-  display: grid;
-  grid-template-columns: 0.9fr 1.2fr 0.9fr;
-  align-items: center;
-  gap: 20px;
-  position: relative;
-}
-
-/* Hero Left Model */
-.hero-model-wrap {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-model-wrap img {
-  max-height: 480px;
-  filter: drop-shadow(0 18px 30px rgba(115, 45, 74, 0.12));
-  animation: gentleFloat 7s ease-in-out infinite;
-}
-
-.hero-quote-left {
-  position: absolute;
-  top: 10%;
-  right: -25px;
-  z-index: 5;
-}
-
-/* Hero Center Content */
-.hero-center-content {
-  text-align: center;
-  padding: 0 15px;
-}
-
-.hero-center-content h1 {
-  font-size: clamp(38px, 4.2vw, 56px);
-  line-height: 1.15;
-  margin-bottom: 16px;
-  font-style: normal;
-}
-
-.hero-center-content h1 span {
-  font-style: italic;
-  color: var(--wine);
-  display: block;
-}
-
-.hero-center-content p {
-  color: var(--text-muted);
-  font-size: 16px;
-  max-width: 480px;
-  margin: 0 auto 26px;
-  line-height: 1.6;
-}
-
-.hero-cta-button {
-  background: var(--wine);
-  color: #ffffff;
-  font-size: 16px;
-  font-weight: 600;
-  padding: 14px 34px;
-  border-radius: var(--radius-pill);
-  box-shadow: 0 10px 24px rgba(115, 45, 74, 0.25);
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-}
-
-.hero-cta-button:hover {
-  background: var(--wine-dark);
-  transform: translateY(-3px) scale(1.02);
-  box-shadow: 0 14px 32px rgba(115, 45, 74, 0.32);
-}
-
-/* Hero Right Polaroid Collage */
-.hero-polaroids-wrap {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-
-.hero-polaroid-card {
-  width: 220px;
-  background: #ffffff;
-  padding: 10px 10px 14px;
-  border-radius: 12px;
-  box-shadow: 0 12px 28px rgba(115, 45, 74, 0.1);
-  border: 1px solid var(--border-light);
-  transition: transform 0.35s ease;
-}
-
-.hero-polaroid-card:hover {
-  transform: scale(1.04) rotate(0deg) !important;
-  z-index: 10;
-}
-
-.polaroid-1 { transform: rotate(5deg); margin-bottom: -30px; }
-.polaroid-2 { transform: rotate(-4deg); z-index: 2; }
-
-/* 5 Feature Cards Strip (Bottom of Screen 1) */
-.hero-features-strip {
-  max-width: 1200px;
-  margin: 0 auto 60px;
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 16px;
-}
-
-.hero-feature-card {
-  background: #ffffff;
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-card);
-  padding: 24px 18px;
-  text-align: center;
-  box-shadow: var(--shadow-soft);
-  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  cursor: pointer;
-}
-
-.hero-feature-card:hover {
-  transform: translateY(-6px);
-  box-shadow: var(--shadow-hover);
-  border-color: var(--rose);
-}
-
-.feature-icon-circle {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  background: var(--blush);
-  color: var(--wine);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 22px;
-  margin: 0 auto 14px;
-  transition: transform 0.3s ease;
-}
-
-.hero-feature-card:hover .feature-icon-circle {
-  transform: scale(1.1) rotate(4deg);
-}
-
-.hero-feature-card h3 {
-  font-family: var(--font-sans);
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text-plum);
-  margin-bottom: 6px;
-}
-
-.hero-feature-card p {
-  font-size: 12px;
-  color: var(--text-muted);
-  line-height: 1.45;
 }
 
 /* --------------------------------------------------------------------------
    8. WELCOME BACK SECTION (SCREEN 4)
    -------------------------------------------------------------------------- */
 .dashboard-welcome-header {
-  max-width: 1100px;
+  max-width: 1440px;
   margin: 0 auto 36px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   position: relative;
-}
-
-.welcome-decor-left {
-  width: 120px;
-  filter: drop-shadow(0 10px 20px rgba(115, 45, 74, 0.1));
-  animation: gentleFloat 7s ease-in-out infinite;
 }
 
 .welcome-center {
@@ -1124,11 +891,11 @@ h1, h2, h3 {
 }
 
 .dashboard-action-cards {
-  max-width: 1100px;
+  max-width: 1440px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
+  gap: 24px;
 }
 
 .dashboard-action-card {
@@ -1192,99 +959,6 @@ h1, h2, h3 {
   animation: pageFadeIn 0.5s ease-out;
 }
 
-.wardrobe-page .feature-content {
-  position: relative;
-  z-index: 2;
-}
-
-/* Background decoration layer in wardrobe - subtle, non-intrusive stickers */
-.wardrobe-decorations {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-}
-
-.wardrobe-doodle {
-  position: absolute;
-  display: block;
-  height: auto;
-  object-fit: contain;
-  pointer-events: none;
-  user-select: none;
-  filter: drop-shadow(0 8px 16px rgba(115, 45, 74, 0.08));
-  animation: gentleFloat 8s ease-in-out infinite;
-}
-
-.wd-mirror {
-  width: 125px;
-  max-width: 125px;
-  right: 2%;
-  top: 14%;
-  opacity: 0.75;
-  transform: rotate(4deg);
-}
-
-.wd-heels {
-  width: 110px;
-  max-width: 110px;
-  left: 2%;
-  bottom: 6%;
-  opacity: 0.8;
-  transform: rotate(-6deg);
-}
-
-.wd-girl {
-  width: 115px;
-  max-width: 115px;
-  right: 2%;
-  bottom: 4%;
-  opacity: 0.8;
-}
-
-.wd-flower {
-  width: 55px;
-  max-width: 55px;
-  left: 18%;
-  top: 10%;
-  opacity: 0.7;
-}
-
-.wd-frames {
-  width: 65px;
-  max-width: 65px;
-  right: 12%;
-  bottom: 15%;
-  opacity: 0.7;
-}
-
-.wd-decoration {
-  width: 65px;
-  max-width: 65px;
-  right: 8%;
-  top: 8%;
-  opacity: 0.7;
-}
-
-.wd-note {
-  width: 60px;
-  max-width: 60px;
-  left: 22%;
-  bottom: 8%;
-  opacity: 0.7;
-}
-
-@media (max-width: 900px) {
-  .wd-mirror, .wd-heels, .wd-girl {
-    width: 75px;
-    opacity: 0.5;
-  }
-  .wd-flower, .wd-frames, .wd-decoration, .wd-note {
-    display: none;
-  }
-}
-
 /* Feature Page Cards & Image Containment */
 .coming-soon-card {
   background: var(--bg-card-glass, rgba(255, 255, 255, 0.94));
@@ -1296,27 +970,6 @@ h1, h2, h3 {
   position: relative;
   z-index: 2;
 }
-
-.feature-page img:not(.wardrobe-doodle):not(.fashion-decor) {
-  max-width: 100%;
-  max-height: 260px;
-  width: auto;
-  height: auto;
-  object-fit: contain;
-  margin: 0 auto;
-}
-
-.captured-image {
-  max-width: 100% !important;
-  max-height: 280px !important;
-  width: auto !important;
-  height: auto !important;
-  object-fit: contain !important;
-  border-radius: 14px;
-  margin: 14px auto;
-  display: block;
-}
-
 
 .section-editorial-header {
   display: flex;
@@ -1354,6 +1007,44 @@ h1, h2, h3 {
   background: var(--wine-dark);
   transform: translateY(-2px);
   box-shadow: 0 10px 24px rgba(115, 45, 74, 0.28);
+}
+
+.primary-pill-button {
+  background: linear-gradient(135deg, var(--wine) 0%, #521c32 100%);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 12px 26px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 6px 18px rgba(115, 45, 74, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.2px;
+  text-decoration: none;
+}
+
+.primary-pill-button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8a3356 0%, var(--wine) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(115, 45, 74, 0.32);
+}
+
+.primary-pill-button:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.2);
+}
+
+.primary-pill-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Search & Filter Bar */
@@ -1408,44 +1099,47 @@ h1, h2, h3 {
 /* Category Tabs */
 .category-tabs {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 28px;
-  overflow-x: auto;
-  padding-bottom: 6px;
-  scrollbar-width: thin;
+  position: relative;
+  z-index: 1;
 }
 
 .category-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   background: #ffffff;
-  color: var(--text-muted);
-  border: 1px solid var(--border-light);
-  border-radius: var(--radius-pill);
+  color: var(--text-dark);
+  border: 1px solid var(--border-card);
   padding: 8px 18px;
-  font-size: 13px;
-  font-weight: 600;
+  border-radius: var(--radius-pill);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
   transition: all 0.25s ease;
-  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.04);
 }
 
 .category-tab:hover {
   border-color: var(--rose);
-  color: var(--wine);
-  background: var(--bg-cream);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(115, 45, 74, 0.08);
 }
 
 .category-tab.active {
   background: var(--wine);
   color: #ffffff;
   border-color: var(--wine);
-  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.2);
+  box-shadow: 0 6px 18px rgba(115, 45, 74, 0.24);
 }
 
 /* Wardrobe / Clothes Grid */
 .clothes-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
 }
 
 .clothes-card {
@@ -1515,21 +1209,6 @@ h1, h2, h3 {
   font-weight: 600;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
-}
-
-.card-action-heart {
-  position: absolute;
-  bottom: 16px;
-  right: 14px;
-  background: transparent;
-  color: var(--rose);
-  font-size: 18px;
-  transition: transform 0.25s ease;
-}
-
-.card-action-heart:hover {
-  transform: scale(1.25);
-  color: var(--wine);
 }
 
 .edit-clothing-button {
@@ -1663,40 +1342,6 @@ h1, h2, h3 {
   margin-bottom: 4px;
 }
 
-.thrift-price-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.thrift-price {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--wine);
-}
-
-.thrift-size-tag {
-  font-size: 12px;
-  color: var(--text-muted);
-}
-
-.thrift-view-btn {
-  width: 100%;
-  background: var(--wine);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 600;
-  padding: 9px 18px;
-  border-radius: var(--radius-pill);
-  transition: all 0.25s ease;
-}
-
-.thrift-view-btn:hover {
-  background: var(--wine-dark);
-  transform: translateY(-1px);
-}
-
 /* --------------------------------------------------------------------------
    11. AI OUTFIT RECOMMENDATION (SCREEN 7)
    -------------------------------------------------------------------------- */
@@ -1754,35 +1399,46 @@ h1, h2, h3 {
   outline: none;
 }
 
-.outfit-flatlay-display {
-  background: var(--bg-cream);
-  border-radius: 16px;
-  padding: 20px;
-  text-align: center;
-  position: relative;
-  min-height: 280px;
-  display: flex;
+.outfit-generate-btn {
+  width: 100%;
+  margin-top: 18px;
+  background: linear-gradient(135deg, var(--wine) 0%, #501b31 100%);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 14px 24px;
+  border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(115, 45, 74, 0.28), 0 2px 6px rgba(115, 45, 74, 0.15);
+  cursor: pointer;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.3px;
+  position: relative;
+  overflow: hidden;
 }
 
-.why-works-list {
-  list-style: none;
-  margin-bottom: 24px;
+.outfit-generate-btn:hover:not(:disabled) {
+  background: linear-gradient(135deg, #8e365b 0%, var(--wine) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 30px rgba(115, 45, 74, 0.38), 0 0 16px rgba(217, 140, 168, 0.35);
 }
 
-.why-works-list li {
-  font-size: 14px;
-  color: var(--text-dark);
-  margin-bottom: 12px;
-  display: flex;
-  align-items: center;
-  gap: 10px;
+.outfit-generate-btn:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.2);
 }
 
-.check-pink {
-  color: var(--wine);
-  font-weight: 700;
+.outfit-generate-btn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background: linear-gradient(135deg, #7c4458 0%, #5e2a3f 100%);
 }
 
 /* --------------------------------------------------------------------------
@@ -2087,8 +1743,69 @@ h1, h2, h3 {
   display: flex;
   gap: 16px;
   justify-content: center;
+  align-items: center;
   margin-bottom: 20px;
   flex-wrap: wrap;
+}
+
+.about-cta-buttons .cta-explore-wardrobe-btn {
+  background: #ffffff;
+  color: var(--wine);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22), 0 0 12px rgba(255, 255, 255, 0.35);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.2px;
+}
+
+.about-cta-buttons .cta-explore-wardrobe-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: #fff3f6;
+  color: var(--wine-dark);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28), 0 0 20px rgba(255, 255, 255, 0.55);
+}
+
+.about-cta-buttons .cta-explore-wardrobe-btn:active {
+  transform: translateY(0);
+}
+
+.about-cta-buttons .cta-styled-occasion-btn {
+  background: #ffffff;
+  color: var(--wine);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 700;
+  padding: 13px 28px;
+  border-radius: var(--radius-pill);
+  border: 1.5px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.2px;
+}
+
+.about-cta-buttons .cta-styled-occasion-btn:hover {
+  transform: translateY(-2px) scale(1.02);
+  background: #fff3f6;
+  color: var(--wine-dark);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.28);
+}
+
+.about-cta-buttons .cta-styled-occasion-btn:active {
+  transform: translateY(0);
 }
 
 .about-craft-signature {
@@ -2279,8 +1996,8 @@ h1, h2, h3 {
 
 .thrift-listings-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 22px;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 24px;
 }
 
 .thrift-card-badge {
@@ -2406,17 +2123,50 @@ h1, h2, h3 {
   box-shadow: 0 0 0 4px var(--blush-tint);
 }
 
+.thrift-publish-btn,
 .thrift-sell-card .primary-pill-button {
-  padding: 15px 40px;
-  font-size: 16px;
+  background: linear-gradient(135deg, var(--wine) 0%, #521c32 100%);
+  color: #ffffff;
+  font-family: var(--font-sans);
+  font-size: 15px;
   font-weight: 700;
+  padding: 14px 34px;
   border-radius: var(--radius-pill);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 24px rgba(115, 45, 74, 0.28), 0 2px 6px rgba(115, 45, 74, 0.14);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  letter-spacing: 0.3px;
+}
+
+.thrift-publish-btn:hover,
+.thrift-sell-card .primary-pill-button:hover {
+  background: linear-gradient(135deg, #8c365a 0%, var(--wine) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px rgba(115, 45, 74, 0.36), 0 0 14px rgba(217, 140, 168, 0.25);
+}
+
+.thrift-publish-btn:active,
+.thrift-sell-card .primary-pill-button:active {
+  transform: translateY(0);
+  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.2);
 }
 
 .thrift-sell-card .edit-cancel-button {
-  padding: 15px 30px;
+  padding: 14px 30px;
   font-size: 15px;
+  font-weight: 600;
   border-radius: var(--radius-pill);
+  border: 1.5px solid var(--border-light);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.25s ease;
 }
 
 /* --------------------------------------------------------------------------
@@ -2520,23 +2270,6 @@ h1, h2, h3 {
 
 .ai-upload-file-label:hover {
   background: var(--wine-dark);
-  transform: translateY(-2px);
-}
-
-.ai-camera-snap-btn {
-  background: #ffffff;
-  color: var(--wine);
-  border: 1.5px solid var(--wine);
-  padding: 13px 24px;
-  border-radius: var(--radius-pill);
-  font-size: 15px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-
-.ai-camera-snap-btn:hover {
-  background: var(--blush);
   transform: translateY(-2px);
 }
 
@@ -2801,36 +2534,6 @@ h1, h2, h3 {
   font-size: 11px;
   color: var(--text-muted);
   margin-bottom: 4px;
-}
-
-.lookbook-empty-state {
-  text-align: center;
-  padding: 30px 15px;
-}
-
-.lookbook-empty-state img {
-  max-width: 180px;
-  height: auto;
-  margin: 0 auto 16px;
-  filter: drop-shadow(0 10px 18px rgba(115, 45, 74, 0.08));
-  animation: gentleFloat 7s ease-in-out infinite;
-}
-
-.lookbook-empty-state p {
-  font-size: 14px;
-  color: var(--text-muted);
-  font-style: italic;
-}
-
-.ai-reasoning-card {
-  background: var(--rose-soft);
-  border: 1px solid rgba(217, 140, 168, 0.4);
-  border-radius: 14px;
-  padding: 16px;
-  margin-top: 18px;
-  font-size: 13px;
-  color: var(--text-plum);
-  line-height: 1.5;
 }
 
 /* Multi-piece outfit card role pills and image wrap */
@@ -3267,94 +2970,6 @@ h1, h2, h3 {
   font-size: 14px;
 }
 
-/* --------------------------------------------------------------------------
-   CAMERA MODAL (PHOTO BOOTH)
-   -------------------------------------------------------------------------- */
-.camera-modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(58, 26, 39, 0.6);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  animation: pageFadeIn 0.3s ease-out;
-}
-
-.camera-modal-box {
-  background: #ffffff;
-  border-radius: 24px;
-  max-width: 520px;
-  width: 100%;
-  padding: 28px;
-  box-shadow: 0 25px 60px rgba(58, 26, 39, 0.35);
-  text-align: center;
-  border: 1px solid var(--border-card);
-}
-
-.camera-modal-box h2 {
-  font-size: 24px;
-  font-style: italic;
-  margin-bottom: 16px;
-}
-
-.camera-video-container {
-  width: 100%;
-  height: 320px;
-  border-radius: 16px;
-  overflow: hidden;
-  background: #000;
-  margin-bottom: 20px;
-  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
-}
-
-.camera-video-container video {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.camera-modal-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.camera-capture-btn {
-  background: var(--wine);
-  color: #ffffff;
-  font-size: 14px;
-  font-weight: 600;
-  padding: 11px 24px;
-  border-radius: var(--radius-pill);
-  box-shadow: 0 6px 18px rgba(115, 45, 74, 0.22);
-  transition: all 0.25s ease;
-}
-
-.camera-capture-btn:hover {
-  background: var(--wine-dark);
-  transform: translateY(-2px);
-}
-
-.camera-close-btn {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1.5px solid var(--border-light);
-  font-size: 14px;
-  font-weight: 600;
-  padding: 11px 20px;
-  border-radius: var(--radius-pill);
-  transition: all 0.25s ease;
-}
-
-.camera-close-btn:hover {
-  background: var(--bg-cream);
-  color: var(--text-dark);
-}
-
 /* ==========================================================================
    14. THEMATIC DOODLES & FASHION ASSETS ACROSS ALL PAGES
    (Wardrobe, Edit, Recommendation, Thrift, About, Modals)
@@ -3370,52 +2985,47 @@ h1, h2, h3 {
   min-height: calc(100vh - 72px);
   position: relative;
   isolation: isolate;
-  overflow: hidden;
+  overflow-x: hidden;
   animation: pageFadeIn 0.5s ease-out;
 }
 
-/* Central Content Containers (Framed by the luxurious anime & doodle side gutters) */
+/* Central Content Containers (Modern luxury wide viewport layout) */
 .page-content-container,
 .wardrobe-content-container,
 .recommendation-content-container,
 .thrift-content-container,
 .about-content-container {
-  max-width: 1140px;
+  width: 100%;
+  max-width: 1540px;
   margin: 0 auto;
-  padding: 30px 24px 60px;
+  padding: 36px clamp(24px, 4vw, 56px) 70px;
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
 }
 
 .edit-content-container {
-  max-width: 960px;
+  width: 100%;
+  max-width: 1080px;
   margin: 0 auto;
-  padding: 30px 24px 60px;
+  padding: 36px 24px 70px;
   position: relative;
   z-index: 2;
+  box-sizing: border-box;
 }
 
-/* Universal Full-Viewport Side Doodles & Anime Layer */
+/* Universal Full-Viewport Side Doodles & Anime Layer - Deactivated for clean professional layout */
 .page-side-doodles-container,
 .wardrobe-page-decorations,
 .recommendation-page-decorations,
 .thrift-page-decorations,
 .about-page-decorations,
 .edit-page-decorations {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  z-index: 1;
-  overflow: hidden;
+  display: none !important;
 }
 
 /* Base Style for All Side Gutter Doodles */
-.page-side-doodle,
-.page-decor-sticker,
-.wd-bg-decor,
-.edit-bg-decor,
-.rec-bg-decor,
-.thrift-bg-decor {
+.page-side-doodle {
   pointer-events: none;
   user-select: none;
   filter: drop-shadow(0 4px 10px rgba(115, 45, 74, 0.08));
@@ -3538,362 +3148,24 @@ h1, h2, h3 {
   animation: animeBob 7s ease-in-out infinite;
 }
 
-/* --------------------------------------------------------------------------
-   WARDROBE SIDE GUTTER DOODLES
-   -------------------------------------------------------------------------- */
-.wd-side-hanger,
-.wd-bg-hanger {
-  left: 2%;
-  top: 90px;
-  transform: rotate(8deg);
-  animation: gentleFloat 9s ease-in-out infinite;
+/* Responsive Content Container Adjustments */
+@media (max-width: 1600px) {
+  .page-content-container,
+  .wardrobe-content-container,
+  .recommendation-content-container,
+  .thrift-content-container,
+  .about-content-container {
+    max-width: 1400px;
+  }
 }
 
-.wd-side-sparkle-1 {
-  left: 4.2%;
-  top: 220px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.wd-side-swatches {
-  left: 2.2%;
-  top: 310px;
-  transform: rotate(-12deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.wd-side-floral,
-.wd-bg-floral {
-  left: 1.8%;
-  top: 540px;
-  transform: rotate(15deg);
-  animation: gentleFloat 10s ease-in-out infinite;
-}
-
-.wd-side-sparkle-2 {
-  left: 3.8%;
-  top: 680px;
-  animation: sparklePulse 4s ease-in-out infinite;
-}
-
-.wd-side-ribbon,
-.wd-bg-ribbon {
-  left: 2%;
-  top: 780px;
-  transform: rotate(-10deg);
-  animation: floatDrift 13s ease-in-out infinite;
-}
-
-.wd-side-bow {
-  right: 2.2%;
-  top: 85px;
-  transform: rotate(10deg);
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-}
-
-.wd-side-heart {
-  right: 4%;
-  top: 195px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.wd-side-heels,
-.wd-bg-heels {
-  right: 1.8%;
-  top: 295px;
-  transform: rotate(-8deg);
-  animation: floatDrift 10s ease-in-out infinite;
-}
-
-.wd-side-sunglasses,
-.wd-bg-sunglasses {
-  right: 2.4%;
-  top: 520px;
-  transform: rotate(12deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.wd-side-sparkle-3,
-.wd-bg-sparkles {
-  right: 3.6%;
-  top: 650px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.wd-side-perfume {
-  right: 1.8%;
-  top: 750px;
-  transform: rotate(-6deg);
-  animation: floatDrift 12s ease-in-out infinite;
-}
-
-/* --------------------------------------------------------------------------
-   AI STYLIST (RECOMMENDATION) SIDE GUTTER DOODLES
-   -------------------------------------------------------------------------- */
-.rec-side-mirror,
-.rec-bg-mirror {
-  left: 2%;
-  top: 95px;
-  transform: rotate(6deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.rec-side-sparkle-1 {
-  left: 4%;
-  top: 210px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.rec-side-ribbon,
-.rec-bg-sticker {
-  left: 2.2%;
-  top: 300px;
-  transform: rotate(-12deg);
-  animation: floatDrift 12s ease-in-out infinite;
-}
-
-.rec-side-floral {
-  left: 1.8%;
-  top: 510px;
-  transform: rotate(14deg);
-  animation: gentleFloat 10s ease-in-out infinite;
-}
-
-.rec-side-swatches {
-  left: 2.2%;
-  top: 710px;
-  transform: rotate(-8deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.rec-side-perfume,
-.rec-bg-perfume {
-  right: 2%;
-  top: 90px;
-  transform: rotate(-8deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.rec-side-heart {
-  right: 3.8%;
-  top: 200px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.rec-side-sunglasses,
-.rec-bg-lipstick {
-  right: 2.2%;
-  top: 290px;
-  transform: rotate(10deg);
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-}
-
-.rec-side-bow {
-  right: 2.4%;
-  top: 490px;
-  transform: rotate(-10deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.rec-side-sparkle-2,
-.rec-bg-sparkles {
-  right: 3.5%;
-  top: 630px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-/* --------------------------------------------------------------------------
-   THRIFT STORE SIDE GUTTER DOODLES
-   -------------------------------------------------------------------------- */
-.thrift-side-leaf,
-.thrift-bg-leaf {
-  left: 2.2%;
-  top: 100px;
-  transform: rotate(-15deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.thrift-side-sparkle-1 {
-  left: 4%;
-  top: 220px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.thrift-side-jeans,
-.thrift-bg-sneakers {
-  left: 1.8%;
-  top: 320px;
-  transform: rotate(10deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.thrift-side-flowers,
-.thrift-bg-flowers {
-  left: 2.4%;
-  top: 540px;
-  transform: rotate(15deg);
-  animation: gentleFloat 10s ease-in-out infinite;
-}
-
-.thrift-side-handbag {
-  right: 2%;
-  top: 95px;
-  transform: rotate(12deg);
-  animation: floatDrift 10s ease-in-out infinite;
-}
-
-.thrift-side-heart {
-  right: 3.8%;
-  top: 210px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.thrift-side-sneakers {
-  right: 1.8%;
-  top: 310px;
-  transform: rotate(-10deg);
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-}
-
-.thrift-side-sunglasses,
-.thrift-bg-sunglasses {
-  right: 2.2%;
-  top: 520px;
-  transform: rotate(12deg);
-  animation: floatDrift 12s ease-in-out infinite;
-}
-
-.thrift-side-sparkle-2 {
-  right: 3.5%;
-  top: 670px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-/* --------------------------------------------------------------------------
-   ABOUT US SIDE GUTTER DOODLES
-   -------------------------------------------------------------------------- */
-.about-side-ribbon {
-  left: 2%;
-  top: 105px;
-  transform: rotate(-12deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.about-side-sparkle-1 {
-  left: 4%;
-  top: 225px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.about-side-swatches {
-  left: 2.2%;
-  top: 330px;
-  transform: rotate(8deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.about-side-floral {
-  left: 1.8%;
-  top: 550px;
-  transform: rotate(15deg);
-  animation: gentleFloat 10s ease-in-out infinite;
-}
-
-.about-side-bow {
-  right: 2.2%;
-  top: 95px;
-  transform: rotate(10deg);
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-}
-
-.about-side-heart {
-  right: 3.8%;
-  top: 210px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.about-side-perfume {
-  right: 1.8%;
-  top: 310px;
-  transform: rotate(-8deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.about-side-sunglasses {
-  right: 2.2%;
-  top: 530px;
-  transform: rotate(12deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.about-side-sparkle-2 {
-  right: 3.4%;
-  top: 690px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-/* --------------------------------------------------------------------------
-   EDIT CLOTHING SIDE GUTTER DOODLES
-   -------------------------------------------------------------------------- */
-.edit-side-swatches,
-.edit-bg-swatches {
-  left: 3%;
-  top: 110px;
-  transform: rotate(-10deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.edit-side-sparkle-1,
-.edit-bg-sparkles {
-  left: 4.8%;
-  top: 220px;
-  animation: sparklePulse 3.5s ease-in-out infinite;
-}
-
-.edit-side-floral {
-  left: 3.2%;
-  top: 330px;
-  transform: rotate(14deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.edit-side-mirror,
-.edit-bg-mirror {
-  right: 3%;
-  top: 100px;
-  transform: rotate(8deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.edit-side-heart {
-  right: 4.5%;
-  top: 210px;
-  animation: heartBeatPop 4s ease-in-out infinite;
-}
-
-.edit-side-bow,
-.edit-bg-bow {
-  right: 3.2%;
-  top: 320px;
-  transform: rotate(-10deg);
-  animation: floatDrift 10s ease-in-out infinite;
-}
-
-/* Responsive Gutter Adjustments */
 @media (max-width: 1440px) {
   .page-content-container,
   .wardrobe-content-container,
   .recommendation-content-container,
   .thrift-content-container,
   .about-content-container {
-    max-width: 1060px;
-  }
-  .page-side-doodle {
-    transform: scale(0.92);
-  }
-  .page-side-anime-card,
-  .page-side-sticker-card {
-    transform: scale(0.92);
+    max-width: 1280px;
   }
 }
 
@@ -3903,15 +3175,8 @@ h1, h2, h3 {
   .recommendation-content-container,
   .thrift-content-container,
   .about-content-container {
-    max-width: 960px;
-  }
-  .page-side-doodle {
-    transform: scale(0.82);
-    opacity: 0.82;
-  }
-  .page-side-anime-card,
-  .page-side-sticker-card {
-    transform: scale(0.85);
+    max-width: 100%;
+    padding: 28px 24px 60px;
   }
 }
 
@@ -3919,7 +3184,7 @@ h1, h2, h3 {
   .page-side-doodle,
   .page-side-anime-card,
   .page-side-sticker-card {
-    display: none;
+    display: none !important;
   }
 }
 
@@ -3949,69 +3214,6 @@ h1, h2, h3 {
   margin-top: 4px;
 }
 
-/* Category Tabs with Doodle Icons */
-.category-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 28px;
-  position: relative;
-  z-index: 1;
-}
-
-.category-tab {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: #ffffff;
-  color: var(--text-dark);
-  border: 1px solid var(--border-card);
-  padding: 8px 18px;
-  border-radius: var(--radius-pill);
-  font-size: 13.5px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 12px rgba(115, 45, 74, 0.04);
-}
-
-.category-tab:hover {
-  border-color: var(--rose);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(115, 45, 74, 0.08);
-}
-
-.category-tab.active {
-  background: var(--wine);
-  color: #ffffff;
-  border-color: var(--wine);
-  box-shadow: 0 6px 18px rgba(115, 45, 74, 0.24);
-}
-
-.category-tab-doodle-icon {
-  width: 18px;
-  height: 18px;
-  object-fit: contain;
-  transition: transform 0.25s ease;
-}
-
-.category-tab.active .category-tab-doodle-icon {
-  filter: brightness(0) invert(1);
-}
-
-.category-tab:hover .category-tab-doodle-icon {
-  transform: scale(1.2) rotate(6deg);
-}
-
-.category-tab-glyph-icon {
-  font-size: 13px;
-  color: var(--rose);
-}
-
-.category-tab.active .category-tab-glyph-icon {
-  color: #ffffff;
-}
-
 /* Wardrobe Illustrated Empty State */
 .wardrobe-empty-state-card {
   background: rgba(255, 255, 255, 0.95);
@@ -4032,8 +3234,7 @@ h1, h2, h3 {
   margin-bottom: 20px;
 }
 
-.empty-art-photo,
-.empty-art-girl {
+.empty-art-photo {
   width: 170px;
   height: 170px;
   object-fit: cover;
@@ -4108,17 +3309,6 @@ h1, h2, h3 {
   justify-content: center;
 }
 
-.ai-dropzone-hanger-img {
-  width: 46px;
-  height: 46px;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-}
-
-.ai-upload-placeholder:hover .ai-dropzone-hanger-img {
-  transform: scale(1.1) rotate(6deg);
-}
-
 .ai-dropzone-sparkle-img {
   position: absolute;
   top: -6px;
@@ -4136,41 +3326,6 @@ h1, h2, h3 {
   padding: 30px 20px 60px;
   position: relative;
   animation: pageFadeIn 0.5s ease-out;
-}
-
-.edit-bg-swatches {
-  width: 90px;
-  right: 4%;
-  top: 140px;
-  opacity: 0.75;
-  transform: rotate(10deg);
-  animation: gentleFloat 9s ease-in-out infinite;
-}
-
-.edit-bg-mirror {
-  width: 110px;
-  left: 2%;
-  top: 260px;
-  opacity: 0.75;
-  transform: rotate(-8deg);
-  animation: floatDrift 11s ease-in-out infinite;
-}
-
-.edit-bg-bow {
-  width: 60px;
-  right: 8%;
-  bottom: 80px;
-  opacity: 0.7;
-  transform: rotate(-15deg);
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-}
-
-.edit-bg-sparkles {
-  width: 40px;
-  left: 10%;
-  top: 100px;
-  opacity: 0.8;
-  animation: sparklePulse 3.5s ease-in-out infinite;
 }
 
 .edit-atelier-preview-card {
@@ -4221,11 +3376,6 @@ h1, h2, h3 {
   justify-content: center;
 }
 
-.edit-sketch-img {
-  width: 60px;
-  opacity: 0.8;
-}
-
 .edit-polaroid-pin {
   position: absolute;
   top: -10px;
@@ -4253,8 +3403,7 @@ h1, h2, h3 {
   margin-bottom: 16px;
 }
 
-.lookbook-muse-photo,
-.lookbook-muse-img {
+.lookbook-muse-photo {
   width: 220px;
   height: 160px;
   object-fit: cover;
@@ -4262,15 +3411,6 @@ h1, h2, h3 {
   border: 3px solid #ffffff;
   box-shadow: 0 16px 36px rgba(115, 45, 74, 0.16);
   animation: gentleFloat 7s ease-in-out infinite;
-}
-
-.lookbook-quote-sticker {
-  position: absolute;
-  top: -8px;
-  right: -24px;
-  width: 78px;
-  transform: rotate(12deg);
-  filter: drop-shadow(0 6px 14px rgba(115, 45, 74, 0.12));
 }
 
 .lookbook-sparkles-doodle {
@@ -4328,8 +3468,7 @@ h1, h2, h3 {
   margin-bottom: 14px;
 }
 
-.history-books-photo,
-.history-books-img {
+.history-books-photo {
   width: 130px;
   height: 130px;
   object-fit: cover;
@@ -4415,8 +3554,7 @@ h1, h2, h3 {
   height: 220px;
 }
 
-.thrift-banner-photo,
-.thrift-banner-muse {
+.thrift-banner-photo {
   height: 190px;
   width: 280px;
   max-width: 100%;
@@ -4426,44 +3564,6 @@ h1, h2, h3 {
   box-shadow: 0 18px 40px rgba(115, 45, 74, 0.18);
   animation: gentleFloat 7s ease-in-out infinite;
   z-index: 2;
-}
-
-.thrift-banner-handbag {
-  position: absolute;
-  top: 15px;
-  right: 20px;
-  width: 85px;
-  transform: rotate(12deg);
-  filter: drop-shadow(0 8px 16px rgba(115, 45, 74, 0.12));
-  animation: floatDrift 9s ease-in-out infinite;
-  z-index: 1;
-}
-
-.thrift-banner-jeans {
-  position: absolute;
-  bottom: 10px;
-  left: 20px;
-  width: 75px;
-  transform: rotate(-15deg);
-  filter: drop-shadow(0 8px 16px rgba(115, 45, 74, 0.12));
-  animation: gentleFloat 8s ease-in-out infinite reverse;
-  z-index: 1;
-}
-
-.thrift-banner-leaf {
-  position: absolute;
-  top: 5px;
-  left: 40px;
-  width: 44px;
-  opacity: 0.85;
-}
-
-.thrift-banner-sparkle {
-  position: absolute;
-  bottom: 25px;
-  right: 40px;
-  width: 32px;
-  animation: sparklePulse 3s ease-in-out infinite;
 }
 
 /* Thrift Empty States */
@@ -4483,8 +3583,7 @@ h1, h2, h3 {
   margin-bottom: 18px;
 }
 
-.thrift-empty-photo,
-.thrift-empty-girl {
+.thrift-empty-photo {
   width: 170px;
   height: 140px;
   object-fit: cover;
@@ -4564,8 +3663,7 @@ h1, h2, h3 {
   justify-content: center;
 }
 
-.about-muse-photo,
-.about-muse-portrait {
+.about-muse-photo {
   width: 320px;
   max-width: 100%;
   height: auto;
@@ -4640,17 +3738,6 @@ h1, h2, h3 {
   position: relative;
 }
 
-.about-pillar-asset-img {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-  transition: transform 0.3s ease;
-}
-
-.about-info-card:hover .about-pillar-asset-img {
-  transform: scale(1.15) rotate(5deg);
-}
-
 .about-pillar-sparkle {
   position: absolute;
   top: -4px;
@@ -4706,31 +3793,6 @@ h1, h2, h3 {
   transform: rotate(-12deg);
 }
 
-/* ==========================================================================
-   CAMERA MODAL PHOTO BOOTH DECORATIONS
-   ========================================================================== */
-.camera-modal-box {
-  position: relative;
-}
-
-.camera-modal-floral-corner {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 90px;
-  opacity: 0.75;
-  pointer-events: none;
-}
-
-.camera-modal-sparkles {
-  position: absolute;
-  bottom: 20px;
-  left: 20px;
-  width: 32px;
-  pointer-events: none;
-  animation: sparklePulse 3s ease-in-out infinite;
-}
-
 /* Responsive adjustments for banners and decorations */
 @media (max-width: 900px) {
   .thrift-atelier-banner {
@@ -4749,10 +3811,7 @@ h1, h2, h3 {
   }
   .page-side-doodle,
   .page-side-anime-card,
-  .page-side-sticker-card,
-  .wd-bg-hanger, .wd-bg-heels, .wd-bg-sunglasses, .wd-bg-ribbon, .wd-bg-floral,
-  .rec-bg-mirror, .rec-bg-perfume, .rec-bg-lipstick, .rec-bg-sticker,
-  .thrift-bg-leaf, .thrift-bg-flowers, .thrift-bg-sneakers, .thrift-bg-sunglasses {
+  .page-side-sticker-card {
     display: none;
   }
 }
@@ -4766,15 +3825,6 @@ h1, h2, h3 {
   }
   .fashion-side {
     display: none;
-  }
-  .hero-editorial-section {
-    grid-template-columns: 1fr;
-  }
-  .hero-model-wrap, .hero-polaroids-wrap {
-    display: none;
-  }
-  .hero-features-strip {
-    grid-template-columns: repeat(2, 1fr);
   }
   .dashboard-action-cards {
     grid-template-columns: repeat(2, 1fr);
@@ -4798,9 +3848,6 @@ h1, h2, h3 {
     font-size: 13px;
     padding: 4px 8px;
   }
-  .hero-features-strip {
-    grid-template-columns: 1fr;
-  }
   .dashboard-action-cards {
     grid-template-columns: 1fr;
   }
@@ -4811,4 +3858,20 @@ h1, h2, h3 {
     animation: none !important;
     transition: none !important;
   }
+}
+/* ===== Pink Bow Background ===== */
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background-image: url("./assets/pink-bows.png");
+  background-size: 500px auto;
+  background-position: center;
+  background-repeat: repeat;
+  background-attachment: fixed;
+}
+
+#root {
+  min-height: 100vh;
+  background: transparent;
 }

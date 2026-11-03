@@ -1,8 +1,9 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import "./App.css";
 
 import fashionImage from "./assets/fashion-ai.png";
 import homeIllustration from "./assets/home-illustration.png";
+import glowingBow from "./assets/glowing-bow-sticker.png";
 
 import {
   DoodleSparkles,
@@ -13,13 +14,10 @@ import {
   DoodleRibbon,
   DoodleFloral,
   DoodlePerfume,
-  DoodleHeels,
   DoodleDenim,
-  DoodleHandbag,
   DoodleMirror,
   DoodleLeaf,
   DoodleSwatches,
-  DoodleQuoteSticker,
   CategoryDoodleIcon,
   FullSideDoodles,
 } from "./FashionDoodles";
@@ -45,6 +43,7 @@ function App() {
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(true);
   const [registerName, setRegisterName] = useState("");
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
@@ -88,7 +87,6 @@ function App() {
   const [sortOrder, setSortOrder] = useState("recent");
   const [filterOccasion, setFilterOccasion] = useState("All");
   const [filterSeason, setFilterSeason] = useState("All");
-  const [showFilters, setShowFilters] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [clothingSearch, setClothingSearch] = useState("");
   const [editingItem, setEditingItem] = useState(null);
@@ -110,34 +108,6 @@ function App() {
   const [isReGenerating, setIsReGenerating] = useState(false);
   const [recommendationHistory, setRecommendationHistory] = useState([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
-
-  // =========================
-  // CAMERA STATE
-  // =========================
-  const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraStream, setCameraStream] = useState(null);
-  const [capturedImage, setCapturedImage] = useState(null);
-  const videoRef = useRef(null);
-
-  // =========================
-  // FETCH WARDROBE & STYLIST ARCHIVE ON LOGIN
-  // =========================
-  useEffect(() => {
-    if (isLoggedIn) {
-      fetchWardrobe();
-      fetchStylistHistory();
-    }
-  }, [isLoggedIn]);
-
-  // Page-specific data loaders
-  useEffect(() => {
-    if (activePage === "thrift") {
-      loadThriftListings();
-      loadSavedThriftListings();
-    } else if (activePage === "recommendation" && isLoggedIn) {
-      fetchStylistHistory();
-    }
-  }, [activePage, isLoggedIn]);
 
   const fetchStylistHistory = async () => {
     const userId = localStorage.getItem("userId");
@@ -336,7 +306,7 @@ function App() {
       } else {
         setMessage(data.error || "Registration failed.");
       }
-    } catch (error) {
+    } catch {
       setMessage("Cannot connect to the server. Please make sure FastAPI is running.");
     }
   };
@@ -354,73 +324,6 @@ function App() {
     setLoginPassword("");
   };
 
-
-  // =====================================================
-  // CAMERA
-  // =====================================================
-  const openCamera = async () => {
-    try {
-      if (!navigator.mediaDevices?.getUserMedia) {
-        alert("Camera is not supported by this browser.");
-        return;
-      }
-
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: false,
-      });
-
-      setCameraStream(stream);
-      setCameraOpen(true);
-    } catch (error) {
-      console.error("Camera error:", error);
-      alert("Cannot access camera. Please allow camera permission.");
-    }
-  };
-
-  const closeCamera = () => {
-    if (cameraStream) {
-      cameraStream.getTracks().forEach((track) => track.stop());
-    }
-    setCameraStream(null);
-    setCameraOpen(false);
-  };
-
-  const capturePhoto = () => {
-    if (!videoRef.current) return;
-
-    const video = videoRef.current;
-
-    const canvas = document.createElement("canvas");
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    const context = canvas.getContext("2d");
-    context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-    setCapturedImage(canvas.toDataURL("image/jpeg"));
-    closeCamera();
-  };
-
-
-  // =====================================================
-  // HELPERS
-  // =====================================================
-  const dataURLtoFile = (dataurl, filename) => {
-    const arr = dataurl.split(",");
-    const mime = arr[0].match(/:(.*?);/)[1];
-    const bstr = atob(arr[1]);
-
-    let n = bstr.length;
-    const u8arr = new Uint8Array(n);
-
-    while (n--) {
-      u8arr[n] = bstr.charCodeAt(n);
-    }
-
-    return new File([u8arr], filename, { type: mime });
-  };
-
   const categoryMatches = (item, selectedCategory) => {
     if (selectedCategory === "All") return true;
 
@@ -433,151 +336,63 @@ function App() {
       keywords.some((t) => cat.includes(t) || subCat.includes(t) || type.includes(t) || name.includes(t));
 
     // 1. INDIAN & ETHNIC WEAR
-    if (
-      selectedCategory === "Indian & Ethnic Wear" ||
-      selectedCategory === "Indian Attire"
-    ) {
-      return (
-        cat === "indian & ethnic wear" ||
-        cat === "indian attire" ||
-        matchesAny([
-          "saree", "sari", "half saree", "langa voni", "dhavani", "pattu pavadai",
-          "lehenga", "ghagra", "chaniya", "anarkali", "kurti", "kurta", "salwar",
-          "sherwani", "bandhgala", "nehru jacket", "modi vest", "achkan", "dhoti",
-          "veshti", "mundu", "lungi", "sharara", "gharara", "dupatta", "chunni",
-          "phulkari", "kanchipuram", "banarasi", "chanderi", "paithani", "chikankari",
-          "kaftan", "caftan", "indo-western", "indo western", "kimono", "hanbok",
-          "cheongsam", "qipao", "abaya", "dirndl", "ethnic"
-        ])
-      );
+    if (selectedCategory === "Indian & Ethnic Wear" || selectedCategory === "Indian Attire") {
+      return cat === "indian & ethnic wear" || cat === "indian attire" || matchesAny([
+        "saree", "sari", "half saree", "langa voni", "dhavani", "pattu pavadai", "lehenga", "ghagra", "chaniya", "anarkali", "kurti", "kurta", "salwar", "sherwani", "bandhgala", "nehru jacket", "modi vest", "achkan", "dhoti", "veshti", "mundu", "lungi", "sharara", "gharara", "dupatta", "chunni", "phulkari", "kanchipuram", "banarasi", "chanderi", "paithani", "chikankari", "kaftan", "caftan", "indo-western", "indo western", "kimono", "hanbok", "cheongsam", "qipao", "abaya", "dirndl", "ethnic"
+      ]);
     }
 
     // 2. JEWELRY
     if (selectedCategory === "Jewelry" || selectedCategory === "Jewels") {
-      return (
-        cat === "jewelry" ||
-        matchesAny([
-          "jewel", "necklace", "choker", "earring", "jhumka", "jhumki", "chandbali",
-          "bangle", "kada", "kangan", "bracelet", "ring", "anklet", "payal", "pajeb",
-          "tikka", "maang tikka", "mathapatti", "borla", "passa", "nath", "nose ring",
-          "mangalsutra", "haar", "hasli", "polki", "kundan", "diamond ring", "gold chain",
-          "hathphool", "kamarbandh", "tagdi", "bichhiya", "toe ring", "brooch"
-        ])
-      );
+      return cat === "jewelry" || matchesAny([
+        "jewel", "necklace", "choker", "earring", "jhumka", "jhumki", "chandbali", "bangle", "kada", "kangan", "bracelet", "ring", "anklet", "payal", "pajeb", "tikka", "maang tikka", "mathapatti", "borla", "passa", "nath", "nose ring", "mangalsutra", "haar", "hasli", "polki", "kundan", "diamond ring", "gold chain", "hathphool", "kamarbandh", "tagdi", "bichhiya", "toe ring", "brooch"
+      ]);
     }
 
     // 3. FOOTWEAR
-    if (
-      selectedCategory === "Footwear" ||
-      selectedCategory === "Shoes & Heels" ||
-      selectedCategory === "Shoes"
-    ) {
-      return (
-        cat === "footwear" ||
-        cat === "shoes" ||
-        cat === "heels" ||
-        cat === "boots" ||
-        cat === "sandals" ||
-        matchesAny([
-          "heel", "stilettos", "stiletto", "pumps", "wedge", "platform heel",
-          "boots", "boot", "shoes", "shoe", "sneakers", "sneaker", "trainer",
-          "loafers", "loafer", "flats", "flat", "sandals", "sandal", "slides",
-          "flip-flop", "jutti", "mojari", "kolhapuri", "khussa", "oxford",
-          "brogue", "derby", "mules", "espadrille", "slippers", "chappal"
-        ])
-      );
+    if (selectedCategory === "Footwear" || selectedCategory === "Shoes & Heels" || selectedCategory === "Shoes") {
+      return cat === "footwear" || cat === "shoes" || cat === "heels" || cat === "boots" || cat === "sandals" || matchesAny([
+        "heel", "stilettos", "stiletto", "pumps", "wedge", "platform heel", "boots", "boot", "shoes", "shoe", "sneakers", "sneaker", "trainer", "loafers", "loafer", "flats", "flat", "sandals", "sandal", "slides", "flip-flop", "jutti", "mojari", "kolhapuri", "khussa", "oxford", "brogue", "derby", "mules", "espadrille", "slippers", "chappal"
+      ]);
     }
 
     // 4. HATS & HEADWEAR
-    if (
-      selectedCategory === "Hats & Headwear" ||
-      selectedCategory === "Hats" ||
-      selectedCategory === "Caps"
-    ) {
-      return (
-        cat === "hats & headwear" ||
-        cat === "hats" ||
-        cat === "caps" ||
-        matchesAny([
-          "hat", "hats", "cap", "caps", "fedora", "panama hat", "sun hat",
-          "wide brim", "bucket hat", "boater", "cowboy hat", "bowler", "beret",
-          "baseball cap", "snapback", "trucker", "beanie", "skull cap", "turban",
-          "pagri", "pagdi", "safa", "pheta", "fascinator", "headwrap", "visor"
-        ])
-      );
+    if (selectedCategory === "Hats & Headwear" || selectedCategory === "Hats" || selectedCategory === "Caps") {
+      return cat === "hats & headwear" || cat === "hats" || cat === "caps" || matchesAny([
+        "hat", "hats", "cap", "caps", "fedora", "panama hat", "sun hat", "wide brim", "bucket hat", "boater", "cowboy hat", "bowler", "beret", "baseball cap", "snapback", "trucker", "beanie", "skull cap", "turban", "pagri", "pagdi", "safa", "pheta", "fascinator", "headwrap", "visor"
+      ]);
     }
 
     // 5. BAGS & PURSES
     if (selectedCategory === "Bags & Purses" || selectedCategory === "Bags") {
-      return (
-        cat === "bags & purses" ||
-        cat === "bags" ||
-        cat === "clutch" ||
-        matchesAny([
-          "bag", "bags", "handbag", "backpack", "tote", "purse", "clutch",
-          "potli", "batua", "hobo", "shoulder bag", "crossbody", "sling bag",
-          "satchel", "fanny pack", "belt bag", "duffel", "duffle", "jhola",
-          "minaudiere", "wristlet", "wallet"
-        ])
-      );
+      return cat === "bags & purses" || cat === "bags" || cat === "clutch" || matchesAny([
+        "bag", "bags", "handbag", "backpack", "tote", "purse", "clutch", "potli", "batua", "hobo", "shoulder bag", "crossbody", "sling bag", "satchel", "fanny pack", "belt bag", "duffel", "duffle", "jhola", "minaudiere", "wristlet", "wallet"
+      ]);
     }
 
     // 6. TOPS
     if (selectedCategory === "Tops") {
-      return (
-        cat === "tops" ||
-        cat === "shirt" ||
-        cat === "t-shirt" ||
-        cat === "upper" ||
-        matchesAny([
-          "shirt", "t-shirt", "tshirt", "top", "blouse", "upper", "tops", "sweater",
-          "hoodie", "jacket", "cardigan", "polo", "crop top", "tank", "tee",
-          "blazer", "coat", "sweatshirt", "corset", "bustier", "peplum", "vest",
-          "waistcoat", "shrug", "poncho"
-        ])
-      );
+      return cat === "tops" || cat === "shirt" || cat === "t-shirt" || cat === "upper" || matchesAny([
+        "shirt", "t-shirt", "tshirt", "top", "blouse", "upper", "tops", "sweater", "hoodie", "jacket", "cardigan", "polo", "crop top", "tank", "tee", "blazer", "coat", "sweatshirt", "corset", "bustier", "peplum", "vest", "waistcoat", "shrug", "poncho"
+      ]);
     }
 
     // 7. PANTS & BOTTOMS
     if (selectedCategory === "Pants" || selectedCategory === "Bottoms") {
-      return (
-        cat === "pants" ||
-        cat === "bottoms" ||
-        cat === "jeans" ||
-        cat === "trousers" ||
-        cat === "skirt" ||
-        cat === "shorts" ||
-        cat === "lower" ||
-        cat === "bottom" ||
-        matchesAny([
-          "jeans", "trousers", "skirt", "pants", "pant", "lower", "bottom",
-          "bottoms", "shorts", "short", "chinos", "denim", "cargo", "jogger",
-          "flare", "slacks", "leggings", "jeggings", "palazzo", "culottes", "sweatpants"
-        ])
-      );
+      return cat === "pants" || cat === "bottoms" || cat === "jeans" || cat === "trousers" || cat === "skirt" || cat === "shorts" || cat === "lower" || cat === "bottom" || matchesAny([
+        "jeans", "trousers", "skirt", "pants", "pant", "lower", "bottom", "bottoms", "shorts", "short", "chinos", "denim", "cargo", "jogger", "flare", "slacks", "leggings", "jeggings", "palazzo", "culottes", "sweatpants"
+      ]);
     }
 
     // 8. DRESSES & GOWNS
-    if (
-      selectedCategory === "Dresses & Gowns" ||
-      selectedCategory === "Gowns & Dresses" ||
-      selectedCategory === "Dresses"
-    ) {
-      return (
-        cat === "dresses & gowns" ||
-        cat === "gown" ||
-        cat === "dress" ||
-        matchesAny([
-          "gown", "evening gown", "ballgown", "grand gown", "dress", "dresses",
-          "frock", "jumpsuit", "romper", "one-piece", "one_piece", "slip dress",
-          "cocktail dress", "maxi dress", "bodycon", "sundress"
-        ])
-      );
+    if (selectedCategory === "Dresses & Gowns" || selectedCategory === "Gowns & Dresses" || selectedCategory === "Dresses") {
+      return cat === "dresses & gowns" || cat === "gown" || cat === "dress" || matchesAny([
+        "gown", "evening gown", "ballgown", "grand gown", "dress", "dresses", "frock", "jumpsuit", "romper", "one-piece", "one_piece", "slip dress", "cocktail dress", "maxi dress", "bodycon", "sundress"
+      ]);
     }
 
     // 9. ACCESSORIES
     if (selectedCategory === "Accessories") {
-      // Exclude items that belong to dedicated categories (jewelry, hats, bags, footwear)
       if (
         categoryMatches(item, "Jewelry") ||
         categoryMatches(item, "Hats & Headwear") ||
@@ -586,17 +401,9 @@ function App() {
       ) {
         return false;
       }
-
-      return (
-        cat === "accessories" ||
-        matchesAny([
-          "accessory", "accessories", "sunglasses", "sunglass", "glasses", "shades",
-          "eyewear", "spectacles", "belt", "belts", "watch", "watches", "wristwatch",
-          "scarf", "scarves", "shawl", "muffler", "stole", "bandana", "tie", "necktie",
-          "bow tie", "bowtie", "pocket square", "cufflinks", "hair accessories",
-          "headband", "scrunchie", "hair clip"
-        ])
-      );
+      return cat === "accessories" || matchesAny([
+        "accessory", "accessories", "sunglasses", "sunglass", "glasses", "shades", "eyewear", "spectacles", "belt", "belts", "watch", "watches", "wristwatch", "scarf", "scarves", "shawl", "muffler", "stole", "bandana", "tie", "necktie", "bow tie", "bowtie", "pocket square", "cufflinks", "hair accessories", "headband", "scrunchie", "hair clip"
+      ]);
     }
 
     // 10. OTHERS
@@ -626,17 +433,12 @@ function App() {
     setWardrobeMessage("");
     setDetectedAttributes(null);
 
-    let imageFile = null;
-    if (capturedImage) {
-      imageFile = dataURLtoFile(capturedImage, "camera-photo.jpg");
-    } else if (clothingImage) {
-      imageFile = clothingImage;
-    }
-
-    if (!imageFile) {
-      setWardrobeMessage("Please select or capture a clothing image first.");
+    if (!clothingImage) {
+      setWardrobeMessage("Please select a clothing image first.");
       return;
     }
+
+    const imageFile = clothingImage;
 
     setIsAiUploading(true);
     setWardrobeMessage("✨ AI analyzing garment colors, style, occasion & season...");
@@ -687,7 +489,6 @@ function App() {
 
       // 3. Clear inputs
       setClothingImage(null);
-      setCapturedImage(null);
       setClothingName("");
       setClothingCategory("");
       setClothingColor("");
@@ -738,18 +539,12 @@ function App() {
     }
 
     try {
-      let imageFile = null;
-
-      if (capturedImage) {
-        imageFile = dataURLtoFile(capturedImage, "camera-photo.jpg");
-      } else if (clothingImage) {
-        imageFile = clothingImage;
-      }
-
-      if (!imageFile) {
-        setWardrobeMessage("Please select or capture a clothing image.");
+      if (!clothingImage) {
+        setWardrobeMessage("Please select a clothing image.");
         return;
       }
+
+      const imageFile = clothingImage;
 
       // =====================================================
       // STEP 1: GENERATE AI CATALOG IMAGES
@@ -861,7 +656,6 @@ function App() {
       setClothingStyle("");
       setClothingSeason("");
       setClothingImage(null);
-      setCapturedImage(null);
 
       fetchWardrobe();
 
@@ -950,7 +744,7 @@ function App() {
     if (listingType) params.append("listing_type", listingType);
 
     const response = await fetch(
-      `http://127.0.0.1:8000/thrift?${params.toString()}`
+      `${API}/thrift?${params.toString()}`
     );
 
     const data = await response.json();
@@ -966,168 +760,192 @@ function App() {
     setThriftLoading(false);
   }
 };
-const loadSavedThriftListings = async () => {
-  try {
-    const response = await fetch(
-      "http://127.0.0.1:8000/thrift/saved?user_id=string@1234"
-    );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail || "Failed to load saved thrift items."
+  const loadSavedThriftListings = async () => {
+    try {
+      const response = await fetch(
+        `${API}/thrift/saved?user_id=string@1234`
       );
-    }
 
-    setSavedThriftListings(data);
-  } catch (error) {
-    console.error("Saved thrift error:", error);
-  }
-};
-const handleSaveThrift = async (listingId) => {
-  try {
-    const response = await fetch(
-      `http://127.0.0.1:8000/thrift/${listingId}/save?user_id=string@1234`,
-      { 
-        method: "POST",
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to load saved thrift items."
+        );
       }
-    );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.detail || "Failed to save thrift item.");
+      setSavedThriftListings(data);
+    } catch (error) {
+      console.error("Saved thrift error:", error);
     }
+  };
 
-    alert("Item saved!");
-  } catch (error) {
-    console.error("Save thrift error:", error);
-    alert("Could not save item.");
-  }
-};
-const handleUnsaveThrift = async (listingId) => {
-  try {
-    const response = await fetch(
-      `${API}/thrift/${listingId}/save?user_id=string@1234`,
-      {
-        method: "DELETE",
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail || "Failed to remove saved item."
+  const handleSaveThrift = async (listingId) => {
+    try {
+      const response = await fetch(
+        `${API}/thrift/${listingId}/save?user_id=string@1234`,
+        { 
+          method: "POST",
+        }
       );
-    }
 
-    alert("Item removed from saved items!");
+      const data = await response.json();
 
-    loadSavedThriftListings();
-
-  } catch (error) {
-    console.error("Unsave thrift error:", error);
-    alert("Could not remove saved item.");
-  }
-};
-const handleDeleteThrift = async (listingId) => {
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this thrift listing?"
-  );
-
-  if (!confirmed) {
-    return;
-  }
-
-  try {
-    const response = await fetch(
-      `${API}/thrift/${listingId}?user_id=string@1234`,
-      {
-        method: "DELETE",
+      if (!response.ok) {
+        throw new Error(data.detail || "Failed to save thrift item.");
       }
-    );
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail || "Failed to delete thrift item."
-      );
+      alert("Item saved!");
+    } catch (error) {
+      console.error("Save thrift error:", error);
+      alert("Could not save item.");
     }
+  };
 
-    alert("Thrift listing deleted successfully!");
+  const handleUnsaveThrift = async (listingId) => {
+    try {
+      const response = await fetch(
+        `${API}/thrift/${listingId}/save?user_id=string@1234`,
+        {
+          method: "DELETE",
+        }
+      );
 
-    loadThriftListings(
-      thriftSearch,
-      thriftCategory,
-      thriftType
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to remove saved item."
+        );
+      }
+
+      alert("Item removed from saved items!");
+
+      loadSavedThriftListings();
+
+    } catch (error) {
+      console.error("Unsave thrift error:", error);
+      alert("Could not remove saved item.");
+    }
+  };
+
+  const handleDeleteThrift = async (listingId) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this thrift listing?"
     );
 
-    loadSavedThriftListings();
-
-  } catch (error) {
-    console.error("Delete thrift error:", error);
-    alert(error.message || "Could not delete item.");
-  }
-};
-const handleCreateThriftListing = async () => {
-  try {
-    if (!thriftItemName || !thriftItemCategory || !thriftImage) {
-      alert("Please fill in the item name, category, and image.");
+    if (!confirmed) {
       return;
     }
 
-    const formData = new FormData();
-
-    formData.append("user_id", "string@1234");
-    formData.append("item_name", thriftItemName);
-    formData.append("category", thriftItemCategory);
-    formData.append(
-      "price",
-      thriftListingType === "sale" ? thriftItemPrice : "0"
-    );
-    formData.append("listing_type", thriftListingType);
-    formData.append("description", thriftDescription);
-    formData.append("image", thriftImage);
-
-    const response = await fetch(
-      "http://127.0.0.1:8000/thrift",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(
-        data.detail || "Failed to create thrift listing."
+    try {
+      const response = await fetch(
+        `${API}/thrift/${listingId}?user_id=string@1234`,
+        {
+          method: "DELETE",
+        }
       );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to delete thrift item."
+        );
+      }
+
+      alert("Thrift listing deleted successfully!");
+
+      loadThriftListings(
+        thriftSearch,
+        thriftCategory,
+        thriftType
+      );
+
+      loadSavedThriftListings();
+
+    } catch (error) {
+      console.error("Delete thrift error:", error);
+      alert(error.message || "Could not delete item.");
     }
+  };
 
-    alert("Item listed successfully!");
+  const handleCreateThriftListing = async () => {
+    try {
+      if (!thriftItemName || !thriftItemCategory || !thriftImage) {
+        alert("Please fill in the item name, category, and image.");
+        return;
+      }
 
-    setThriftItemName("");
-    setThriftItemCategory("");
-    setThriftItemPrice("");
-    setThriftListingType("sale");
-    setThriftDescription("");
-    setThriftImage(null);
+      const formData = new FormData();
 
-    loadThriftListings(
-      thriftSearch,
-      thriftCategory,
-      thriftType
-    );
+      formData.append("user_id", "string@1234");
+      formData.append("item_name", thriftItemName);
+      formData.append("category", thriftItemCategory);
+      formData.append(
+        "price",
+        thriftListingType === "sale" ? thriftItemPrice : "0"
+      );
+      formData.append("listing_type", thriftListingType);
+      formData.append("description", thriftDescription);
+      formData.append("image", thriftImage);
 
-  } catch (error) {
-    console.error("Create thrift listing error:", error);
-    alert("Could not list item.");
-  }
-};
+      const response = await fetch(
+        `${API}/thrift`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.detail || "Failed to create thrift listing."
+        );
+      }
+
+      alert("Item listed successfully!");
+
+      setThriftItemName("");
+      setThriftItemCategory("");
+      setThriftItemPrice("");
+      setThriftListingType("sale");
+      setThriftDescription("");
+      setThriftImage(null);
+
+      loadThriftListings(
+        thriftSearch,
+        thriftCategory,
+        thriftType
+      );
+
+    } catch (error) {
+      console.error("Create thrift listing error:", error);
+      alert("Could not list item.");
+    }
+  };
+
+  // =====================================================
+  // FETCH WARDROBE & STYLIST ARCHIVE ON LOGIN / PAGE CHANGE
+  // =====================================================
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchWardrobe();
+      fetchStylistHistory();
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    if (activePage === "thrift") {
+      loadThriftListings();
+      loadSavedThriftListings();
+    } else if (activePage === "recommendation" && isLoggedIn) {
+      fetchStylistHistory();
+    }
+  }, [activePage, isLoggedIn]);
 
 
   // =====================================================
@@ -1144,117 +962,153 @@ const handleCreateThriftListing = async () => {
   // =====================================================
   if (!isLoggedIn) {
     return (
-      <div className="app-container">
+      <div className="app-container auth-wrapper">
         <div className="page auth-page">
 
-          {/* LEFT FASHION IMAGE WITH DOODLE QUOTE & STICKERS */}
+          {/* LEFT HERO FASHION ARTWORK & BRANDING */}
           <section className="fashion-side">
-            {/* SUBTLE AMBIENT VECTOR ACCENTS */}
-            <div className="auth-doodle-decorations">
-              <DoodleSparkles className="auth-doodle-sparkle-top" size={32} color="#f4d38c" />
-              <DoodleFloral className="auth-doodle-floral-corner" size={42} />
-            </div>
-
-            <div className="fashion-image-wrapper">
+            <div className="fashion-hero-frame">
               <img
                 src={fashionImage}
                 alt="AI Fashion Stylist"
-                className="fashion-image"
+                className="fashion-hero-artwork"
               />
-              
-              <div className="auth-doodle-quote-badge">
-                <DoodleQuoteSticker text="Style is personal power ♡" />
-              </div>
-
-              <div className="auth-doodle-script-caption">
-                Couture Curation • Personal AI Atelier ♡
-              </div>
             </div>
           </section>
 
           {/* RIGHT LOGIN SIDE */}
           <section className="login-side">
-            {/* AMBIENT FLOATING VECTOR ACCENTS */}
-            <div className="auth-login-side-decor">
-              <DoodleSparkles className="auth-amb-sparkle" size={28} color="#d4af37" />
-            </div>
-
             <div className="login-card">
-              <div className="card-brand-header">
-                <div className="card-brand-emblem">
-                  <DoodleHanger size={28} stroke="var(--wine)" />
-                  <DoodleSparkles className="emblem-sparkle-icon" size={16} color="#d4af37" />
+              {/* Top-Right Glowing Bow Sticker */}
+              <div className="login-card-bow-container" aria-hidden="true">
+                <img src={glowingBow} alt="" className="login-card-glow-bow" />
+              </div>
+
+              {/* Card Brand Header */}
+              <div className="atelier-card-header">
+                <div className="atelier-hanger-icon" aria-hidden="true">
+                  <svg width="42" height="34" viewBox="0 0 50 38" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                      d="M25 15C25 10 25 5 29.5 5C32.5 5 34 7 34 9.5C34 12.5 31 14 26 15.5"
+                      stroke="#f28da5"
+                      strokeWidth="1.8"
+                      strokeLinecap="round"
+                    />
+                    <path
+                      d="M25 16L8 26.5C6.5 27.4 6 29 7 30C7.8 31 9 31.5 10.5 31.5H39.5C41 31.5 42.2 31 43 30C44 29 43.5 27.4 42 26.5L25 16Z"
+                      stroke="#f28da5"
+                      strokeWidth="1.8"
+                      strokeLinejoin="round"
+                      fill="rgba(242, 141, 165, 0.08)"
+                    />
+                    <path
+                      d="M38 5C38 7.5 40.5 10 43 10C40.5 10 38 12.5 38 15C38 12.5 35.5 10 33 10C35.5 10 38 7.5 38 5Z"
+                      fill="#ffccd8"
+                    />
+                    <circle cx="44" cy="16" r="1.2" fill="#ffccd8" />
+                    <circle cx="31" cy="7" r="1" fill="#ffccd8" />
+                  </svg>
                 </div>
-                <div className="card-brand-title">AI Stylist</div>
-                <p className="card-brand-subtitle">Private Dressing Room & Atelier</p>
+
+                <h1 className="atelier-card-title" style={{ color: "#faecef" }}>
+                  {!isRegistering ? "Welcome Back " : "Create Account "}
+                  <span className="atelier-heart-glyph" style={{ color: "#f8cbd6" }}>♡</span>
+                </h1>
+                <p className="atelier-pill-tag">PRIVATE DRESSING ROOM &amp; ATELIER</p>
+                <p className="atelier-card-subtitle">Your personal AI-powered styling experience awaits.</p>
               </div>
 
               {!isRegistering ? (
                 <>
-                  <h1>
-                    Welcome Back <span>♡</span>
-                  </h1>
-                  <p className="subtitle">Sign in to your AI Stylist</p>
-
-                  <form onSubmit={handleLogin}>
-                    <div className="input-group">
-                      <span className="input-icon">✉️</span>
+                  <form onSubmit={handleLogin} className="atelier-form">
+                    <div className="atelier-input-group">
+                      <span className="atelier-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="4" width="20" height="16" rx="3" />
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                      </span>
                       <input
                         type="email"
                         placeholder="Email Address"
                         value={loginEmail}
                         onChange={(e) => setLoginEmail(e.target.value)}
                         required
+                        autoComplete="email"
                       />
                     </div>
 
-                    <div className="input-group">
-                      <span className="input-icon">🔒</span>
+                    <div className="atelier-input-group">
+                      <span className="atelier-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      </span>
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         value={loginPassword}
                         onChange={(e) => setLoginPassword(e.target.value)}
                         required
+                        autoComplete="current-password"
                       />
                       <button
                         type="button"
-                        className="password-toggle"
+                        className="atelier-password-toggle"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
-                        {showPassword ? "🙈" : "◉"}
+                        {showPassword ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                            <line x1="2" y1="2" x2="22" y2="22" />
+                          </svg>
+                        )}
                       </button>
                     </div>
 
-                    <div className="options">
-                      <label className="remember">
-                        <input type="checkbox" />
+                    <div className="atelier-options-row">
+                      <label className="atelier-remember-me">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                        />
+                        <span className="atelier-checkbox-custom" />
                         <span>Remember Me</span>
                       </label>
 
                       <button
                         type="button"
-                        className="forgot"
+                        className="atelier-forgot-btn"
                         onClick={() => alert("Password recovery coming soon")}
                       >
                         Forgot Password?
                       </button>
                     </div>
 
-                    <button type="submit" className="login-button">
-                      👗 &nbsp; Login &nbsp; →
+                    <button type="submit" className="atelier-login-btn">
+                      Login &rarr;
                     </button>
                   </form>
 
-                  <div className="divider">
-                    <span></span>
-                    <p>Or continue with</p>
-                    <span></span>
+                  <div className="atelier-divider">
+                    <span className="atelier-divider-line" />
+                    <p className="atelier-divider-text">Or continue with</p>
+                    <span className="atelier-divider-line" />
                   </div>
 
                   <button
                     type="button"
-                    className="google-login-btn"
+                    className="atelier-google-btn"
                     onClick={() => alert("Google Sign-In is coming soon!")}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24">
@@ -1266,84 +1120,114 @@ const handleCreateThriftListing = async () => {
                     Continue with Google
                   </button>
 
-                  <p className="signup-text">
+                  <p className="atelier-footer-text">
                     New to AI Stylist?
                     <button
                       type="button"
+                      className="atelier-link-btn"
                       onClick={() => {
                         setIsRegistering(true);
                         setMessage("");
                       }}
                     >
-                      Create Account →
+                      Create Account &rarr;
                     </button>
                   </p>
                 </>
               ) : (
                 <>
-                  <h1>
-                    Create Account <span>♡</span>
-                  </h1>
-                  <p className="subtitle">Join your AI Stylist journey</p>
-
-                  <form onSubmit={handleRegister}>
-                    <div className="input-group">
-                      <span className="input-icon">👤</span>
+                  <form onSubmit={handleRegister} className="atelier-form">
+                    <div className="atelier-input-group">
+                      <span className="atelier-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                          <circle cx="12" cy="7" r="4" />
+                        </svg>
+                      </span>
                       <input
                         type="text"
                         placeholder="Full Name"
                         value={registerName}
                         onChange={(e) => setRegisterName(e.target.value)}
+                        required
+                        autoComplete="name"
                       />
                     </div>
 
-                    <div className="input-group">
-                      <span className="input-icon">✉️</span>
+                    <div className="atelier-input-group">
+                      <span className="atelier-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="2" y="4" width="20" height="16" rx="3" />
+                          <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                        </svg>
+                      </span>
                       <input
                         type="email"
                         placeholder="Email Address"
                         value={registerEmail}
                         onChange={(e) => setRegisterEmail(e.target.value)}
+                        required
+                        autoComplete="email"
                       />
                     </div>
 
-                    <div className="input-group">
-                      <span className="input-icon">🔒</span>
+                    <div className="atelier-input-group">
+                      <span className="atelier-input-icon" aria-hidden="true">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                          <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                          <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                        </svg>
+                      </span>
                       <input
                         type={showPassword ? "text" : "password"}
                         placeholder="Password"
                         value={registerPassword}
                         onChange={(e) => setRegisterPassword(e.target.value)}
+                        required
+                        autoComplete="new-password"
                       />
                       <button
                         type="button"
-                        className="password-toggle"
+                        className="atelier-password-toggle"
                         onClick={() => setShowPassword(!showPassword)}
+                        aria-label={showPassword ? "Hide password" : "Show password"}
                       >
-                        {showPassword ? "🙈" : "◉"}
+                        {showPassword ? (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z" />
+                            <circle cx="12" cy="12" r="3" />
+                          </svg>
+                        ) : (
+                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
+                            <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
+                            <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" />
+                            <line x1="2" y1="2" x2="22" y2="22" />
+                          </svg>
+                        )}
                       </button>
                     </div>
 
-                    <button type="submit" className="login-button">
-                      ✨ &nbsp; Create Account &nbsp; →
+                    <button type="submit" className="atelier-login-btn">
+                      Create Account &rarr;
                     </button>
 
                     {message && (
-                      <p style={{ textAlign: "center", marginTop: "15px", color: "var(--wine)", fontWeight: "500" }}>
+                      <p className="atelier-message-badge">
                         {message}
                       </p>
                     )}
                   </form>
 
-                  <div className="divider">
-                    <span></span>
-                    <p>Or continue with</p>
-                    <span></span>
+                  <div className="atelier-divider">
+                    <span className="atelier-divider-line" />
+                    <p className="atelier-divider-text">Or continue with</p>
+                    <span className="atelier-divider-line" />
                   </div>
 
                   <button
                     type="button"
-                    className="google-login-btn"
+                    className="atelier-google-btn"
                     onClick={() => alert("Google Sign-In is coming soon!")}
                   >
                     <svg width="18" height="18" viewBox="0 0 24 24">
@@ -1355,16 +1239,17 @@ const handleCreateThriftListing = async () => {
                     Continue with Google
                   </button>
 
-                  <p className="signup-text">
+                  <p className="atelier-footer-text">
                     Already have an account?
                     <button
                       type="button"
+                      className="atelier-link-btn"
                       onClick={() => {
                         setIsRegistering(false);
                         setMessage("");
                       }}
                     >
-                      ← Back to Login
+                      &larr; Back to Login
                     </button>
                   </p>
                 </>
@@ -1474,16 +1359,7 @@ const handleCreateThriftListing = async () => {
               alt=""
               className="fashion-decor fashion-perfume"
             />
-            <img
-              src="/fashion-assets/jewellery.png"
-              alt=""
-              className="fashion-decor fashion-jewellery"
-            />
-            <img
-              src="/fashion-assets/hanger.png"
-              alt=""
-              className="fashion-decor fashion-hanger"
-            />
+
             <img
               src="/fashion-assets/sparkles.png"
               alt=""
@@ -1601,17 +1477,17 @@ const handleCreateThriftListing = async () => {
                 <span className="curated-badge-pill">✨ VISION AI AUTO-CATALOG</span>
                 <h2>Add Clothes with Zero Effort</h2>
                 <p>
-                  Simply upload or snap a photo — our AI instantly recognizes the <strong>garment type, color, occasion, season & style</strong> and saves it directly to your wardrobe. No manual typing required!
+                  Simply upload a photo — our AI instantly recognizes the <strong>garment type, color, occasion, season & style</strong> and saves it directly to your wardrobe. No manual typing required!
                 </p>
               </div>
 
               {/* PHOTO UPLOAD & PREVIEW SECTION */}
               <div className="ai-upload-dropzone-box">
-                {clothingImage || capturedImage ? (
+                {clothingImage ? (
                   <div className="ai-upload-preview-wrap">
                     <div className="ai-upload-image-preview">
                       <img
-                        src={capturedImage || URL.createObjectURL(clothingImage)}
+                        src={URL.createObjectURL(clothingImage)}
                         alt="Garment Preview"
                       />
                       <button
@@ -1619,7 +1495,6 @@ const handleCreateThriftListing = async () => {
                         className="ai-upload-remove-img-btn"
                         onClick={() => {
                           setClothingImage(null);
-                          setCapturedImage(null);
                           setDetectedAttributes(null);
                         }}
                       >
@@ -1629,7 +1504,7 @@ const handleCreateThriftListing = async () => {
 
                     <div className="ai-upload-ready-text">
                       <p className="ai-upload-filename">
-                        📷 {clothingImage ? clothingImage.name : "Live Camera Capture"}
+                        📁 {clothingImage.name}
                       </p>
                       <span className="ai-upload-ready-pill">✓ Photo ready for AI recognition</span>
                     </div>
@@ -1640,8 +1515,8 @@ const handleCreateThriftListing = async () => {
                       <DoodleHanger size={46} />
                       <DoodleSparkles className="ai-dropzone-sparkle-img" size={24} color="#d4af37" />
                     </div>
-                    <h3>Select or Snap a Garment Photo</h3>
-                    <p>Supported: JPG, PNG, WEBP from your closet or live camera</p>
+                    <h3>Select a Garment Photo</h3>
+                    <p>Supported: JPG, PNG, WEBP from your closet</p>
 
                     <div className="ai-upload-action-row">
                       <label className="ai-upload-file-label">
@@ -1653,20 +1528,11 @@ const handleCreateThriftListing = async () => {
                           onChange={(e) => {
                             if (e.target.files && e.target.files[0]) {
                               setClothingImage(e.target.files[0]);
-                              setCapturedImage(null);
                               setDetectedAttributes(null);
                             }
                           }}
                         />
                       </label>
-
-                      <button
-                        type="button"
-                        className="ai-camera-snap-btn"
-                        onClick={openCamera}
-                      >
-                        📷 Live Camera
-                      </button>
                     </div>
                   </div>
                 )}
@@ -1723,7 +1589,7 @@ const handleCreateThriftListing = async () => {
                 <button
                   type="button"
                   className="ai-auto-save-glow-btn"
-                  disabled={isAiUploading || (!clothingImage && !capturedImage)}
+                  disabled={isAiUploading || !clothingImage}
                   onClick={handleAiAutoUploadClothing}
                 >
                   {isAiUploading ? (
@@ -1742,7 +1608,6 @@ const handleCreateThriftListing = async () => {
                     setWardrobeMessage("");
                     setDetectedAttributes(null);
                     setClothingImage(null);
-                    setCapturedImage(null);
                   }}
                 >
                   Cancel
@@ -1959,38 +1824,14 @@ const handleCreateThriftListing = async () => {
               <div className="clothes-grid">
                 {wardrobeItems
                   .filter((item) => {
-                    if (
-                      clothingSearch &&
-                      !item.item_name
-                        ?.toLowerCase()
-                        .includes(clothingSearch.toLowerCase())
-                    ) {
-                      return false;
-                    }
-
-                    if (
-                      filterOccasion !== "All" &&
-                      item.occasion !== filterOccasion
-                    ) {
-                      return false;
-                    }
-
-                    if (
-                      filterSeason !== "All" &&
-                      item.season !== filterSeason
-                    ) {
-                      return false;
-                    }
-
+                    if (clothingSearch && !item.item_name?.toLowerCase().includes(clothingSearch.toLowerCase())) return false;
+                    if (filterOccasion !== "All" && item.occasion !== filterOccasion) return false;
+                    if (filterSeason !== "All" && item.season !== filterSeason) return false;
                     return categoryMatches(item, selectedCategory);
                   })
                   .sort((a, b) => {
-                    const dateA = new Date(a.created_at || 0);
-                    const dateB = new Date(b.created_at || 0);
-
-                    return sortOrder === "recent"
-                      ? dateB - dateA
-                      : dateA - dateB;
+                    const diff = new Date(b.created_at || 0) - new Date(a.created_at || 0);
+                    return sortOrder === "recent" ? diff : -diff;
                   })
                   .map((item) => (
                     <div className="clothes-card" key={item._id}>
@@ -1999,6 +1840,10 @@ const handleCreateThriftListing = async () => {
                           <img
                             src={`${API}${item.image}`}
                             alt={item.item_name}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=400&q=80";
+                            }}
                           />
                         ) : (
                           <span>👗</span>
@@ -2366,18 +2211,29 @@ const handleCreateThriftListing = async () => {
 
               <button
                 type="button"
-                className="primary-pill-button"
-                style={{ marginTop: "18px" }}
+                className="primary-pill-button outfit-generate-btn"
                 disabled={isGeneratingOutfit || isReGenerating}
                 onClick={() => handleGenerateOutfit(false)}
               >
                 {isGeneratingOutfit ? "✨ Curating Outfit Set..." : "✨ Generate Outfit Set"}
               </button>
+              {aiRecommendation && (
+                <p style={{ marginTop: "12px", color: "var(--wine, #732d4a)", fontSize: "0.9rem", textAlign: "center" }}>
+                  {aiRecommendation}
+                </p>
+              )}
             </div>
 
             {/* COLUMN 2: TODAY'S LOOKBOOK */}
             <div className="recommendation-card-box">
-              <h2>Today's Curated Set ♡</h2>
+              <h2>
+                Today's Curated Set ♡
+                {recommendationStyle && (
+                  <span style={{ fontSize: "0.85rem", opacity: 0.8, marginLeft: "8px", fontWeight: "normal" }}>
+                    • {recommendationStyle}
+                  </span>
+                )}
+              </h2>
 
               {recommendedOutfit.length > 0 ? (
                 <>
@@ -2414,7 +2270,14 @@ const handleCreateThriftListing = async () => {
                     {recommendedOutfit.map((item) => (
                       <div className="lookbook-item" key={item._id}>
                         <div className="lookbook-item-image-wrap">
-                          <img src={`${API}${item.image}`} alt={item.item_name} />
+                          <img
+                            src={`${API}${item.image}`}
+                            alt={item.item_name}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=400&q=80";
+                            }}
+                          />
                           {item.outfit_role && (
                             <span className="outfit-role-pill">{item.outfit_role}</span>
                           )}
@@ -2612,7 +2475,14 @@ const handleCreateThriftListing = async () => {
                       {(item.outfit || []).map((piece, pIdx) => (
                         <div className="stylist-history-thumb" key={pIdx}>
                           {piece.image ? (
-                            <img src={`${API}${piece.image}`} alt={piece.item_name} />
+                            <img
+                              src={`${API}${piece.image}`}
+                              alt={piece.item_name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=400&q=80";
+                              }}
+                            />
                           ) : (
                             <span>👗</span>
                           )}
@@ -2722,10 +2592,6 @@ const handleCreateThriftListing = async () => {
                 alt="Circular Sustainable Fashion"
                 className="thrift-banner-photo"
               />
-              <DoodleHandbag className="thrift-banner-handbag" size={52} />
-              <DoodleDenim className="thrift-banner-jeans" size={48} />
-              <DoodleLeaf className="thrift-banner-leaf" size={40} />
-              <DoodleSparkles className="thrift-banner-sparkle" size={32} color="#d4af37" />
             </div>
           </div>
 
@@ -2977,10 +2843,10 @@ const handleCreateThriftListing = async () => {
               <div style={{ display: "flex", gap: "12px", marginTop: "24px" }}>
                 <button
                   type="button"
-                  className="primary-pill-button"
+                  className="primary-pill-button thrift-publish-btn"
                   onClick={handleCreateThriftListing}
                 >
-                  ✨ Publish Listing
+                  ✨ Add to Thrift Market
                 </button>
                 <button
                   type="button"
@@ -3078,7 +2944,9 @@ const handleCreateThriftListing = async () => {
                 alt="Anime Haute Couture Muse"
                 className="about-muse-photo"
               />
-              <DoodleSparkles className="about-decor-sparkles" size={30} color="#d4af37" />
+              <DoodleSparkles className="about-decor-sparkles" size={38} color="#d4af37" />
+              <DoodleRibbon className="about-decor-ribbon" size={68} />
+              <DoodleBow className="about-decor-frames" size={48} />
               <div className="about-art-quote doodle-script-quote">
                 Where Vision AI meets Haute Couture ♡
               </div>
@@ -3204,15 +3072,14 @@ const handleCreateThriftListing = async () => {
             <div className="about-cta-buttons">
               <button
                 type="button"
-                className="primary-pill-button"
+                className="cta-explore-wardrobe-btn"
                 onClick={() => setActivePage("wardrobe")}
               >
                 👗 Explore My Wardrobe
               </button>
               <button
                 type="button"
-                className="add-item-pill-btn"
-                style={{ background: "#ffffff", color: "var(--wine)" }}
+                className="cta-styled-occasion-btn"
                 onClick={() => setActivePage("recommendation")}
               >
                 ✨ Get Styled for an Occasion
@@ -3222,43 +3089,6 @@ const handleCreateThriftListing = async () => {
               Crafted with passion for conscious style lovers worldwide ✦
             </span>
           </div>
-          </div>
-        </div>
-      )}
-
-      {/* =================================================
-          CAMERA MODAL (PHOTO BOOTH - SCREEN 8)
-      ================================================= */}
-      {cameraOpen && (
-        <div className="camera-modal-overlay">
-          <div className="camera-modal-box">
-            <DoodleFloral className="camera-modal-floral-corner" size={54} />
-            <DoodleSparkles className="camera-modal-sparkles" size={32} color="#d4af37" />
-            <h2>Live Camera Booth 📷</h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "13px", marginBottom: "16px" }}>
-              Frame your outfit or clothing piece in good lighting
-            </p>
-
-            <div className="camera-video-container">
-              <video ref={videoRef} autoPlay playsInline />
-            </div>
-
-            <div className="camera-modal-actions">
-              <button
-                type="button"
-                className="camera-capture-btn"
-                onClick={capturePhoto}
-              >
-                📸 Capture Photo
-              </button>
-              <button
-                type="button"
-                className="camera-close-btn"
-                onClick={closeCamera}
-              >
-                ✕ Cancel
-              </button>
-            </div>
           </div>
         </div>
       )}

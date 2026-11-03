@@ -13,10 +13,10 @@ export const FASHION_WEB_IMAGES = {
   editAtelier: "https://images.unsplash.com/photo-1445205170230-053b83016050?auto=format&fit=crop&w=1000&q=85",
   
   // AI Recommendation Lookbook Moodboard (Stylist flatlay & outfit inspiration)
-  recommendationMoodboard: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1000&q=85",
+  recommendationMoodboard: "https://i.pinimg.com/736x/e4/75/57/e475575f8981ef3e22eb7f57d73e3c17.jpg",
   
   // Thrift Store Hero Banner (Sustainable circular garments)
-  thriftBanner: "https://images.unsplash.com/photo-1489987707025-afc232f7ea0f?auto=format&fit=crop&w=1000&q=85",
+  thriftBanner: "https://i.pinimg.com/1200x/52/1d/d9/521dd9ceb321e9968bf40b55e15b6ebf.jpg",
   
   // Thrift Empty Listings State (Vintage boutique showcase)
   thriftEmpty: "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?auto=format&fit=crop&w=1000&q=85",

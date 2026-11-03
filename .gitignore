@@ -23,4 +23,30 @@ dist-ssr
 *.sln
 *.sw?
 # Local Python environments
-.venv-mflux/
+.venv*
+venv/
+venv*/
+backend/venv/
+backend/venv*/
+__pycache__/
+*.pyc
+
+# Uploads and temporary files
+uploads/
+backend/uploads/*
+!backend/uploads/.gitkeep
+
+# Environment files
+.env
+backend/.env
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Additional virtual environment
+venv313/
